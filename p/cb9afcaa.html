@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>【OSTEP】梦开始的地方 | 册页晚的学习笔记</title><meta name="keywords" content="OS,OSTEP"><meta name="author" content="册页晚"><meta name="copyright" content="册页晚"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="梦开始的地方 梦开始的地方  OSTEP，全称是 Operating Systems: Three Easy Pieces，官网链接，主要讲述操作系统中的三个&quot;简单&quot;部分：虚拟化、并发和持久化。中文翻译本叫《操作系统导论》。  不闻不若闻之，闻之不若见之，见之不若知之，知之不若行之。动手实践是学习操作系统的最佳姿势。 虚拟化  虚拟化：操作系统将物理资源转换为更通用、更强大且更">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【OSTEP】梦开始的地方">
+<meta property="og:url" content="http://ceywan.top/p/cb9afcaa.html">
+<meta property="og:site_name" content="册页晚的学习笔记">
+<meta property="og:description" content="梦开始的地方 梦开始的地方  OSTEP，全称是 Operating Systems: Three Easy Pieces，官网链接，主要讲述操作系统中的三个&quot;简单&quot;部分：虚拟化、并发和持久化。中文翻译本叫《操作系统导论》。  不闻不若闻之，闻之不若见之，见之不若知之，知之不若行之。动手实践是学习操作系统的最佳姿势。 虚拟化  虚拟化：操作系统将物理资源转换为更通用、更强大且更">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://image.ceyewan.top/20.png">
+<meta property="article:published_time" content="2022-06-22T13:22:11.000Z">
+<meta property="article:modified_time" content="2022-06-22T13:29:28.591Z">
+<meta property="article:author" content="册页晚">
+<meta property="article:tag" content="OS">
+<meta property="article:tag" content="OSTEP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://image.ceyewan.top/20.png"><link rel="shortcut icon" href="http://image.ceyewan.top/favicon.png"><link rel="canonical" href="http://ceywan.top/p/cb9afcaa"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '【OSTEP】梦开始的地方',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: undefined,
+  isToc: true,
+  postUpdate: '2022-06-22 21:29:28'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/pikachu.css"><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="http://image.ceyewan.top/head.jpg" onerror="onerror=null;src='http://image.ceyewan.top/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 家</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('http://image.ceyewan.top/20.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">册页晚的学习笔记</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 家</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">【OSTEP】梦开始的地方</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-06-22T13:22:11.000Z" title="发表于 2022-06-22 21:22:11">2022-06-22</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-06-22T13:29:28.591Z" title="更新于 2022-06-22 21:29:28">2022-06-22</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/OS/">OS</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="【OSTEP】梦开始的地方"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1>梦开始的地方</h1>
+<h2 id="梦开始的地方">梦开始的地方</h2>
+<blockquote>
+<p><code>OSTEP</code>，全称是 <code>Operating Systems: Three Easy Pieces</code>，<a target="_blank" rel="noopener" href="https://pages.cs.wisc.edu/~remzi/OSTEP/">官网链接</a>，主要讲述操作系统中的三个&quot;简单&quot;部分：虚拟化、并发和持久化。中文翻译本叫《操作系统导论》。</p>
+</blockquote>
+<p>不闻不若闻之，闻之不若见之，见之不若知之，知之不若行之。动手实践是学习操作系统的最佳姿势。</p>
+<h2 id="虚拟化">虚拟化</h2>
+<ul>
+<li>虚拟化：操作系统将物理资源转换为更通用、更强大且更易于使用的虚拟形式。</li>
+<li>虚拟化让许多程序同时运行（从而共享CPU），让许多程序可以同时访问自己的指令和数据（从而共享内存），让许多程序访问设备（从而共享磁盘），所以操作系统也被称为资源管理器。</li>
+</ul>
+<h3 id="虚拟化-CPU">虚拟化 CPU</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">    assert(argc == <span class="number">2</span>);</span><br><span class="line">    <span class="type">char</span> *str = argv[<span class="number">1</span>];</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, str);</span><br><span class="line">        sleep(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后我们在命令行输入：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./cpu <span class="string">&quot;A&quot;</span> &amp;  ./cpu <span class="string">&quot; B&quot;</span> &amp;  ./cpu <span class="string">&quot;  C&quot;</span></span><br></pre></td></tr></table></figure>
+<p>那么事情就变得有趣了，我们可以看到这三个程序似乎在同时运行。这里只有三个，其实不是单核的话本身就是可以同时的，但是如果有一百个，看到的也是似乎在同时运行。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">➜  nowcoker ./a.out <span class="string">&quot;A&quot;</span> &amp; ./a.out <span class="string">&quot; B&quot;</span> &amp; ./a.out <span class="string">&quot;  C&quot;</span></span><br><span class="line">[1] 1331</span><br><span class="line">[2] 1332</span><br><span class="line">A</span><br><span class="line"> B</span><br><span class="line">  C</span><br><span class="line">A</span><br><span class="line"> B</span><br><span class="line">  C</span><br><span class="line"> B</span><br><span class="line">A</span><br><span class="line">  C</span><br></pre></td></tr></table></figure>
+<p>事实证明，在硬件的一些帮助下，操作系统负责提供这种假象，即系统拥有非常多的CPU虚拟。</p>
+<h3 id="虚拟化内存">虚拟化内存</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> *p = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="type">int</span>));</span><br><span class="line">    assert(p != <span class="literal">NULL</span>);</span><br><span class="line">    <span class="comment">// getpid()函数：获取进程识别码</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;(%d) memory address of p: %p\n&quot;</span>, getpid(), p);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们可以看到，如果禁用地址空间随机化之后（<code>sudo sysctl -w kernel.randomize_va_space=0</code>，默认值为 2 ），两个的地址会相同。因为是操作系统在管理物理内存，而我们可见的只是操作系统给出的一个标志而已，并不是真正的地址。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  nowcoker ./a.out &amp; ./a.out</span><br><span class="line">[1] 1788</span><br><span class="line">(1788) memory address of p: 0x5555555592a0</span><br><span class="line">(1789) memory address of p: 0x5555555592a0</span><br></pre></td></tr></table></figure>
+<h2 id="并发">并发</h2>
+<ul>
+<li>并发：同时处理多件事情</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// volatile 防止编译器对代码进行优化</span></span><br><span class="line"><span class="comment">// 编译器在用到这个变量时必须每次都小心地重新读取这个值</span></span><br><span class="line"><span class="keyword">volatile</span> <span class="type">int</span> counter = <span class="number">0</span>;</span><br><span class="line"><span class="type">int</span> loops;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">worker</span><span class="params">(<span class="type">void</span> *arg)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; loops; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        counter++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">    assert(argc == <span class="number">2</span>);</span><br><span class="line">    loops = atoi(argv[<span class="number">1</span>]);</span><br><span class="line">    <span class="type">pthread_t</span> p1, p2;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Initial value: %d\n&quot;</span>, counter);</span><br><span class="line">    <span class="comment">// pthread_create():创建线程，运行相关的线程函数。</span></span><br><span class="line">    <span class="comment">// 第一个参数为指向线程标识符的指针。</span></span><br><span class="line">    <span class="comment">// 第二个参数用来设置线程属性。</span></span><br><span class="line">    <span class="comment">// 第三个参数是线程运行函数的起始地址。</span></span><br><span class="line">    <span class="comment">// 最后一个参数是运行函数的参数。</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// pthread_join():阻塞当前线程/回收线程资源</span></span><br><span class="line">    <span class="comment">// 第一个参数线程标识符</span></span><br><span class="line">    <span class="comment">// 第二个参数用户定义的指针，用来存储被等待线程的返回值。</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建了两个线程，具体在 common_threads.h 中实现</span></span><br><span class="line">    <span class="type">int</span> rc = pthread_create(&amp;p1, <span class="literal">NULL</span>, worker, <span class="literal">NULL</span>);</span><br><span class="line">    assert(rc != <span class="number">-1</span>);</span><br><span class="line">    rc = pthread_create(&amp;p2, <span class="literal">NULL</span>, worker, <span class="literal">NULL</span>);</span><br><span class="line">    assert(rc != <span class="number">-1</span>);</span><br><span class="line">    rc = pthread_join(p1, <span class="literal">NULL</span>);</span><br><span class="line">    assert(rc != <span class="number">-1</span>);</span><br><span class="line">    rc = pthread_join(p2, <span class="literal">NULL</span>);</span><br><span class="line">    assert(rc != <span class="number">-1</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Final value : %d\n&quot;</span>, counter);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看到，数据量小的时候可以并发，数据量大的时候就会产生错误。因为指令不是以原子方式（atomically）执行（所有的指令一次性执行）的，所以奇怪的事情可能会发生。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">➜  nowcoker ./a.out 100</span><br><span class="line">Initial value: 0</span><br><span class="line">Final value : 200</span><br><span class="line">➜  nowcoker ./a.out 10000</span><br><span class="line">Initial value: 0</span><br><span class="line">Final value : 20000</span><br><span class="line">➜  nowcoker ./a.out 1000000</span><br><span class="line">Initial value: 0</span><br><span class="line">Final value : 1107899</span><br><span class="line">➜  nowcoker ./a.out 10000000</span><br><span class="line">Initial value: 0</span><br><span class="line">Final value : 11969538</span><br></pre></td></tr></table></figure>
+<h2 id="持久化">持久化</h2>
+<ul>
+<li>持久化存储数据</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 文件操作</span></span><br><span class="line">    <span class="type">int</span> fd = open(<span class="string">&quot;file.txt&quot;</span>, O_RDWR | O_CREAT | O_APPEND, <span class="number">0777</span>);</span><br><span class="line">    assert(fd != <span class="number">-1</span>);</span><br><span class="line">    <span class="type">int</span> rc = write(fd, <span class="string">&quot;Hello World\n&quot;</span>, <span class="number">12</span>);</span><br><span class="line">    assert(rc != <span class="number">-1</span>);</span><br><span class="line">    rc = close(fd);</span><br><span class="line">    assert(rc != <span class="number">-1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行 <code>./a.out &amp; ./a.out</code> ，可以看到本地生成了一个 <code>file.txt</code> 文件，文件内容为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Hello World</span><br><span class="line">Hello World</span><br></pre></td></tr></table></figure>
+<h2 id="补充">补充</h2>
+<ol>
+<li><code>int main(int argc, char *argv[])</code></li>
+</ol>
+<p><code>argc</code> 表示命令行参数的个数，<code>./a.out 10</code> 就有两个参数，然后 <code>argv[0]</code> 存储 <code>./a.out</code> ，<code>argv[1]</code> 存储 <code>10</code> ，都是字符串形式。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://ceywan.top">册页晚</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://ceywan.top/p/cb9afcaa.html">http://ceywan.top/p/cb9afcaa.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://ceywan.top" target="_blank">册页晚的学习笔记</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/OS/">OS</a><a class="post-meta__tags" href="/tags/OSTEP/">OSTEP</a></div><div class="post_share"><div class="social-share" data-image="http://image.ceyewan.top/20.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/p/2fad324d.html"><img class="next-cover" src="http://image.ceyewan.top/39.png" onerror="onerror=null;src='http://image.ceyewan.top/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">【MySQL】知识总结</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/p/871d033f.html" title="【操作系统】修改其他进程的内存"><img class="cover" src="http://image.ceyewan.top/3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-21</div><div class="title">【操作系统】修改其他进程的内存</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="http://image.ceyewan.top/head.jpg" onerror="this.onerror=null;this.src='http://image.ceyewan.top/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">册页晚</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ceyewan"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/ceyewan" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:ceyewan@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">今天也要开心呀！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">梦开始的地方</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A2%A6%E5%BC%80%E5%A7%8B%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="toc-number">1.1.</span> <span class="toc-text">梦开始的地方</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="toc-number">1.2.</span> <span class="toc-text">虚拟化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E5%8C%96-CPU"><span class="toc-number">1.2.1.</span> <span class="toc-text">虚拟化 CPU</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E5%8C%96%E5%86%85%E5%AD%98"><span class="toc-number">1.2.2.</span> <span class="toc-text">虚拟化内存</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91"><span class="toc-number">1.3.</span> <span class="toc-text">并发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96"><span class="toc-number">1.4.</span> <span class="toc-text">持久化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%A5%E5%85%85"><span class="toc-number">1.5.</span> <span class="toc-text">补充</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/p/cb9afcaa.html" title="【OSTEP】梦开始的地方"><img src="http://image.ceyewan.top/20.png" onerror="this.onerror=null;this.src='http://image.ceyewan.top/404.jpg'" alt="【OSTEP】梦开始的地方"/></a><div class="content"><a class="title" href="/p/cb9afcaa.html" title="【OSTEP】梦开始的地方">【OSTEP】梦开始的地方</a><time datetime="2022-06-22T13:22:11.000Z" title="发表于 2022-06-22 21:22:11">2022-06-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/2fad324d.html" title="【MySQL】知识总结"><img src="http://image.ceyewan.top/39.png" onerror="this.onerror=null;this.src='http://image.ceyewan.top/404.jpg'" alt="【MySQL】知识总结"/></a><div class="content"><a class="title" href="/p/2fad324d.html" title="【MySQL】知识总结">【MySQL】知识总结</a><time datetime="2022-06-22T02:44:01.000Z" title="发表于 2022-06-22 10:44:01">2022-06-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/871d033f.html" title="【操作系统】修改其他进程的内存"><img src="http://image.ceyewan.top/3.jpg" onerror="this.onerror=null;this.src='http://image.ceyewan.top/404.jpg'" alt="【操作系统】修改其他进程的内存"/></a><div class="content"><a class="title" href="/p/871d033f.html" title="【操作系统】修改其他进程的内存">【操作系统】修改其他进程的内存</a><time datetime="2022-06-21T14:14:30.000Z" title="发表于 2022-06-21 22:14:30">2022-06-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/2261a6f2.html" title="【SQL安全】基于 dvwa 和 sqlmap 的 SQL 注入"><img src="http://image.ceyewan.top/1.jpg" onerror="this.onerror=null;this.src='http://image.ceyewan.top/404.jpg'" alt="【SQL安全】基于 dvwa 和 sqlmap 的 SQL 注入"/></a><div class="content"><a class="title" href="/p/2261a6f2.html" title="【SQL安全】基于 dvwa 和 sqlmap 的 SQL 注入">【SQL安全】基于 dvwa 和 sqlmap 的 SQL 注入</a><time datetime="2022-06-19T16:07:05.000Z" title="发表于 2022-06-20 00:07:05">2022-06-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/eb71853c.html" title="【Linux】系统编程入门"><img src="http://image.ceyewan.top/12.jpg" onerror="this.onerror=null;this.src='http://image.ceyewan.top/404.jpg'" alt="【Linux】系统编程入门"/></a><div class="content"><a class="title" href="/p/eb71853c.html" title="【Linux】系统编程入门">【Linux】系统编程入门</a><time datetime="2022-06-19T06:23:46.000Z" title="发表于 2022-06-19 14:23:46">2022-06-19</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By 册页晚</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="icp"><a target="_blank" rel="noopener" href="https://beian.miit.gov.cn/"><img class="icp-icon" src="http://image.ceyewan.top/icp.png"/><span>湘ICP备2022011624号</span></a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
