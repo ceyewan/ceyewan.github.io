@@ -1,0 +1,339 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>【Linux】多进程开发（一） | 册页晚的学习笔记</title><meta name="keywords" content="Linux,多进程"><meta name="author" content="册页晚"><meta name="copyright" content="册页晚"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="进程概述   进程是正在运行的程序的实例，是基本的分配单元也是基本的执行单元。   可以用一个程序来创建多个进程，进程是由内核定义的抽象实体，并为该实体分配用以执行程序的各项系统资源。   单道程序：计算机内存中只允许一个程序运行   多道程序：计算机内存中同时放几道相互独立的程序，使它们在调度下，相互穿插运行。   时间片：操作系统分配给每个正在运行的进程微观上的一段时间。   并发：指在同一时">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Linux】多进程开发（一）">
+<meta property="og:url" content="http://ceywan.top/p/9673663.html">
+<meta property="og:site_name" content="册页晚的学习笔记">
+<meta property="og:description" content="进程概述   进程是正在运行的程序的实例，是基本的分配单元也是基本的执行单元。   可以用一个程序来创建多个进程，进程是由内核定义的抽象实体，并为该实体分配用以执行程序的各项系统资源。   单道程序：计算机内存中只允许一个程序运行   多道程序：计算机内存中同时放几道相互独立的程序，使它们在调度下，相互穿插运行。   时间片：操作系统分配给每个正在运行的进程微观上的一段时间。   并发：指在同一时">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://image.ceyewan.top/37.png">
+<meta property="article:published_time" content="2022-06-24T04:01:45.000Z">
+<meta property="article:modified_time" content="2022-06-24T04:03:20.043Z">
+<meta property="article:author" content="册页晚">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="多进程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://image.ceyewan.top/37.png"><link rel="shortcut icon" href="http://image.ceyewan.top/favicon.png"><link rel="canonical" href="http://ceywan.top/p/9673663"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '【Linux】多进程开发（一）',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: undefined,
+  isToc: true,
+  postUpdate: '2022-06-24 12:03:20'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/pikachu.css"><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="http://image.ceyewan.top/head.jpg" onerror="onerror=null;src='http://image.ceyewan.top/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">7</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 家</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('http://image.ceyewan.top/37.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">册页晚的学习笔记</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 家</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">【Linux】多进程开发（一）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-06-24T04:01:45.000Z" title="发表于 2022-06-24 12:01:45">2022-06-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-06-24T04:03:20.043Z" title="更新于 2022-06-24 12:03:20">2022-06-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Linux%E9%AB%98%E5%B9%B6%E5%8F%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">Linux高并发服务器</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="【Linux】多进程开发（一）"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="进程概述">进程概述</h3>
+<ul>
+<li>
+<p>进程是正在运行的程序的实例，是基本的分配单元也是基本的执行单元。</p>
+</li>
+<li>
+<p>可以用一个程序来创建多个进程，进程是由内核定义的抽象实体，并为该实体分配用以执行程序的各项系统资源。</p>
+</li>
+<li>
+<p>单道程序：计算机内存中只允许一个程序运行</p>
+</li>
+<li>
+<p>多道程序：计算机内存中同时放几道相互独立的程序，使它们在调度下，相互穿插运行。</p>
+</li>
+<li>
+<p>时间片：操作系统分配给每个正在运行的进程微观上的一段时间。</p>
+</li>
+<li>
+<p>并发：指在同一时刻，有多条指令在多个处理器上同时执行。</p>
+</li>
+<li>
+<p>指在同一时刻只能有一条指令执行，但多个进程指令被快速的轮换执行，使得在宏观上具有多个进程同时执行的效果，但在微观上并不是同时执行的，只是把时间分成若干段，使多个进程快速交替的执行。</p>
+</li>
+<li>
+<p>内核为每个进程分配一个 <code>PCB</code> 进程控制块，维护进程相关的信息，<code>Linux</code> 内核的进程控制块是 <code>task_struct</code> 结构体（<code>/usr/src/linux-headers-xxx/include/linux/sched.h</code> 中）</p>
+</li>
+</ul>
+<h3 id="进程状态转换">进程状态转换</h3>
+<ul>
+<li>[新建态]、运行态、就绪态、阻塞态、[终止态]</li>
+<li>查看进程 <code>ps aux / ajx</code>
+<ul>
+<li>a：显示终端上的所有进程，包括其他用户的进程</li>
+<li>u：显示进程的详细信息</li>
+<li>x：显示没有控制终端的进程</li>
+<li>j：列出与作业控制相关的信息</li>
+</ul>
+</li>
+<li>STAT 参数的意义：
+<ul>
+<li>D：不可中断</li>
+<li>R：正在运行或在队列中的进程</li>
+<li>S：处于休眠状态</li>
+<li>T：停止或被追踪</li>
+<li>Z：僵尸进程</li>
+<li>W：进入内存交换</li>
+<li>X：死掉的进程</li>
+<li>&lt;：高优先级</li>
+<li>N：低优先级</li>
+<li>S：包含子进程</li>
+<li>+：位于前台的进程组</li>
+</ul>
+</li>
+<li>实时显示进程动态 <code>top [-d 5]</code>
+<ul>
+<li>-d 来指定信息更新的时间间隔</li>
+<li>M 根据内存使用量排序</li>
+<li>P 根据 CPU 占有率排序</li>
+<li>T 根据进程运行时间排序</li>
+<li>U 根据用户名排序</li>
+<li>K 输入指定的 PID 杀死进程</li>
+</ul>
+</li>
+<li>杀死进程 <code>kill [-signal] pid</code>
+<ul>
+<li><code>kill -l</code> 列出所有信号</li>
+<li><code>kill –SIGKILL pid</code></li>
+<li><code>kill -9 pid</code></li>
+<li><code>killall name xxx</code> 根据进程名杀死进程</li>
+</ul>
+</li>
+<li>进程号和相关函数
+<ul>
+<li>每个进程都对应唯一一个进程号，类型为 <code>pid</code></li>
+<li>任何进程（除 <code>init</code> 进程）都由一个进程创建，该进程称为被创建进程的父进程 <code>PPID</code></li>
+<li>进程组是一个或多个进程的集合，有个进程组号，为 <code>PGID</code> 。</li>
+<li><code>pid_t getpid(void)</code> 和 <code>pid_t getppid(void)</code> 和 <code>pid_t getpgid(pid_t pid)</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="创建进程">创建进程</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> <span class="title function_">fork</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line"><span class="comment">// 创建一个和父进程一模一样的子进程，子进程从这行开始执行</span></span><br><span class="line"><span class="comment">// 子进程返回 0，父进程返回子进程的 pid，失败返回 -1</span></span><br></pre></td></tr></table></figure>
+<p>完全的复制操作，可以认为只有 <code>pid</code> 不同， 相互之间几乎没有联系。（准确来说，<code>Linux</code> 的 <code>fork()</code> 使用的是写时拷贝，<code>fork</code> 时并不复制整个地址空间，而是共享，只有当需要写入时才会复制。这样效率高）</p>
+<h3 id="父子进程关系和-GDB-调试">父子进程关系和 GDB 调试</h3>
+<p><strong>父子进程关系</strong></p>
+<ul>
+<li><code>fork</code> 函数的返回值不同</li>
+<li><code>PCB</code> 中的进程号和信号集等不同</li>
+<li>数据读时共享，写时拷贝</li>
+</ul>
+<p><strong>GDB 调试</strong></p>
+<ul>
+<li>设置调试子进程，<code>set follow-fork-mode child</code> ，默认是父进程</li>
+<li>设置调试模式，<code>set detch-on-fork on/off</code>，默认为 <code>on</code> ，表示调试当前进程时其他进程继续运行；否则，挂起。</li>
+<li>查看调试的进程，<code>info inferiors</code></li>
+<li>切换当前调试的进程：<code>inferior id</code></li>
+<li>使进程脱离 GDB 的调试：<code>detach inferiors id</code></li>
+</ul>
+<h3 id="exec-函数族">exec 函数族</h3>
+<p>根据指定的文件名找到可执行文件，并用它来取代调用进程的内容，也就是在调用进程内部执行一个可执行文件。</p>
+<p>执行成功后不会返回，因为调用进程的实体，包括代码段、数据段和堆栈都被新的内容取代，只保留进程 ID 等表面信息。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">execl</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *pathname, <span class="type">const</span> <span class="type">char</span> *arg0, ... <span class="comment">/* (char *)0 */</span> )</span>;</span><br><span class="line"><span class="comment">/* </span></span><br><span class="line"><span class="comment">	- path 需要执行的文件的路径或者名称，相对路径or绝对路径</span></span><br><span class="line"><span class="comment">	- arg 是执行可执行文件的参数列表</span></span><br><span class="line"><span class="comment">		- 第一个参数没有用</span></span><br><span class="line"><span class="comment">		- 最后一个参数为 NULL</span></span><br><span class="line"><span class="comment">	execl(&quot;a.out&quot;, &quot;a.out&quot;,&quot;10&quot;, NULL);</span></span><br><span class="line"><span class="comment">	execl(&quot;/bin/ps&quot;, &quot;ps&quot;, NULL);</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">execv</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *pathname, <span class="type">char</span> *<span class="type">const</span> argv[])</span>; </span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">execle</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *pathname, <span class="type">const</span> <span class="type">char</span> *arg0, ...<span class="comment">/* (char *)0, char *const envp[] */</span> )</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">execve</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *pathname, <span class="type">char</span> *<span class="type">const</span> argv[], <span class="type">char</span>*<span class="type">const</span> envp[])</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">execlp</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *filename, <span class="type">const</span> <span class="type">char</span> *arg0, ... <span class="comment">/*(char *)0 */</span> )</span>;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">- file 需要执行的可执行文件名</span></span><br><span class="line"><span class="comment">- execl(&quot;ps&quot;, &quot;ps&quot;, NULL);</span></span><br><span class="line"><span class="comment">- 这个函数可以从环境路径自行查找</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">execvp</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *filename, <span class="type">char</span> *<span class="type">const</span> argv[])</span>;</span><br><span class="line"> </span><br><span class="line"><span class="type">int</span> <span class="title function_">fexecve</span><span class="params">(<span class="type">int</span> fd, <span class="type">char</span> *<span class="type">const</span> argv[], <span class="type">char</span> *<span class="type">const</span> envp[])</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>
+<p><code>l(list)</code> 参数地址列表，以空指针结尾</p>
+</li>
+<li>
+<p><code>v(vector)</code> 存有各参数地址的指针数组的地址</p>
+</li>
+<li>
+<p><code>p(path)</code> 按 PATH 环境变量指定的目录搜索可执行文件</p>
+</li>
+<li>
+<p><code>e(environment)</code> 存有环境变量字符串地址的指针数组的地址，自行指定环境路径</p>
+</li>
+</ul>
+<h3 id="进程退出、孤儿进程、僵尸进程">进程退出、孤儿进程、僵尸进程</h3>
+<p>父进程有回收子进程资源的要求。</p>
+<h4 id="进程退出">进程退出</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">exit</span><span class="params">(<span class="type">int</span> status)</span>; <span class="comment">// 标准 C 库</span></span><br><span class="line"><span class="type">void</span> _exit(<span class="type">int</span> status); <span class="comment">// Linux 系统，没有处理缓冲区等操作，直接退出</span></span><br><span class="line"><span class="comment">// status 是进程退出时的状态信息，父进程回收子进程资源时可以获取</span></span><br></pre></td></tr></table></figure>
+<h4 id="孤儿进程">孤儿进程</h4>
+<p>父进程运行结束，子进程还在运行。那么子进程就是一个孤儿进程，内核会把孤儿进程的父进程设置为 <code>init</code> 。</p>
+<h4 id="僵尸进程">僵尸进程</h4>
+<p>每个进程结束后，都会释放用户区数据，内核区的 PCB 需要父进程释放。</p>
+<p>进程终止，父进程尚未回收，子进程残留 PCB 存放于内核中，变成僵尸进程。</p>
+<p>僵尸进程不能被 <code>kill -9</code> 杀死。</p>
+<p>杀死父进程，让僵尸进程被 <code>init</code> 接管，<code>init</code> 会定时释放子进程的内核区。</p>
+<h3 id="wait-函数">wait 函数</h3>
+<p>父进程回收子进程的资源，通过调用 wait 或 waitpid 得到子进程退出状态同时彻底清除这个进程。</p>
+<p>wait() 函数会阻塞，waitpid 可以设置不阻塞，同时还可以指定等待哪个子进程结束。</p>
+<p>一个 wait 或 waitpid 一次只能清理一个子进程。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> <span class="title function_">wait</span><span class="params">(<span class="type">int</span> *wstatus)</span>;</span><br><span class="line"><span class="comment">// 参数为进程的退出状态，不接受那就用 NULL</span></span><br><span class="line"><span class="comment">// 成功返回回收的子进程的 id，失败返回 -1</span></span><br></pre></td></tr></table></figure>
+<p>调用 wait 函数的进程将被挂起，直到它的一个子进程退出或者没有任何子进程了（返回 -1）。</p>
+<h3 id="waitpid-函数">waitpid 函数</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> <span class="title function_">waitpid</span><span class="params">(<span class="type">pid_t</span> pid, <span class="type">int</span> *wstatus, <span class="type">int</span> options)</span>;</span><br><span class="line"><span class="comment">// 回收指定子进程</span></span><br><span class="line">wait(&amp;status) = waitpid(<span class="number">-1</span>, &amp;status, <span class="number">0</span>);</span><br><span class="line"><span class="comment">// pid &lt; -1, 回收某个进程组的组 id 的绝对值，回收指定进程组的子进程</span></span><br><span class="line"><span class="comment">// pid = -1, 回收所有的子进程中的一个</span></span><br><span class="line"><span class="comment">// pid &gt; 0, 回收指定的 pid 进程</span></span><br><span class="line"><span class="comment">// pid = 0, 回收当前进程组的任意一个进程</span></span><br><span class="line"><span class="comment">// options：0表示阻塞，WNOHANG 表示非阻塞</span></span><br><span class="line"><span class="comment">// 返回值大于 0 为成功，-1 为失败，0表示非阻塞，还有子进程</span></span><br></pre></td></tr></table></figure>
+<p>父进程可以不阻塞的回收子进程，这样的话，父进程既可以做自己的事，又能适时回收子进程。</p>
+<h3 id="进程间通信">进程间通信</h3>
+<p>进程是一个独立的资源分配单元，不同进程资源独立，没有关联，不能在一个进程中直接访问另一个进程的资源。</p>
+<p>但是，进程不是孤立的，不同进程需要进行信息交互和状态的传递，因此需要进程间通信（IPC）。</p>
+<p><img src="http://image.ceyewan.top/typora/image-20220623230811181.png" alt="image-20220623230811181"></p>
+<h3 id="匿名管道">匿名管道</h3>
+<p>管道也叫无名（匿名）管道，是 UNIX 系统 IPC 的最古老的形式。</p>
+<p>统计一个目录中文件的数目命令 <code>ls | wc -l</code> ，两个进程，<code>ls </code> 将数据写入管道，<code>wc</code> 从管道中读取数据（单向字节流管道）。</p>
+<ul>
+<li>管道其实是一个在内核内存中维护的缓冲器。</li>
+<li>管道拥有文件特质：读操作、写操作，匿名管道没有文件实体，有名管道有文件实体但不存储数据。</li>
+<li>一个管道是一个顺序字节流，类似于双指针环形队列。</li>
+<li>匿名进程只用用于具有关系的进程之间的通信。</li>
+</ul>
+<h3 id="父子进程通过匿名管道通信">父子进程通过匿名管道通信</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建匿名管道，用于进程间通信</span></span><br><span class="line"><span class="comment">// pipefd[0]：读端，pipefd[1]：写端</span></span><br><span class="line"><span class="comment">// 成功返回 0 ，失败返回 -1</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">pipe</span><span class="params">(<span class="type">int</span> pipefd[<span class="number">2</span>])</span>;</span><br><span class="line"><span class="comment">// 查看管道缓冲大小</span></span><br><span class="line">ulimit -a</span><br><span class="line"><span class="comment">// 查看管道缓冲大小的函数</span></span><br><span class="line"><span class="type">long</span> <span class="title function_">fpathconf</span><span class="params">(pipefd[<span class="number">0</span>], <span class="type">int</span> name)</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="匿名管道通信案例">匿名管道通信案例</h3>
+<p>实现 <code>ps aux | grep root</code> :</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> p[<span class="number">2</span>];</span><br><span class="line">    <span class="type">int</span> rc = pipe(p);</span><br><span class="line">    assert(rc != <span class="number">-1</span>);</span><br><span class="line">    <span class="type">int</span> pid = fork();</span><br><span class="line">    assert(pid != <span class="number">-1</span>);</span><br><span class="line">    <span class="keyword">if</span> (pid == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        rc = close(p[<span class="number">0</span>]);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">        rc = dup2(p[<span class="number">1</span>], STDOUT_FILENO);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">        rc = execlp(<span class="string">&quot;ps&quot;</span>, <span class="string">&quot;ps&quot;</span>, <span class="string">&quot;aux&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        rc = close(p[<span class="number">1</span>]);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">        rc = dup2(p[<span class="number">0</span>], STDIN_FILENO);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">        rc = execlp(<span class="string">&quot;grep&quot;</span>, <span class="string">&quot;grep&quot;</span>, <span class="string">&quot;root&quot;</span>, <span class="literal">NULL</span>);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>终端对比，基本一致：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">➜  nowcoker gcc a.c </span><br><span class="line">➜  nowcoker ./a.out </span><br><span class="line">root         1  0.0  0.0   1744  1076 ?        Sl   00:03   0:00 /init</span><br><span class="line">root        10  0.0  0.0   1752    64 ?        Ss   00:03   0:00 /init</span><br><span class="line">root        11  0.0  0.0   1752    72 ?        S    00:03   0:00 /init</span><br><span class="line">root        45  0.0  0.0   1764    64 ?        Ss   00:03   0:00 /init</span><br><span class="line">root        46  0.0  0.0   1764    80 ?        S    00:03   0:00 /init</span><br><span class="line">root        63  0.0  0.0   1764    64 ?        Ss   00:03   0:00 /init</span><br><span class="line">root        64  0.1  0.0   1764    80 ?        S    00:03   0:01 /init</span><br><span class="line">ceyewan    716  0.0  0.0   9576  2408 pts/3    S+   00:14   0:00 grep root</span><br><span class="line">➜  nowcoker ps aux | grep root <span class="comment"># 这里的 root 显示为红色，因为最后那一段</span></span><br><span class="line">root         1  0.0  0.0   1744  1076 ?        Sl   00:03   0:00 /init</span><br><span class="line">root        10  0.0  0.0   1752    64 ?        Ss   00:03   0:00 /init</span><br><span class="line">root        11  0.0  0.0   1752    72 ?        S    00:03   0:00 /init</span><br><span class="line">root        45  0.0  0.0   1764    64 ?        Ss   00:03   0:00 /init</span><br><span class="line">root        46  0.0  0.0   1764    80 ?        S    00:03   0:00 /init</span><br><span class="line">root        63  0.0  0.0   1764    64 ?        Ss   00:03   0:00 /init</span><br><span class="line">root        64  0.1  0.0   1764    80 ?        S    00:03   0:01 /init</span><br><span class="line">ceyewan    756  0.0  0.0   9708  2280 pts/3    S+   00:16   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox root</span><br></pre></td></tr></table></figure>
+<h3 id="管道的读写特点和管道设置为非阻塞">管道的读写特点和管道设置为非阻塞</h3>
+<ul>
+<li>如果所有指向写端的文件描述符关闭（没关闭）了，那么 read 会（返回 0）（阻塞）。</li>
+<li>如果所有指向读端的文件描述符关闭（没关闭）了，那么 write 会（收到 SIGPIPE 信号） （阻塞）。</li>
+<li>设置管道非阻塞</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 得到原 flags，添加非阻塞，然后写入</span></span><br><span class="line"><span class="type">int</span> flags = fcntl(fd[<span class="number">0</span>], F_GETFL);</span><br><span class="line">flags |= O_NONBLOCK;</span><br><span class="line">fcntl(fd[<span class="number">0</span>], F_SETFL, flags);</span><br></pre></td></tr></table></figure>
+<h3 id="有名管道介绍及使用">有名管道介绍及使用</h3>
+<p>有名管道，FIFO，也叫命名管道。</p>
+<ol>
+<li>FIFO 在文件系统作为一个特殊文件存在，但是内容放在内存中</li>
+<li>当使用 FIFO 的进程退出后，FIFO 文件将继续保存在文件系统中</li>
+<li>FIFO 有名字，不相关的进程可以通过打开有名管道进行通信</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过命令创建有名管道</span></span><br><span class="line">mkfifo xxx;</span><br><span class="line"><span class="comment">// 通过函数创建有名管道</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">mkfifo</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *pathname, <span class="type">mode_t</span> mode)</span>;</span><br><span class="line"><span class="comment">// mode 和 open 是一样的</span></span><br></pre></td></tr></table></figure>
+<h3 id="有名管道实现简易聊天功能">有名管道实现简易聊天功能</h3>
+<blockquote>
+<p>a.c</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> rc = access(<span class="string">&quot;fifo1&quot;</span>, F_OK);</span><br><span class="line">    <span class="keyword">if</span> (rc == <span class="number">-1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        rc = mkfifo(<span class="string">&quot;fifo1&quot;</span>, <span class="number">0664</span>);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    rc = access(<span class="string">&quot;fifo2&quot;</span>, F_OK);</span><br><span class="line">    <span class="keyword">if</span> (rc == <span class="number">-1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        rc = mkfifo(<span class="string">&quot;fifo2&quot;</span>, <span class="number">0664</span>);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> fdw = open(<span class="string">&quot;fifo1&quot;</span>, O_WRONLY);</span><br><span class="line">    assert(fdw != <span class="number">-1</span>);</span><br><span class="line">    <span class="type">int</span> fdr = open(<span class="string">&quot;fifo2&quot;</span>, O_RDONLY);</span><br><span class="line">    assert(fdr != <span class="number">-1</span>);</span><br><span class="line">    <span class="type">int</span> pid = fork();</span><br><span class="line">    assert(pid &gt;= <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (pid &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        rc = close(fdr);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">        <span class="type">char</span> s[<span class="number">3</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">sprintf</span>(s, <span class="string">&quot;%d\n&quot;</span>, i);</span><br><span class="line">            rc = write(fdw, s, <span class="built_in">strlen</span>(s));</span><br><span class="line">            assert(rc != <span class="number">-1</span>);</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;A write %s&quot;</span>, s);</span><br><span class="line">            sleep(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        rc = close(fdw);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        rc = close(fdw);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">        <span class="type">char</span> buf[<span class="number">3</span>];</span><br><span class="line">        <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            rc = read(fdr, buf, <span class="number">3</span>);</span><br><span class="line">            assert(rc != <span class="number">-1</span>);</span><br><span class="line">            <span class="keyword">if</span> (rc == <span class="number">0</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;A read all right.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;A read %s&quot;</span>, buf);</span><br><span class="line">        &#125;</span><br><span class="line">        rc = close(fdr);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>b.c</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// b 如果也创建管道的话可能会有并发问题</span></span><br><span class="line">    <span class="type">int</span> fdr = open(<span class="string">&quot;fifo1&quot;</span>, O_RDONLY);</span><br><span class="line">    assert(fdr != <span class="number">-1</span>);</span><br><span class="line">    <span class="type">int</span> fdw = open(<span class="string">&quot;fifo2&quot;</span>, O_WRONLY);</span><br><span class="line">    assert(fdw != <span class="number">-1</span>);</span><br><span class="line">    <span class="type">int</span> pid = fork();</span><br><span class="line">    assert(pid &gt;= <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (pid &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> rc = close(fdr);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">        <span class="type">char</span> s[<span class="number">3</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">sprintf</span>(s, <span class="string">&quot;%d\n&quot;</span>, i);</span><br><span class="line">            rc = write(fdw, s, <span class="built_in">strlen</span>(s));</span><br><span class="line">            assert(rc != <span class="number">-1</span>);</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;B write %s&quot;</span>, s);</span><br><span class="line">            sleep(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        rc = close(fdw);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> rc = close(fdw);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">        <span class="type">char</span> buf[<span class="number">3</span>];</span><br><span class="line">        <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            rc = read(fdr, buf, <span class="number">3</span>);</span><br><span class="line">            assert(rc != <span class="number">-1</span>);</span><br><span class="line">            <span class="keyword">if</span> (rc == <span class="number">0</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;B read all right.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;B read %s&quot;</span>, buf);</span><br><span class="line">        &#125;</span><br><span class="line">        rc = close(fdr);</span><br><span class="line">        assert(rc != <span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>终端输出：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">➜  nowcoker gcc a.c -o a &amp; gcc b.c -o b</span><br><span class="line">[<span class="number">1</span>] <span class="number">2731</span></span><br><span class="line">[<span class="number">1</span>]  + <span class="number">2731</span> done       gcc a.c -o a</span><br><span class="line">➜  nowcoker ./a &amp; ./b                  </span><br><span class="line">[<span class="number">1</span>] <span class="number">2743</span></span><br><span class="line">A write <span class="number">0</span></span><br><span class="line">B write <span class="number">0</span></span><br><span class="line">A read <span class="number">0</span></span><br><span class="line">B read <span class="number">0</span></span><br><span class="line">B read <span class="number">1</span></span><br><span class="line">A write <span class="number">1</span></span><br><span class="line">B write <span class="number">1</span></span><br><span class="line">A read <span class="number">1</span></span><br><span class="line">B read <span class="number">2</span></span><br><span class="line">A read <span class="number">2</span></span><br><span class="line">A write <span class="number">2</span></span><br><span class="line">B write <span class="number">2</span></span><br><span class="line">A read all right.</span><br><span class="line">B read all right.</span><br><span class="line">[<span class="number">1</span>]  + <span class="number">2743</span> done       ./a</span><br><span class="line">➜  nowcoker rm fifo1 fifo2 </span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://ceywan.top">册页晚</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://ceywan.top/p/9673663.html">http://ceywan.top/p/9673663.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://ceywan.top" target="_blank">册页晚的学习笔记</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/%E5%A4%9A%E8%BF%9B%E7%A8%8B/">多进程</a></div><div class="post_share"><div class="social-share" data-image="http://image.ceyewan.top/37.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/p/3e21c2d7.html"><img class="next-cover" src="http://image.ceyewan.top/25.png" onerror="onerror=null;src='http://image.ceyewan.top/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">【OSTEP】虚拟化CPU</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/p/eb71853c.html" title="【Linux】系统编程入门"><img class="cover" src="http://image.ceyewan.top/45.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-19</div><div class="title">【Linux】系统编程入门</div></div></a></div><div><a href="/p/871d033f.html" title="【操作系统】修改其他进程的内存"><img class="cover" src="http://image.ceyewan.top/19.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-06-21</div><div class="title">【操作系统】修改其他进程的内存</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="http://image.ceyewan.top/head.jpg" onerror="this.onerror=null;this.src='http://image.ceyewan.top/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">册页晚</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">7</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ceyewan"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/ceyewan" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:ceyewan@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">今天也要开心呀！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">进程概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2"><span class="toc-number">2.</span> <span class="toc-text">进程状态转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E8%BF%9B%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">创建进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%88%B6%E5%AD%90%E8%BF%9B%E7%A8%8B%E5%85%B3%E7%B3%BB%E5%92%8C-GDB-%E8%B0%83%E8%AF%95"><span class="toc-number">4.</span> <span class="toc-text">父子进程关系和 GDB 调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exec-%E5%87%BD%E6%95%B0%E6%97%8F"><span class="toc-number">5.</span> <span class="toc-text">exec 函数族</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E9%80%80%E5%87%BA%E3%80%81%E5%AD%A4%E5%84%BF%E8%BF%9B%E7%A8%8B%E3%80%81%E5%83%B5%E5%B0%B8%E8%BF%9B%E7%A8%8B"><span class="toc-number">6.</span> <span class="toc-text">进程退出、孤儿进程、僵尸进程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E9%80%80%E5%87%BA"><span class="toc-number">6.1.</span> <span class="toc-text">进程退出</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%A4%E5%84%BF%E8%BF%9B%E7%A8%8B"><span class="toc-number">6.2.</span> <span class="toc-text">孤儿进程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%83%B5%E5%B0%B8%E8%BF%9B%E7%A8%8B"><span class="toc-number">6.3.</span> <span class="toc-text">僵尸进程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wait-%E5%87%BD%E6%95%B0"><span class="toc-number">7.</span> <span class="toc-text">wait 函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#waitpid-%E5%87%BD%E6%95%B0"><span class="toc-number">8.</span> <span class="toc-text">waitpid 函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1"><span class="toc-number">9.</span> <span class="toc-text">进程间通信</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8C%BF%E5%90%8D%E7%AE%A1%E9%81%93"><span class="toc-number">10.</span> <span class="toc-text">匿名管道</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%88%B6%E5%AD%90%E8%BF%9B%E7%A8%8B%E9%80%9A%E8%BF%87%E5%8C%BF%E5%90%8D%E7%AE%A1%E9%81%93%E9%80%9A%E4%BF%A1"><span class="toc-number">11.</span> <span class="toc-text">父子进程通过匿名管道通信</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8C%BF%E5%90%8D%E7%AE%A1%E9%81%93%E9%80%9A%E4%BF%A1%E6%A1%88%E4%BE%8B"><span class="toc-number">12.</span> <span class="toc-text">匿名管道通信案例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%A1%E9%81%93%E7%9A%84%E8%AF%BB%E5%86%99%E7%89%B9%E7%82%B9%E5%92%8C%E7%AE%A1%E9%81%93%E8%AE%BE%E7%BD%AE%E4%B8%BA%E9%9D%9E%E9%98%BB%E5%A1%9E"><span class="toc-number">13.</span> <span class="toc-text">管道的读写特点和管道设置为非阻塞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%89%E5%90%8D%E7%AE%A1%E9%81%93%E4%BB%8B%E7%BB%8D%E5%8F%8A%E4%BD%BF%E7%94%A8"><span class="toc-number">14.</span> <span class="toc-text">有名管道介绍及使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%89%E5%90%8D%E7%AE%A1%E9%81%93%E5%AE%9E%E7%8E%B0%E7%AE%80%E6%98%93%E8%81%8A%E5%A4%A9%E5%8A%9F%E8%83%BD"><span class="toc-number">15.</span> <span class="toc-text">有名管道实现简易聊天功能</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/p/9673663.html" title="【Linux】多进程开发（一）"><img src="http://image.ceyewan.top/37.png" onerror="this.onerror=null;this.src='http://image.ceyewan.top/404.jpg'" alt="【Linux】多进程开发（一）"/></a><div class="content"><a class="title" href="/p/9673663.html" title="【Linux】多进程开发（一）">【Linux】多进程开发（一）</a><time datetime="2022-06-24T04:01:45.000Z" title="发表于 2022-06-24 12:01:45">2022-06-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/3e21c2d7.html" title="【OSTEP】虚拟化CPU"><img src="http://image.ceyewan.top/25.png" onerror="this.onerror=null;this.src='http://image.ceyewan.top/404.jpg'" alt="【OSTEP】虚拟化CPU"/></a><div class="content"><a class="title" href="/p/3e21c2d7.html" title="【OSTEP】虚拟化CPU">【OSTEP】虚拟化CPU</a><time datetime="2022-06-23T05:57:25.000Z" title="发表于 2022-06-23 13:57:25">2022-06-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/cb9afcaa.html" title="【OSTEP】梦开始的地方"><img src="http://image.ceyewan.top/17.png" onerror="this.onerror=null;this.src='http://image.ceyewan.top/404.jpg'" alt="【OSTEP】梦开始的地方"/></a><div class="content"><a class="title" href="/p/cb9afcaa.html" title="【OSTEP】梦开始的地方">【OSTEP】梦开始的地方</a><time datetime="2022-06-22T13:22:11.000Z" title="发表于 2022-06-22 21:22:11">2022-06-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/2fad324d.html" title="【MySQL】知识总结"><img src="http://image.ceyewan.top/51.png" onerror="this.onerror=null;this.src='http://image.ceyewan.top/404.jpg'" alt="【MySQL】知识总结"/></a><div class="content"><a class="title" href="/p/2fad324d.html" title="【MySQL】知识总结">【MySQL】知识总结</a><time datetime="2022-06-22T02:44:01.000Z" title="发表于 2022-06-22 10:44:01">2022-06-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/871d033f.html" title="【操作系统】修改其他进程的内存"><img src="http://image.ceyewan.top/19.png" onerror="this.onerror=null;this.src='http://image.ceyewan.top/404.jpg'" alt="【操作系统】修改其他进程的内存"/></a><div class="content"><a class="title" href="/p/871d033f.html" title="【操作系统】修改其他进程的内存">【操作系统】修改其他进程的内存</a><time datetime="2022-06-21T14:14:30.000Z" title="发表于 2022-06-21 22:14:30">2022-06-21</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By 册页晚</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="icp"><a target="_blank" rel="noopener" href="https://beian.miit.gov.cn/"><img class="icp-icon" src="http://image.ceyewan.top/icp.png"/><span>湘ICP备2022011624号</span></a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
