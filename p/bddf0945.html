@@ -1,0 +1,196 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>【leetcode】详解力扣中int *returnSize和int **returnColumnSizes | 册页晚的学习笔记</title><meta name="keywords" content="C 语言,leetcode"><meta name="author" content="册页晚"><meta name="copyright" content="册页晚"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="在用C语言刷力扣的时候，我们经常会看到这两个东西，int* returnSize 和 int** returnColumnSizes。连题目都看不懂，更何况是做题呢？我也是查找了网上零零碎碎的资料和做了蛮多题之后，终于想明白了。遂整理成此文，希望能帮到后来者。个人理解，如有不足，烦请斧正。  首先我们来看一道题，力扣的第 15 题，三数之和。这是笔者第一次接触到这两个东西的题目。 三数之和 题干">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【leetcode】详解力扣中int *returnSize和int **returnColumnSizes">
+<meta property="og:url" content="https://ceyewan.top/p/bddf0945.html">
+<meta property="og:site_name" content="册页晚的学习笔记">
+<meta property="og:description" content="在用C语言刷力扣的时候，我们经常会看到这两个东西，int* returnSize 和 int** returnColumnSizes。连题目都看不懂，更何况是做题呢？我也是查找了网上零零碎碎的资料和做了蛮多题之后，终于想明白了。遂整理成此文，希望能帮到后来者。个人理解，如有不足，烦请斧正。  首先我们来看一道题，力扣的第 15 题，三数之和。这是笔者第一次接触到这两个东西的题目。 三数之和 题干">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://image.ceyewan.top/12.jpg">
+<meta property="article:published_time" content="2022-07-20T12:23:31.000Z">
+<meta property="article:modified_time" content="2022-07-20T12:24:37.480Z">
+<meta property="article:author" content="册页晚">
+<meta property="article:tag" content="C 语言">
+<meta property="article:tag" content="leetcode">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://image.ceyewan.top/12.jpg"><link rel="shortcut icon" href="https://image.ceyewan.top/favicon.png"><link rel="canonical" href="https://ceyewan.top/p/bddf0945"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '【leetcode】详解力扣中int *returnSize和int **returnColumnSizes',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: undefined,
+  isToc: true,
+  postUpdate: '2022-07-20 20:24:37'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/pikachu.css"><meta name="generator" content="Hexo 6.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://image.ceyewan.top/head.jpg" onerror="onerror=null;src='https://image.ceyewan.top/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">24</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 家</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://image.ceyewan.top/12.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">册页晚的学习笔记</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 家</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">【leetcode】详解力扣中int *returnSize和int **returnColumnSizes</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-07-20T12:23:31.000Z" title="发表于 2022-07-20 20:23:31">2022-07-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-07-20T12:24:37.480Z" title="更新于 2022-07-20 20:24:37">2022-07-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/leetcode/">leetcode</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="【leetcode】详解力扣中int *returnSize和int **returnColumnSizes"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><blockquote>
+<p>在用C语言刷力扣的时候，我们经常会看到这两个东西，<code>int* returnSize</code> 和 <code>int** returnColumnSizes</code>。连题目都看不懂，更何况是做题呢？我也是查找了网上零零碎碎的资料和做了蛮多题之后，终于想明白了。遂整理成此文，希望能帮到后来者。个人理解，如有不足，烦请斧正。</p>
+</blockquote>
+<p>首先我们来看一道题，力扣的第 15 题，<a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/3sum/">三数之和</a>。这是笔者第一次接触到这两个东西的题目。</p>
+<h3 id="三数之和">三数之和</h3>
+<h4 id="题干：">题干：</h4>
+<blockquote>
+<p>给你一个包含 n 个整数的数组 <code>nums</code>，判断 <code>nums</code> 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有和为 0 且不重复的三元组。</p>
+<p>注意：答案中不可以包含重复的三元组。</p>
+</blockquote>
+<h4 id="示例：">示例：</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">输入：nums = [<span class="number">-1</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">-1</span>,<span class="number">-4</span>]</span><br><span class="line">输出：[[<span class="number">-1</span>,<span class="number">-1</span>,<span class="number">2</span>],[<span class="number">-1</span>,<span class="number">0</span>,<span class="number">1</span>]]</span><br><span class="line">    </span><br><span class="line">输入：nums = []</span><br><span class="line">输出：[]</span><br><span class="line">    </span><br><span class="line">输入：nums = [<span class="number">0</span>]</span><br><span class="line">输出：[]</span><br></pre></td></tr></table></figure>
+<h4 id="提示：">提示：</h4>
+<ul>
+<li><code>0 &lt;= nums.length &lt;= 3000</code></li>
+<li><code>-105 &lt;= nums[i] &lt;= 105</code></li>
+</ul>
+<h4 id="默认的代码模板">默认的代码模板</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Return an array of arrays of size *returnSize.</span></span><br><span class="line"><span class="comment"> * The sizes of the arrays are returned as *returnColumnSizes array.</span></span><br><span class="line"><span class="comment"> * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">int</span>** <span class="title function_">threeSum</span><span class="params">(<span class="type">int</span>* nums, <span class="type">int</span> numsSize, <span class="type">int</span>* returnSize, <span class="type">int</span>** returnColumnSizes)</span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="分析">分析</h3>
+<p>题目的意思很明确了，就是这个数组中找到 3 个数，保证 3 个数的和恰好为 <code>target</code> 。我们看默认的代码模板，返回值是一个二阶指针，结合示例，我们可以知道这里需要返回的是一个二维数组。传入的第一个参数 <code>int *nums</code>也很容易理解，就是输入的数组；第二个参数 <code>int numsSize</code> 也容易理解，是数组的长度；那么第三个参数、第四个参数呢？我要处理的是数组，你把数组给我就行了，还多给两个不明不白的东西干啥？</p>
+<p>我们看看代码模板的注释，复制到谷歌翻译（大佬可以跳过这一步）。我们可以看到，三句话的意思是：</p>
+<ul>
+<li>返回大小为 <code>*returnSize</code> 的数组数组。</li>
+<li>数组的大小作为 <code>*returnColumnSizes</code> 数组返回。</li>
+<li>注意：返回的数组和 <code>*columnSizes</code> 数组都必须被 <code>malloced</code>，假设调用者调用 <code>free()</code>。</li>
+</ul>
+<p>第一句话的数组数组声明意思呢？数组里面的元素是数组，其实就是二维数组。我们还是很容易理解 <code>returnSize</code> 其实就是一个指针的，那么 <code>*returnSize</code> 就代表返回大小，这里的返回大小就是我们要返回的二维数组的行数。还是很容易理解的，毕竟我们不告诉编译器我们的二维数组有多少行，编译器又从何得知呢？</p>
+<p>再看第二句话，数组的大小作为  <code>*returnColumnSizes</code> 数组返回。说明 <code>*returnColumnSizes</code> 是一个数组。那么数组的大小是什么意思？前面我们不是说了数组的大小是 <code>*returnSize</code> 吗？怎么又变成 <code>*returnColumnSizes</code> 了？没有搞错吧？确实没有搞错，二维数组除了行还有列啊！那么新的问题又来了，列不是就是3吗？用一个数来表示不就行了？干嘛要用一个数组？这个我只能说，万一呢？万一每一行的长度不一样呢？比如第一行 3 个元素，第二行 2 个元素。力扣就是有这么“严谨”，要求你告诉它每一行有多少个元素。那么你又会有问题了，一个数组，不应该和 <code>nums</code> 一样用指针传入吗？怎么这里是二阶指针？我们先看第三句话。</p>
+<p>第三句话，返回的数组和 <code>*columnSizes</code> 数组都必须被 <code>malloced</code> ，假设调用者调用 <code>free()</code> ，重点在于：  <code>*columnSizes</code> 数组都必须被 <code>malloced</code>  （ <code>*columnSizes</code> 就是 <code>*returnColumnSizes</code>）。这说明 <code>*returnColumnSizes</code>还没初始化呢，还不是一个数组呢。这也很容易理解， <code>*returnColumnSizes</code> 是用来装我们返回的二维数组每一行有多少个元素的（即列数），如果返回 5 行，则 <code>*returnColumnSizes</code> 的长度也得是 5 ， 比如说第一个元素是 3 表示二维数组的第一行有 3 个数，第二个元素是 4 表示二维数组的第二行有 4 个数。别人怎么知道你的二维数组有多少行？自然也就不知道应该初始化 <code>*returnColumnSizes</code> 数组为多大了，这一切还得你来。你 <code>malloc</code> 一个数组，自然就会得到一个指向数组的一阶指针，<code>main</code> 函数传进来一个二阶指针指向你这个一阶指针，这样它就能找到你返回的列数组了。</p>
+<p>好了，或许你还没懂，不过没关系，我们现在来看看我猜测的 <code>main</code> 函数是什么样子的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> nums[<span class="number">6</span>] = &#123;<span class="number">-1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">-1</span>, <span class="number">-4</span>&#125;;</span><br><span class="line">    <span class="type">int</span> numsSize = <span class="number">6</span>;</span><br><span class="line">    <span class="type">int</span> returnSize;<span class="comment">// 表示返回的二维数组的行数</span></span><br><span class="line">    <span class="type">int</span> **returnColumnSize;<span class="comment">// 指向列数组指针的指针</span></span><br><span class="line">    <span class="comment">// 注意：列数组在哪我们无从得知，也不需要知道，</span></span><br><span class="line">    <span class="comment">// 我们只要知道有个一阶指针指向它就行了，我把它叫做列数组指针</span></span><br><span class="line">    <span class="type">int</span> **ans = threeSum(nums, numsSize, &amp;returnSize, returnColumnSizes);</span><br><span class="line">    <span class="comment">// &amp;returnSize 引用传值</span></span><br><span class="line">    <span class="comment">// 最后一个参数我认为也可以是 int *returnColumnSize，然后传入&amp;returnColumnSizes，效果是一样的</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; (*returnSize); i++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; (*returnColumnSize)[i]; j++)</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>, ans[i][j]);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们再来看看 <code>threeSum</code> 函数里面我们需要做的是什么事。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> **<span class="title function_">threeSum</span><span class="params">(<span class="type">int</span> *nums, <span class="type">int</span> numsSize, <span class="type">int</span> *returnSize, <span class="type">int</span> **returnColumnSizes)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// ans是二维数组，先假设有100000个答案，准备有100000个一阶指针的空间先</span></span><br><span class="line">    <span class="comment">// 每个一阶指针可以指向一个数组，即一个答案</span></span><br><span class="line">    <span class="type">int</span> **ans == (<span class="type">int</span> **)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="type">int</span> *) * <span class="number">100000</span>);</span><br><span class="line">    <span class="comment">// returnSize是一阶指针， *returnSize是值</span></span><br><span class="line">    *returnSize = <span class="number">0</span>;<span class="comment">// 答案组数为0</span></span><br><span class="line">    <span class="keyword">while</span> (找到一组答案) &#123;</span><br><span class="line">        <span class="comment">// malloc一个数组存储答案</span></span><br><span class="line">        <span class="type">int</span> *temp = (<span class="type">int</span> *)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="type">int</span>) * <span class="number">3</span>);<span class="comment">// 3个数嘛，3个int</span></span><br><span class="line">        f(把答案写入temp);</span><br><span class="line">        ans[(*returnSize)] = temp;<span class="comment">// 这两个都是一阶指针</span></span><br><span class="line">        (*returnSize)++；</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// returnColumnSizes是二阶指针， (*returnColumnSizes)是一阶指针</span></span><br><span class="line">    <span class="comment">// 有(*returnSize)行就malloc(*returnSize)个元素</span></span><br><span class="line">    (*returnColumnSizes) = (<span class="type">int</span> *)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="type">int</span>) * (*returnSize));</span><br><span class="line">    <span class="comment">// 本题中每一个元素都是3</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; (*returnSize); i++) &#123;</span><br><span class="line">        (*returnColumnSizes)[i] = <span class="number">3</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 我们虽然ans数组malloc了100000个空间，但是其实main函数只会用到前（*returnSize）个，多出来的就多出来吧</span></span><br></pre></td></tr></table></figure>
+<h3 id="题解">题解</h3>
+<p>三重循环暴力法就不写了，这里贴一个双指针的，具体解法力扣的题解讲的比我清楚得多。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># <span class="keyword">define</span> MAX 100000	<span class="comment">// 答案的个数，当然也能用动态扩容</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">comp</span><span class="params">(<span class="type">const</span> <span class="type">void</span> *a, <span class="type">const</span> <span class="type">void</span> *b)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> *(<span class="type">int</span> *)a &gt; *(<span class="type">int</span> *)b ? <span class="number">1</span> : <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span>** <span class="title function_">threeSum</span><span class="params">(<span class="type">int</span>* nums, <span class="type">int</span> numsSize, <span class="type">int</span>* returnSize, <span class="type">int</span>** returnColumnSizes)</span>&#123;</span><br><span class="line">    qsort(nums, numsSize, <span class="keyword">sizeof</span>(<span class="type">int</span>), comp);</span><br><span class="line">    <span class="type">int</span> **ans = (<span class="type">int</span> **)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="type">int</span> *) * MAX);</span><br><span class="line">    *returnSize = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (numsSize &lt; <span class="number">3</span>)   <span class="keyword">return</span> ans;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (i &lt; numsSize - <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="type">int</span> left = i + <span class="number">1</span>, right = numsSize - <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span> (left &lt; right) &#123;</span><br><span class="line">            <span class="type">int</span> sum = nums[left] + nums[right] + nums[i];</span><br><span class="line">            <span class="keyword">if</span> (sum == <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="type">int</span> *temp = (<span class="type">int</span> *)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="type">int</span>) * <span class="number">3</span>);</span><br><span class="line">                temp[<span class="number">0</span>] = nums[i];</span><br><span class="line">                temp[<span class="number">1</span>] = nums[left];</span><br><span class="line">                temp[<span class="number">2</span>] = nums[right];</span><br><span class="line">                ans[(*returnSize)++] = temp;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 这个地方不能是else if，因为总得改变当前的状态，如果是else if，那么找到了一个答案之后就永远不变了，这是不行的</span></span><br><span class="line">            <span class="keyword">if</span> (sum &lt; <span class="number">0</span>)</span><br><span class="line">                <span class="comment">// 小了，就改变left。跳过重复的同时避免出界</span></span><br><span class="line">                <span class="keyword">while</span> (left &lt; numsSize - <span class="number">1</span> &amp;&amp; nums[left] == nums[++left]);</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                <span class="comment">// right跳过重复的</span></span><br><span class="line">                <span class="keyword">while</span> (right &gt; <span class="number">0</span> &amp;&amp; nums[right] == nums[--right]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 第一个数字i，同样避免重复和越界</span></span><br><span class="line">        <span class="keyword">while</span>(i &lt; numsSize - <span class="number">1</span> &amp;&amp; nums[i] == nums[++i]);</span><br><span class="line">    &#125;</span><br><span class="line">    *returnColumnSizes = (<span class="type">int</span> *)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="type">int</span>) * (*returnSize));</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; (*returnSize); i++)</span><br><span class="line">        (*returnColumnSizes)[i] = <span class="number">3</span>;</span><br><span class="line">    <span class="keyword">return</span> ans;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="小结">小结</h3>
+<p>希望本文能帮到你，如果还有不明白的地方，欢迎和我交流。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://ceyewan.top">册页晚</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://ceyewan.top/p/bddf0945.html">https://ceyewan.top/p/bddf0945.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://ceyewan.top" target="_blank">册页晚的学习笔记</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/C-%E8%AF%AD%E8%A8%80/">C 语言</a><a class="post-meta__tags" href="/tags/leetcode/">leetcode</a></div><div class="post_share"><div class="social-share" data-image="https://image.ceyewan.top/12.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/p/751c0a42.html"><img class="next-cover" src="https://image.ceyewan.top/28.png" onerror="onerror=null;src='https://image.ceyewan.top/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">【Linux】网络编程</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://image.ceyewan.top/head.jpg" onerror="this.onerror=null;this.src='https://image.ceyewan.top/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">册页晚</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">24</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">16</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ceyewan"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/ceyewan" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:ceyewan@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">今天也要开心呀！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E6%95%B0%E4%B9%8B%E5%92%8C"><span class="toc-number">1.</span> <span class="toc-text">三数之和</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%A2%98%E5%B9%B2%EF%BC%9A"><span class="toc-number">1.1.</span> <span class="toc-text">题干：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A"><span class="toc-number">1.2.</span> <span class="toc-text">示例：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%90%E7%A4%BA%EF%BC%9A"><span class="toc-number">1.3.</span> <span class="toc-text">提示：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E7%9A%84%E4%BB%A3%E7%A0%81%E6%A8%A1%E6%9D%BF"><span class="toc-number">1.4.</span> <span class="toc-text">默认的代码模板</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%98%E8%A7%A3"><span class="toc-number">3.</span> <span class="toc-text">题解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">小结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/p/bddf0945.html" title="【leetcode】详解力扣中int *returnSize和int **returnColumnSizes"><img src="https://image.ceyewan.top/12.jpg" onerror="this.onerror=null;this.src='https://image.ceyewan.top/404.jpg'" alt="【leetcode】详解力扣中int *returnSize和int **returnColumnSizes"/></a><div class="content"><a class="title" href="/p/bddf0945.html" title="【leetcode】详解力扣中int *returnSize和int **returnColumnSizes">【leetcode】详解力扣中int *returnSize和int **returnColumnSizes</a><time datetime="2022-07-20T12:23:31.000Z" title="发表于 2022-07-20 20:23:31">2022-07-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/751c0a42.html" title="【Linux】网络编程"><img src="https://image.ceyewan.top/28.png" onerror="this.onerror=null;this.src='https://image.ceyewan.top/404.jpg'" alt="【Linux】网络编程"/></a><div class="content"><a class="title" href="/p/751c0a42.html" title="【Linux】网络编程">【Linux】网络编程</a><time datetime="2022-07-18T15:21:41.000Z" title="发表于 2022-07-18 23:21:41">2022-07-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/2af71895.html" title="【Golang】高质量编程与性能调优实战"><img src="https://image.ceyewan.top/4.jpg" onerror="this.onerror=null;this.src='https://image.ceyewan.top/404.jpg'" alt="【Golang】高质量编程与性能调优实战"/></a><div class="content"><a class="title" href="/p/2af71895.html" title="【Golang】高质量编程与性能调优实战">【Golang】高质量编程与性能调优实战</a><time datetime="2022-07-13T08:41:21.000Z" title="发表于 2022-07-13 16:41:21">2022-07-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/54878ac.html" title="【Golang】go语言实现常见排序算法"><img src="https://image.ceyewan.top/36.png" onerror="this.onerror=null;this.src='https://image.ceyewan.top/404.jpg'" alt="【Golang】go语言实现常见排序算法"/></a><div class="content"><a class="title" href="/p/54878ac.html" title="【Golang】go语言实现常见排序算法">【Golang】go语言实现常见排序算法</a><time datetime="2022-07-12T08:23:05.000Z" title="发表于 2022-07-12 16:23:05">2022-07-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/p/f9d8a47b.html" title="【Golang】实现简易分布式系统 GeeCache"><img src="https://image.ceyewan.top/33.png" onerror="this.onerror=null;this.src='https://image.ceyewan.top/404.jpg'" alt="【Golang】实现简易分布式系统 GeeCache"/></a><div class="content"><a class="title" href="/p/f9d8a47b.html" title="【Golang】实现简易分布式系统 GeeCache">【Golang】实现简易分布式系统 GeeCache</a><time datetime="2022-07-12T08:15:19.000Z" title="发表于 2022-07-12 16:15:19">2022-07-12</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By 册页晚</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="icp"><a target="_blank" rel="noopener" href="https://beian.miit.gov.cn/"><img class="icp-icon" src="https://image.ceyewan.top/icp.png"/><span>湘ICP备2022011624号</span></a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
