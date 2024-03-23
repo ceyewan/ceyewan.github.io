@@ -31,7 +31,7 @@
     
     
     <entry>
-      <title>Hash Length Extension Attack Lab</title>
+      <title>Hash-Length-Extension-Attack-Lab</title>
       <link href="/p/78f57b58.html"/>
       <url>/p/78f57b58.html</url>
       
@@ -40,14 +40,12 @@
       
       <categories>
           
-          <category> SeedLabs </category>
+          <category> SeedLabs/Cryptography </category>
           
       </categories>
       
       
         <tags>
-            
-            <tag> SeedLabs </tag>
             
             <tag> Hash Attack </tag>
             

@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
     <meta name="description" content="Introduction当客户端和服务器通过互联网进行通信时，它们就可能会受到 MITM 攻击。攻击者可以拦截来自客户端的请求，修改数据并将修改后的请求发送到服务器。在这种情况下，服务器需要验证接收到的请求的完整性。验证请求完整性的标准方法是在请求上附加一个称为 MAC 的标记。 MAC 是由密钥和一条消息计算出来的，计算 MAC 的一个简单方法是对密钥（密钥只有客户端和服务端知道）和消息拼接后的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hash Length Extension Attack Lab">
+<meta property="og:title" content="Hash-Length-Extension-Attack-Lab">
 <meta property="og:url" content="https://ceyewan.github.io/p/78f57b58.html">
 <meta property="og:site_name" content="Ceyewan&#39;s Blog">
 <meta property="og:description" content="Introduction当客户端和服务器通过互联网进行通信时，它们就可能会受到 MITM 攻击。攻击者可以拦截来自客户端的请求，修改数据并将修改后的请求发送到服务器。在这种情况下，服务器需要验证接收到的请求的完整性。验证请求完整性的标准方法是在请求上附加一个称为 MAC 的标记。 MAC 是由密钥和一条消息计算出来的，计算 MAC 的一个简单方法是对密钥（密钥只有客户端和服务端知道）和消息拼接后的">
@@ -18,9 +18,8 @@
 <meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240322215109853.png">
 <meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240322223200967.png">
 <meta property="article:published_time" content="2024-03-23T10:00:16.000Z">
-<meta property="article:modified_time" content="2024-03-23T10:07:46.297Z">
+<meta property="article:modified_time" content="2024-03-23T15:45:30.241Z">
 <meta property="article:author" content="ceyewan">
-<meta property="article:tag" content="SeedLabs">
 <meta property="article:tag" content="Hash Attack">
 <meta property="article:tag" content="Cryptography">
 <meta name="twitter:card" content="summary">
@@ -44,7 +43,7 @@
       
     
     <!-- title -->
-    <title>Hash Length Extension Attack Lab</title>
+    <title>Hash-Length-Extension-Attack-Lab</title>
     <!-- async scripts -->
     <!-- Google Analytics -->
 
@@ -118,16 +117,16 @@
     <div id="share" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/78f57b58.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/78f57b58.html&text=Hash Length Extension Attack Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash Length Extension Attack Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/78f57b58.html&is_video=false&description=Hash Length Extension Attack Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Hash Length Extension Attack Lab&body=Check out this article: https://ceyewan.github.io/p/78f57b58.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash Length Extension Attack Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash Length Extension Attack Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash Length Extension Attack Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash Length Extension Attack Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/78f57b58.html&name=Hash Length Extension Attack Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/78f57b58.html&t=Hash Length Extension Attack Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/78f57b58.html&text=Hash-Length-Extension-Attack-Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash-Length-Extension-Attack-Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/78f57b58.html&is_video=false&description=Hash-Length-Extension-Attack-Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Hash-Length-Extension-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/78f57b58.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash-Length-Extension-Attack-Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash-Length-Extension-Attack-Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash-Length-Extension-Attack-Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash-Length-Extension-Attack-Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/78f57b58.html&name=Hash-Length-Extension-Attack-Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/78f57b58.html&t=Hash-Length-Extension-Attack-Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -147,7 +146,7 @@
   <header>
     
     <h1 class="posttitle p-name" itemprop="name headline">
-        Hash Length Extension Attack Lab
+        Hash-Length-Extension-Attack-Lab
     </h1>
 
 
@@ -168,14 +167,14 @@
       
     <div class="article-category">
         <i class="fa-solid fa-archive"></i>
-        <a class="category-link" href="/categories/SeedLabs/">SeedLabs</a>
+        <a class="category-link" href="/categories/SeedLabs-Cryptography/">SeedLabs/Cryptography</a>
     </div>
 
 
       
     <div class="article-tag">
         <i class="fa-solid fa-tag"></i>
-        <a class="p-category" href="/tags/Cryptography/" rel="tag">Cryptography</a>, <a class="p-category" href="/tags/Hash-Attack/" rel="tag">Hash Attack</a>, <a class="p-category" href="/tags/SeedLabs/" rel="tag">SeedLabs</a>
+        <a class="p-category" href="/tags/Cryptography/" rel="tag">Cryptography</a>, <a class="p-category" href="/tags/Hash-Attack/" rel="tag">Hash Attack</a>
     </div>
 
 
@@ -278,16 +277,16 @@
     <div id="share-footer" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/78f57b58.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/78f57b58.html&text=Hash Length Extension Attack Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash Length Extension Attack Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/78f57b58.html&is_video=false&description=Hash Length Extension Attack Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Hash Length Extension Attack Lab&body=Check out this article: https://ceyewan.github.io/p/78f57b58.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash Length Extension Attack Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash Length Extension Attack Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash Length Extension Attack Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash Length Extension Attack Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/78f57b58.html&name=Hash Length Extension Attack Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/78f57b58.html&t=Hash Length Extension Attack Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/78f57b58.html&text=Hash-Length-Extension-Attack-Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash-Length-Extension-Attack-Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/78f57b58.html&is_video=false&description=Hash-Length-Extension-Attack-Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Hash-Length-Extension-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/78f57b58.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash-Length-Extension-Attack-Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash-Length-Extension-Attack-Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash-Length-Extension-Attack-Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/78f57b58.html&title=Hash-Length-Extension-Attack-Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/78f57b58.html&name=Hash-Length-Extension-Attack-Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/78f57b58.html&t=Hash-Length-Extension-Attack-Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
