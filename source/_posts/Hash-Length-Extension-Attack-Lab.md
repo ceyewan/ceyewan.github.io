@@ -1,11 +1,10 @@
 ---
-title: Hash Length Extension Attack Lab
+title: Hash-Length-Extension-Attack-Lab
 abbrlink: 78f57b58
 date: 2024-03-23 18:00:16
 categories:
-    - SeedLabs
+    - SeedLabs/Cryptography
 tags:
-    - SeedLabs
     - Hash Attack
     - Cryptography
 ---
