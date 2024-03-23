@@ -292,9 +292,9 @@
       
         <tags>
             
-            <tag> ICMP Redirect Attack </tag>
-            
             <tag> NetworkSecurity </tag>
+            
+            <tag> ICMP Redirect Attack </tag>
             
         </tags>
       
@@ -319,9 +319,9 @@
       
         <tags>
             
-            <tag> NetworkSecurity </tag>
-            
             <tag> ARP Cache Poisoning </tag>
+            
+            <tag> NetworkSecurity </tag>
             
         </tags>
       
