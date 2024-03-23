@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="OverviewRSA 是最早的公钥密码系统之一，广泛用于安全通信。RSA 算法首先生成两个大的随机素数，然后使用它们生成公钥和私钥对，可用于加密、解密、数字签名生成和数字签名验证。RSA 算法是建立在数论基础上的，在相关库的支持下可以很容易地实现。本次实验包括如下主题：  公开密钥加密 RSA 算法以及密钥的生成 大数计算 使用 RSA 的加密和解密  BackgroundRSA 算法涉及对大数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RSA-Public-Key-Encryption-and-Signnature-Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/63322fc3.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="OverviewRSA 是最早的公钥密码系统之一，广泛用于安全通信。RSA 算法首先生成两个大的随机素数，然后使用它们生成公钥和私钥对，可用于加密、解密、数字签名生成和数字签名验证。RSA 算法是建立在数论基础上的，在相关库的支持下可以很容易地实现。本次实验包括如下主题：  公开密钥加密 RSA 算法以及密钥的生成 大数计算 使用 RSA 的加密和解密  BackgroundRSA 算法涉及对大数">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240319174600075.png">
+<meta property="article:published_time" content="2024-03-23T17:00:50.000Z">
+<meta property="article:modified_time" content="2024-03-23T17:02:32.735Z">
+<meta property="article:author" content="ceyewan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240319174600075.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>RSA-Public-Key-Encryption-and-Signnature-Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/7944d15b.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/63322fc3.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/63322fc3.html&text=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/63322fc3.html&title=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/63322fc3.html&is_video=false&description=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RSA-Public-Key-Encryption-and-Signnature-Lab&body=Check out this article: https://ceyewan.github.io/p/63322fc3.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/63322fc3.html&title=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/63322fc3.html&title=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/63322fc3.html&title=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/63322fc3.html&title=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/63322fc3.html&name=RSA-Public-Key-Encryption-and-Signnature-Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/63322fc3.html&t=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview"><span class="toc-number">1.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Background"><span class="toc-number">2.</span> <span class="toc-text">Background</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#BIGNUM-APIs"><span class="toc-number">2.1.</span> <span class="toc-text">BIGNUM APIs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#A-Complete-Example"><span class="toc-number">2.2.</span> <span class="toc-text">A Complete Example</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Deriving-the-Private-Key"><span class="toc-number">3.</span> <span class="toc-text">Task 1: Deriving the Private Key</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Encrypting-a-Message"><span class="toc-number">4.</span> <span class="toc-text">Task 2: Encrypting a Message</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Decrypting-a-Message"><span class="toc-number">5.</span> <span class="toc-text">Task 3: Decrypting a Message</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Signing-a-Message"><span class="toc-number">6.</span> <span class="toc-text">Task 4: Signing a Message</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Verifying-a-Signature"><span class="toc-number">7.</span> <span class="toc-text">Task 5: Verifying a Signature</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        RSA-Public-Key-Encryption-and-Signnature-Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-03-23T17:00:50.000Z" class="dt-published" itemprop="datePublished">2024-03-24</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>RSA 是最早的公钥密码系统之一，广泛用于安全通信。RSA 算法首先生成两个大的随机素数，然后使用它们生成公钥和私钥对，可用于加密、解密、数字签名生成和数字签名验证。RSA 算法是建立在数论基础上的，在相关库的支持下可以很容易地实现。本次实验包括如下主题：</p>
+<ul>
+<li>公开密钥加密</li>
+<li>RSA 算法以及密钥的生成</li>
+<li>大数计算</li>
+<li>使用 RSA 的加密和解密</li>
+</ul>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>RSA 算法涉及对大数的计算。这些计算不能直接使用程序中的简单算术运算符进行，因为这些运算符只能对 32 位或 64 位整数类型进行操作，而 RSA 设计的数字通常超过 512 位。</p>
+<p>有几个库可以对任意大小的整数执行算术运算。在这个实验中，我们将使用 openssl 提供的 Big Number 库。为了使用这个库，我们将把每个大数定义为 BIGNUM 类型，然后使用库提供的 api 执行各种操作，如加法、乘法、指数、模操作等。</p>
+<h3 id="BIGNUM-APIs"><a href="#BIGNUM-APIs" class="headerlink" title="BIGNUM APIs"></a>BIGNUM APIs</h3><p>所有的 api 都可以从  <a target="_blank" rel="noopener" href="https://linux.die.net/man/3/bn">https://linux.die.net/man/3/bn</a> 中找到，我们介绍主要的几个。</p>
+<ul>
+<li>一些库函数需要临时变量。由于在重复子程序调用中与动态内存分配一起使用会很昂贵，占用大量内存，所以创建了一个 BN_CTX 结构来保存库函数使用的 BIGNUM 临时变量。我们需要创建这样一个结构，并将其传递给需要它的函数。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">BN_CTX *ctx = BN_CTX_new()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>初始化 BIGNUM 变量</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">BIGNUM *a = BN_new()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>有很多方法可以给 BIGNUM 变量赋值</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 十进制数字字符串</span></span><br><span class="line">BN_dec2bn(&amp;a, <span class="string">&quot;12345678901112231223&quot;</span>);</span><br><span class="line"><span class="comment">// 十六进制数字字符串</span></span><br><span class="line">BN_hex2bn(&amp;a, <span class="string">&quot;2A3B4C55FF77889AED3F&quot;</span>);</span><br><span class="line"><span class="comment">// 随机的 128 位数字</span></span><br><span class="line">BN_rand(a, <span class="number">128</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"><span class="comment">// 随机的 128 位素数</span></span><br><span class="line">BN_generate_prime_ex(a, <span class="number">128</span>, <span class="number">1</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>打印一个大数</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">printBN</span><span class="params">(<span class="type">char</span> *msg, BIGNUM * a)</span> &#123;</span><br><span class="line">    <span class="comment">// 将大数转为字符串</span></span><br><span class="line">    <span class="type">char</span> * number_str = BN_bn2dec(a);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s %s\n&quot;</span>, msg, number_str);</span><br><span class="line">    OPENSSL_free(number_str);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>基本运算</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">BN_sub(res, a, b); <span class="comment">// res = a - b</span></span><br><span class="line">BN_add(res, a, b); <span class="comment">// res = a + b</span></span><br><span class="line">BN_mul(res, a, b, ctx); <span class="comment">// ctx 是 BN_CTX 类型, res = a * b</span></span><br><span class="line">BN_mod_mul(res, a, b, n, ctx); <span class="comment">// res = a * b mod n</span></span><br><span class="line">BN_mod_exp(res, a, c, n, ctx) <span class="comment">// res = a ^ c mod n</span></span><br><span class="line">BN_mod_inverse(b, a, n, ctx); <span class="comment">// 计算模逆，找到 b 使得 a * b mod n = 1</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="A-Complete-Example"><a href="#A-Complete-Example" class="headerlink" title="A Complete Example"></a>A Complete Example</h3><p>提供了相关文件，我们只需要执行看看即可。</p>
+<h2 id="Task-1-Deriving-the-Private-Key"><a href="#Task-1-Deriving-the-Private-Key" class="headerlink" title="Task 1: Deriving the Private Key"></a>Task 1: Deriving the Private Key</h2><p>设 $p$、$q$、$e$ 是三个质数，设 $n &#x3D; p * q$。我们使用  $(e, n)$ 作为公钥，请计算私钥 $d$。</p>
+<blockquote>
+<p>  在 RSA 加密算法中，$p$ 和 $q$ 是两个足够大且不相等的素数；$n$ 是这两个素数的乘积；$e$ 是公钥中的加密指数，用于加密消息；$(e, n)$ 这一对数值一起构成了 RSA 中的公钥。</p>
+<p>  要生成私钥 $d$，我们需要先计算欧拉函数，$\varphi(n) &#x3D; (p-1)(q-1)$，而 $d$ 就是 $e$ 关于 $\varphi(n)$ 的模逆，也就是说 $e\ *\ d\ \equiv\ 1(mod\ \varphi(n))$​​ </p>
+</blockquote>
+<h2 id="Task-2-Encrypting-a-Message"><a href="#Task-2-Encrypting-a-Message" class="headerlink" title="Task 2: Encrypting a Message"></a>Task 2: Encrypting a Message</h2><p>让 $(e, n)$​ 成为公钥。请加密消息 “A top secret!”。我们需要将这个 ASCII 字符串转换为十六进制字符串，然后将十六进制字符串转换为 BIGNUM。下面的 python 命令可以用来将普通的 ASCII 字符串转换成十六进制字符串。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python3 -c &#x27;rint(&quot;A top secret!&quot;.encode(&quot;utf-8&quot;).hex())&#x27;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>  加密的公式为 $c \equiv m^e\ (mod\ n)$，其中 $m$ 是需要加密的消息，$c$​ 是加密后的密文。</p>
+</blockquote>
+<h2 id="Task-3-Decrypting-a-Message"><a href="#Task-3-Decrypting-a-Message" class="headerlink" title="Task 3: Decrypting a Message"></a>Task 3: Decrypting a Message</h2><blockquote>
+<p>  解密的公式为 $m \equiv c^d\ (mod\ n)$，其中 $c$ 是需要解密的消息，$m$​ 是解密后的明文。</p>
+</blockquote>
+<p>下面的 python 命令可以用来将十六进制字符串转换成 ASCII 字符串。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python3 -c &#x27;print(bytes.fromhex(&quot;4120746f702073656372657421&quot;).decode(&quot;utf-8&quot;))&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>完整代码如下，包括初始化、加密、解密三个部分。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;openssl/bn.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">char</span> *p_str = <span class="string">&quot;F7E75FDC469067FFDC4E847C51F452DF&quot;</span>;</span><br><span class="line"><span class="type">char</span> *q_str = <span class="string">&quot;E85CED54AF57E53E092113E62F436F4F&quot;</span>;</span><br><span class="line"><span class="type">char</span> *e_str = <span class="string">&quot;0D88C3&quot;</span>;</span><br><span class="line"><span class="type">char</span> *m_str = <span class="string">&quot;4120746F702073656372657421&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">printBN</span><span class="params">(<span class="type">char</span> *msg, BIGNUM *a)</span> &#123;</span><br><span class="line">  <span class="type">char</span> *number_str = BN_bn2hex(a);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;%s %s\n&quot;</span>, msg, number_str);</span><br><span class="line">  OPENSSL_free(number_str);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  BN_CTX *ctx = BN_CTX_new();</span><br><span class="line">  BIGNUM *p = BN_new();</span><br><span class="line">  BIGNUM *p_1 = BN_new();</span><br><span class="line">  BIGNUM *q = BN_new();</span><br><span class="line">  BIGNUM *q_1 = BN_new();</span><br><span class="line">  BIGNUM *e = BN_new();</span><br><span class="line">  BIGNUM *d = BN_new();</span><br><span class="line">  BIGNUM *n = BN_new();</span><br><span class="line">  BIGNUM *n2 = BN_new();</span><br><span class="line">  BIGNUM *m = BN_new();</span><br><span class="line">  BIGNUM *c = BN_new();</span><br><span class="line">  BN_hex2bn(&amp;p, p_str);</span><br><span class="line">  BN_hex2bn(&amp;q, q_str);</span><br><span class="line">  BN_hex2bn(&amp;e, e_str);</span><br><span class="line">  BN_hex2bn(&amp;m, m_str);</span><br><span class="line">  <span class="comment">// RSA 算法初始化</span></span><br><span class="line">  BN_mul(n, p, q, ctx);</span><br><span class="line">  BN_sub_word(p, <span class="number">1</span>);</span><br><span class="line">  printBN(<span class="string">&quot;p_1 is&quot;</span>, p);</span><br><span class="line">  BN_sub_word(q, <span class="number">1</span>);</span><br><span class="line">  printBN(<span class="string">&quot;q_1 is&quot;</span>, q);</span><br><span class="line">  BN_mul(n2, p, q, ctx);</span><br><span class="line">  BN_mod_inverse(d, e, n2, ctx);</span><br><span class="line">  <span class="comment">// 加密</span></span><br><span class="line">  BN_mod_exp(c, m, e, n, ctx);</span><br><span class="line">  printBN(<span class="string">&quot;c is&quot;</span>, c);</span><br><span class="line">  <span class="comment">// 解密</span></span><br><span class="line">  BN_mod_exp(m, c, d, n, ctx);</span><br><span class="line">  printBN(<span class="string">&quot;m is&quot;</span>, m);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Task-4-Signing-a-Message"><a href="#Task-4-Signing-a-Message" class="headerlink" title="Task 4: Signing a Message"></a>Task 4: Signing a Message</h2><p>如下，明文失之毫厘，密文差以千里。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240319174600075.png" alt="image-20240319174600075"></p>
+<h2 id="Task-5-Verifying-a-Signature"><a href="#Task-5-Verifying-a-Signature" class="headerlink" title="Task 5: Verifying a Signature"></a>Task 5: Verifying a Signature</h2><p>使用公钥  $(e, n)$  将消息 $m$ 加密，与签名 $s$ 对比，如果符合，那么说明签名来自于 Alice。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview"><span class="toc-number">1.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Background"><span class="toc-number">2.</span> <span class="toc-text">Background</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#BIGNUM-APIs"><span class="toc-number">2.1.</span> <span class="toc-text">BIGNUM APIs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#A-Complete-Example"><span class="toc-number">2.2.</span> <span class="toc-text">A Complete Example</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Deriving-the-Private-Key"><span class="toc-number">3.</span> <span class="toc-text">Task 1: Deriving the Private Key</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Encrypting-a-Message"><span class="toc-number">4.</span> <span class="toc-text">Task 2: Encrypting a Message</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Decrypting-a-Message"><span class="toc-number">5.</span> <span class="toc-text">Task 3: Decrypting a Message</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Signing-a-Message"><span class="toc-number">6.</span> <span class="toc-text">Task 4: Signing a Message</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Verifying-a-Signature"><span class="toc-number">7.</span> <span class="toc-text">Task 5: Verifying a Signature</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/63322fc3.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/63322fc3.html&text=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/63322fc3.html&title=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/63322fc3.html&is_video=false&description=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=RSA-Public-Key-Encryption-and-Signnature-Lab&body=Check out this article: https://ceyewan.github.io/p/63322fc3.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/63322fc3.html&title=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/63322fc3.html&title=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/63322fc3.html&title=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/63322fc3.html&title=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/63322fc3.html&name=RSA-Public-Key-Encryption-and-Signnature-Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/63322fc3.html&t=RSA-Public-Key-Encryption-and-Signnature-Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

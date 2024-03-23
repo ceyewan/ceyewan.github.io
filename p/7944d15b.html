@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Introduction一个安全的单向散列函数需要满足两个性质：单向性质和抗冲突性质。单向性质保证无法通过哈希值找到最开始的输入。抗冲突性确保了计算上不可能找到两个不同的输入，计算得到的哈希值是相同的。 但是，一些广泛使用的单向哈希函数在保持抗冲突性方面存在问题，在 2004 年 CRYPTO 会议的尾部会议 上，王晓云和合著者演示了一个针对 md5 的碰撞攻击。2017 年 2 月，阿姆斯特丹">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MD5-Collision-Attack-Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/7944d15b.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="Introduction一个安全的单向散列函数需要满足两个性质：单向性质和抗冲突性质。单向性质保证无法通过哈希值找到最开始的输入。抗冲突性确保了计算上不可能找到两个不同的输入，计算得到的哈希值是相同的。 但是，一些广泛使用的单向哈希函数在保持抗冲突性方面存在问题，在 2004 年 CRYPTO 会议的尾部会议 上，王晓云和合著者演示了一个针对 md5 的碰撞攻击。2017 年 2 月，阿姆斯特丹">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321161620665.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321163613051.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321204321158.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321204856235.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321222011111.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321222140713.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321223242061.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321232732049.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321232028582.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321234132864.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240322004316624.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240322004507207.png">
+<meta property="article:published_time" content="2024-03-23T16:57:05.000Z">
+<meta property="article:modified_time" content="2024-03-23T16:58:30.617Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="Cryptography">
+<meta property="article:tag" content="MD5 Collision">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321161620665.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>MD5-Collision-Attack-Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/63322fc3.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/862ec7e4.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/7944d15b.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/7944d15b.html&text=MD5-Collision-Attack-Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/7944d15b.html&title=MD5-Collision-Attack-Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/7944d15b.html&is_video=false&description=MD5-Collision-Attack-Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MD5-Collision-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/7944d15b.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/7944d15b.html&title=MD5-Collision-Attack-Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/7944d15b.html&title=MD5-Collision-Attack-Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/7944d15b.html&title=MD5-Collision-Attack-Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/7944d15b.html&title=MD5-Collision-Attack-Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/7944d15b.html&name=MD5-Collision-Attack-Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/7944d15b.html&t=MD5-Collision-Attack-Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Generating-Two-Different-Files-with-the-Same-MD5-Hash"><span class="toc-number">2.</span> <span class="toc-text">Task 1: Generating Two Different Files with the Same MD5 Hash</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Understanding-MD5%E2%80%99s-Property"><span class="toc-number">3.</span> <span class="toc-text">Task 2: Understanding MD5’s Property</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Generating-Two-Executable-Files-with-the-Same-MD5-Hash"><span class="toc-number">4.</span> <span class="toc-text">Task 3: Generating Two Executable Files with the Same MD5 Hash</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Making-the-Two-Programs-Behave-Differently"><span class="toc-number">5.</span> <span class="toc-text">Task 4: Making the Two Programs Behave Differently</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        MD5-Collision-Attack-Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-03-23T16:57:05.000Z" class="dt-published" itemprop="datePublished">2024-03-24</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-Cryptography/">SeedLabs/Cryptography</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Cryptography/" rel="tag">Cryptography</a>, <a class="p-category" href="/tags/MD5-Collision/" rel="tag">MD5 Collision</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>一个安全的单向散列函数需要满足两个性质：单向性质和抗冲突性质。单向性质保证无法通过哈希值找到最开始的输入。抗冲突性确保了计算上不可能找到两个不同的输入，计算得到的哈希值是相同的。</p>
+<p>但是，一些广泛使用的单向哈希函数在保持抗冲突性方面存在问题，在 2004 年 CRYPTO 会议的尾部会议 上，王晓云和合著者演示了一个针对 md5 的碰撞攻击。2017 年 2 月，阿姆斯特丹 CWI 和谷歌研究公司发 布了 SHAttered at-tack，它打破了 SHA-1 的抗碰撞特性。</p>
+<p>本次实验我们需要用到 <a target="_blank" rel="noopener" href="https://www.win.tue.nl/hashclash/">Fast MD5 Collision Generation</a> 这个工具，它是由 Marc Stevens 编写的。</p>
+<h2 id="Task-1-Generating-Two-Different-Files-with-the-Same-MD5-Hash"><a href="#Task-1-Generating-Two-Different-Files-with-the-Same-MD5-Hash" class="headerlink" title="Task 1: Generating Two Different Files with the Same MD5 Hash"></a>Task 1: Generating Two Different Files with the Same MD5 Hash</h2><p>在这个任务中，我们将生成两个具有相同 MD5 哈希值的不同文件，这两个文件具有相同的前缀。我们可以使用 md5collgen 这个程序来实现，这个程序的工作方式如下：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321161620665.png" alt="image-20240321161620665"></p>
+<p>我们执行如下命令：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321163613051.png" alt="image-20240321163613051"></p>
+<p>可以发现，尽管 out1.bin 和 out2.bin 的内容是不同的，但是它俩计算出来的哈希值确实相同的，也就是说，我们实现了哈希碰撞。</p>
+<ul>
+<li><strong>Question 1</strong>：如果你的前缀文件的长度不是 64 的倍数，会发生什么？</li>
+</ul>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321204321158.png" alt="image-20240321204321158"></p>
+<p>我们发现，如果长度不是 64 的倍数，那么会使用 00 来填充，一直填充到是 64 的倍数。</p>
+<ul>
+<li><strong>Question 2</strong>：创建一个 64 字节的前缀文件，然后再次运行碰撞工具，看看会发生什么？</li>
+</ul>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321204856235.png" alt="image-20240321204856235"></p>
+<p>就不会再有填充了。</p>
+<ul>
+<li><strong>Question 3</strong>：两个文件中 md5collgen 生成的数据（128 字节）是否完全不同？并不是，我们粗略观察，会发现大部分都是一样的，基本上没有什么区别，可以使用 cmp 命令来查看。（diff 用来比较文本文件，cmp 用来比较二进制文件）我们发现，只有七处不同。</li>
+</ul>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321222011111.png" alt="image-20240321222011111"></p>
+<h2 id="Task-2-Understanding-MD5’s-Property"><a href="#Task-2-Understanding-MD5’s-Property" class="headerlink" title="Task 2: Understanding MD5’s Property"></a>Task 2: Understanding MD5’s Property</h2><p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321222140713.png" alt="image-20240321222140713"></p>
+<p>MD5 的工作原理如上所示，它将文件分为 64 字节大小的若干块，在每个块中迭代进行哈希运算。最开始有一个初始 $IHV_0$，每次计算的结果就是下一个块的输入，最后的结果就是最终的哈希值。</p>
+<p>基于这个原理，我们可以发现，如果 A 和 B 的哈希值相同，那么 $A || C$ 和 $B || C$ 的哈希值也会相同，$||$ 表示拼接两个字符串。这是因为前面的哈希值相同了，再来和后面相同的块进行相同的哈希运算，结果自然也是相同的。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321223242061.png" alt="image-20240321223242061"></p>
+<h2 id="Task-3-Generating-Two-Executable-Files-with-the-Same-MD5-Hash"><a href="#Task-3-Generating-Two-Executable-Files-with-the-Same-MD5-Hash" class="headerlink" title="Task 3: Generating Two Executable Files with the Same MD5 Hash"></a>Task 3: Generating Two Executable Files with the Same MD5 Hash</h2><p>基于前面两个任务，我们知道，任何一个二进制文件，将其分为 prefix + region + suffix 三个部分。由任务一我们知道 prefix + region1 和 prefix + region2 的哈希值是可以相同的，其中 region 长度为 128 字节。由任务二，添加了 suffix 后，哈希值还是相同的。也就是说，我们可以修改一个程序（把 region1 修改为 region2），而不改变其哈希值。</p>
+<p>首先，给定一个 C 代码，作用就是以十六进制输出一个长度为 200 的数组。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">char</span> xyz[<span class="number">200</span>] = &#123;<span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>, ..., <span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>&#125;;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">200</span>; i++) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%x&quot;</span>, xyz[i]);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先，我们将其编译成二进制文件，然后通过二进制查看工具，我们发现我们的字符串出现在 12352 附近。我们选这个数，是因为是 64 的倍数，我们把文件中前 12352 个字符作为前缀，通过攻击程序得到两个哈希值相同的文件。接下来，我们将 out.bin 文件写入 hash 文件中。因为 md5collgen 程序生成的哈希值相同的文件只会多 128 个字节，这 128 个字节只会覆盖掉我们最开始写入的全 A（0x41）。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321232732049.png" alt="image-20240321232732049"></p>
+<p>这样，尽管 xyz 数组被 out1.bin 和 out2.bin 修改了，hash1 和 hash2 的哈希值还是一样的。如下：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321232028582.png" alt="image-20240321232028582"></p>
+<p>我们的 python 程序如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;out1.bin&quot;</span>, <span class="string">&quot;rb&quot;</span>) <span class="keyword">as</span> src_file1:</span><br><span class="line">    src_data1 = src_file1.read()</span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;out2.bin&quot;</span>, <span class="string">&quot;rb&quot;</span>) <span class="keyword">as</span> src_file2:</span><br><span class="line">    src_data2 = src_file2.read()</span><br><span class="line">    </span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;hash1&quot;</span>, <span class="string">&quot;r+b&quot;</span>) <span class="keyword">as</span> dst_file:</span><br><span class="line">    dst_file.write(src_data1)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;hash1 程序输出:&quot;</span>)</span><br><span class="line">os.system(<span class="string">&quot;./hash1&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;hash1 程序哈希值:&quot;</span>)</span><br><span class="line">os.system(<span class="string">&quot;md5sum hash1&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;hash2&quot;</span>, <span class="string">&quot;r+b&quot;</span>) <span class="keyword">as</span> dst_file:</span><br><span class="line">    dst_file.write(src_data2)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;hash2 程序输出:&quot;</span>)</span><br><span class="line">os.system(<span class="string">&quot;./hash2&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;hash2 程序哈希值:&quot;</span>)</span><br><span class="line">os.system(<span class="string">&quot;md5sum hash2&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Task-4-Making-the-Two-Programs-Behave-Differently"><a href="#Task-4-Making-the-Two-Programs-Behave-Differently" class="headerlink" title="Task 4: Making the Two Programs Behave Differently"></a>Task 4: Making the Two Programs Behave Differently</h2><p>上面我们已经实现了两个打印不同数据的哈希值相同的程序，现在我们要实现两个行为不同的哈希值相同的程序。我们用一个好程序获得权威机构的证书，证书中使用哈希值来防止篡改。而然，如果我们构造一个坏程序和好程序的哈希值相同，那么证书的防篡改功能就失效了。</p>
+<p>但是，我们看到，我们只能修改程序中间的 128 个字节，并且还不是随意的修改。尽管还有其他更复杂、更先进的工具可以解除一些限制，但它们需要更多的计算能力，因此不在本实验室的范围之内。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">Array X; Array Y;</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (X’s contents and Y’s contents are the same)</span><br><span class="line">    	run benign code;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    	run malicious code;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们的实验可以这样进行，修改程序两处数组，然后如果相等就执行好命令，如果不等就执行坏命令。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240321234132864.png" alt="image-20240321234132864"></p>
+<ol>
+<li>构造程序如下：</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">char</span> xyz[<span class="number">200</span>] = &#123;<span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>, ..., <span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>&#125;;</span><br><span class="line"><span class="type">unsigned</span> <span class="type">char</span> abc[<span class="number">200</span>] = &#123;<span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>, ..., <span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>, <span class="number">0x41</span>&#125;;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">128</span>; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (xyz[<span class="number">32</span> + i] != abc[i]) &#123; <span class="comment">// 这里分别偏移 32 和 0 是实验出来的，因为替换要以 64 为块</span></span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;I am bad!\n&quot;</span>);</span><br><span class="line">      <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;I am good!\n&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>编译程序，可以发现，第一个数组开始位置为 12320，因此替换需要在 12352 位置进行，保证是 64 的倍数。第二个数组开始位置为 12544，不用偏移，这也是为什么上面一个是 32 + i，一个是 i。</li>
+<li>执行如下命令，将 P 和 Q 分别求出来。</li>
+</ol>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240322004316624.png" alt="image-20240322004316624"></p>
+<ol start="4">
+<li>改善 python 代码如下，四次替换，写入了三次 P 和一次 Q：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;out1.bin&quot;</span>, <span class="string">&quot;rb&quot;</span>) <span class="keyword">as</span> src_file1:</span><br><span class="line">    src_file1.seek(-<span class="number">128</span>, <span class="number">2</span>)</span><br><span class="line">    src_data1 = src_file1.read()</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;out2.bin&quot;</span>, <span class="string">&quot;rb&quot;</span>) <span class="keyword">as</span> src_file2:</span><br><span class="line">    src_file2.seek(-<span class="number">128</span>, <span class="number">2</span>)</span><br><span class="line">    src_data2 = src_file2.read()</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;hash1&quot;</span>, <span class="string">&quot;r+b&quot;</span>) <span class="keyword">as</span> dst_file1:</span><br><span class="line">    dst_file1.seek(<span class="number">12352</span>)</span><br><span class="line">    dst_file1.write(src_data1)</span><br><span class="line">    dst_file1.seek(<span class="number">12544</span>)</span><br><span class="line">    dst_file1.write(src_data1)</span><br><span class="line">os.system(<span class="string">&quot;md5sum hash1&quot;</span>)</span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;hash2&quot;</span>, <span class="string">&quot;r+b&quot;</span>) <span class="keyword">as</span> dst_file2:</span><br><span class="line">    dst_file2.seek(<span class="number">12352</span>)</span><br><span class="line">    dst_file2.write(src_data2)</span><br><span class="line">    dst_file2.seek(<span class="number">12544</span>)</span><br><span class="line">    dst_file2.write(src_data1)</span><br><span class="line">os.system(<span class="string">&quot;md5sum hash2&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>运行结果如下：</li>
+</ol>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240322004507207.png" alt="image-20240322004507207"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Generating-Two-Different-Files-with-the-Same-MD5-Hash"><span class="toc-number">2.</span> <span class="toc-text">Task 1: Generating Two Different Files with the Same MD5 Hash</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Understanding-MD5%E2%80%99s-Property"><span class="toc-number">3.</span> <span class="toc-text">Task 2: Understanding MD5’s Property</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Generating-Two-Executable-Files-with-the-Same-MD5-Hash"><span class="toc-number">4.</span> <span class="toc-text">Task 3: Generating Two Executable Files with the Same MD5 Hash</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Making-the-Two-Programs-Behave-Differently"><span class="toc-number">5.</span> <span class="toc-text">Task 4: Making the Two Programs Behave Differently</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/7944d15b.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/7944d15b.html&text=MD5-Collision-Attack-Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/7944d15b.html&title=MD5-Collision-Attack-Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/7944d15b.html&is_video=false&description=MD5-Collision-Attack-Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MD5-Collision-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/7944d15b.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/7944d15b.html&title=MD5-Collision-Attack-Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/7944d15b.html&title=MD5-Collision-Attack-Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/7944d15b.html&title=MD5-Collision-Attack-Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/7944d15b.html&title=MD5-Collision-Attack-Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/7944d15b.html&name=MD5-Collision-Attack-Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/7944d15b.html&t=MD5-Collision-Attack-Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

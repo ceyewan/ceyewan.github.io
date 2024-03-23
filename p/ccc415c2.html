@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Overview公钥密码学是当今安全通信的基础，但当通信的一方向另一方发送其公钥时，就会受到中间人攻击。根本的问在于没有简单的方法来核实公钥的所有权。公钥基础设施（PKI）是解决这个问题的一 个实用方案。 在这个实验中，学生能够理解 PKI 是如何工作的、是如何保护网络的以及中间人攻击是如何被 PKI 击败的。此外，学生能够理解信任根在 PKI 中的意义以及信任根被破坏会出现的问题。本次实验包括以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Public-Key-Infrastructure-(PKI)-Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/ccc415c2.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="Overview公钥密码学是当今安全通信的基础，但当通信的一方向另一方发送其公钥时，就会受到中间人攻击。根本的问在于没有简单的方法来核实公钥的所有权。公钥基础设施（PKI）是解决这个问题的一 个实用方案。 在这个实验中，学生能够理解 PKI 是如何工作的、是如何保护网络的以及中间人攻击是如何被 PKI 击败的。此外，学生能够理解信任根在 PKI 中的意义以及信任根被破坏会出现的问题。本次实验包括以">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.github.io/.%5Cimage-20240313135756887.png">
+<meta property="og:image" content="https://ceyewan.github.io/image-20240313142431319.png">
+<meta property="og:image" content="https://ceyewan.github.io/image-20240313142632441.png">
+<meta property="og:image" content="https://ceyewan.github.io/image-20240313144152971.png">
+<meta property="og:image" content="https://ceyewan.github.io/image-20240313150323752.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313151338409.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313151804508.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313155344817.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313155717398.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313161503451.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314003323385.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314103445152.png">
+<meta property="article:published_time" content="2024-03-23T16:51:18.000Z">
+<meta property="article:modified_time" content="2024-03-23T16:53:49.937Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="Cryptography">
+<meta property="article:tag" content="PKI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.github.io/.%5Cimage-20240313135756887.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Public-Key-Infrastructure-(PKI)-Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/862ec7e4.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/f332aa6e.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/ccc415c2.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/ccc415c2.html&text=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/ccc415c2.html&title=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/ccc415c2.html&is_video=false&description=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Public-Key-Infrastructure-(PKI)-Lab&body=Check out this article: https://ceyewan.github.io/p/ccc415c2.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/ccc415c2.html&title=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/ccc415c2.html&title=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/ccc415c2.html&title=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/ccc415c2.html&title=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/ccc415c2.html&name=Public-Key-Infrastructure-(PKI)-Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/ccc415c2.html&t=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview"><span class="toc-number">1.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab-Environment"><span class="toc-number">2.</span> <span class="toc-text">Lab Environment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Becoming-a-Certificate-Authority-CA"><span class="toc-number">3.</span> <span class="toc-text">Task 1: Becoming a Certificate Authority (CA)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Generating-a-Certificate-Request-for-Your-Web-Server"><span class="toc-number">4.</span> <span class="toc-text">Task 2: Generating a Certificate Request for Your Web Server</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Generating-a-Certificate-for-your-server"><span class="toc-number">5.</span> <span class="toc-text">Task 3: Generating a Certificate for your server</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Deploying-Certificate-in-an-Apache-Based-HTTPS-Website"><span class="toc-number">6.</span> <span class="toc-text">Task 4: Deploying Certificate in an Apache-Based HTTPS Website</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Launching-a-Man-In-The-Middle-Attack"><span class="toc-number">7.</span> <span class="toc-text">Task 5: Launching a Man-In-The-Middle Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-6-Launching-a-Man-In-The-Middle-Attack-with-a-Compromised-CA"><span class="toc-number">8.</span> <span class="toc-text">Task 6: Launching a Man-In-The-Middle Attack with a Compromised CA</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Public-Key-Infrastructure-(PKI)-Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-03-23T16:51:18.000Z" class="dt-published" itemprop="datePublished">2024-03-24</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-Cryptography/">SeedLabs/Cryptography</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Cryptography/" rel="tag">Cryptography</a>, <a class="p-category" href="/tags/PKI/" rel="tag">PKI</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>公钥密码学是当今安全通信的基础，但当通信的一方向另一方发送其公钥时，就会受到中间人攻击。根本的问在于没有简单的方法来核实公钥的所有权。公钥基础设施（PKI）是解决这个问题的一 个实用方案。</p>
+<p>在这个实验中，学生能够理解 PKI 是如何工作的、是如何保护网络的以及中间人攻击是如何被 PKI 击败的。此外，学生能够理解信任根在 PKI 中的意义以及信任根被破坏会出现的问题。本次实验包括以下主题：</p>
+<ul>
+<li>公钥加密、公钥基础建设 PKI</li>
+<li>证书颁发机构 CA、X.509 证书和根 CA</li>
+<li>Apache、HTTP 和 HTTPS</li>
+<li>中间人攻击</li>
+</ul>
+<h2 id="Lab-Environment"><a href="#Lab-Environment" class="headerlink" title="Lab Environment"></a>Lab Environment</h2><p>在这个实验中，我们将生成公钥证书，用它来保护 Web 服务器。</p>
+<p><strong>DNS 设置</strong>：我们在主机的 &#x2F;etc&#x2F;hosts 文件中写入如下条目，这样，当我们访问这两个域名时，去往的都是 Web 服务器的地址。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">10.9.0.80 www.bank32.com</span><br><span class="line">10.9.0.80 www.ceyewan2024.com</span><br></pre></td></tr></table></figure>
+
+<h2 id="Task-1-Becoming-a-Certificate-Authority-CA"><a href="#Task-1-Becoming-a-Certificate-Authority-CA" class="headerlink" title="Task 1: Becoming a Certificate Authority (CA)"></a>Task 1: Becoming a Certificate Authority (CA)</h2><p>证书颁发机构（CA）是一个发布数字证书的可信实体。数字证书通过证书的命名主体证明公钥的所有权。在这个实验中，我们需要创建数字证书。首先我们自己成为一个根 CA，然后使用这个 CA 为其他人（例如服务器）颁发证书。在这个任务中，我们将使自己成为一 个根 CA，并为这个 CA 生成一个证书，根 CA 的证书是自签名的。</p>
+<p><strong>配置文件 openssl.conf</strong>：为了使用 OpenSSL 来创建证书，我们需要一个配置文件，这个文件由三个 OpenSSL 命令使用：ca、req 和 x509。该文件的手册可以在网上找到，默认情况下，OpenSSL 使用  &#x2F;usr&#x2F;lib&#x2F;ssl&#x2F;openssl.cnf 配置文件。因为我们要修改配置文件，需要将其复制到当前目录，并配置 OpenSSL 使用这个副本。</p>
+<p>配置文件的  [CA default] 部分显示了我们需要准备的默认设置。其中，我们需要将 unique_subject &#x3D; no 的注释去掉，允许生成具有相同主题（Subject）的证书。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[ CA_default ]</span><br><span class="line"></span><br><span class="line">dir		= ./ceyewanCA		# Where everything is kept</span><br><span class="line">certs		= $dir/certs		# Where the issued certs are kept</span><br><span class="line">crl_dir		= $dir/crl		# Where the issued crl are kept</span><br><span class="line">database	= $dir/index.txt	# database index file.</span><br><span class="line">unique_subject	= no			# Set to &#x27;no&#x27; to allow creation of</span><br><span class="line">								# several certs with same subject.</span><br><span class="line">new_certs_dir	= $dir/newcerts		# default place for new certs.</span><br><span class="line"></span><br><span class="line">certificate	= $dir/cacert.pem 	# The CA certificate</span><br><span class="line">serial		= $dir/serial 		# The current serial number</span><br><span class="line">crlnumber	= $dir/crlnumber	# the current crl number</span><br><span class="line">					# must be commented out to leave a V1 CRL</span><br><span class="line">crl		= $dir/crl.pem 		# The current CRL</span><br><span class="line">private_key	= $dir/private/cakey.pem# The private key</span><br></pre></td></tr></table></figure>
+
+<p>对于 index.txt 文件，只需要创建空文件；对于 serial 文件，在文件中输入一个字符串格式的数字即可（长度需要是偶数）。一旦建立了配置文件，就可以创建并发布证书了。</p>
+<p>运行如下命令为我们的 CA 生成一个自签名的证书：</p>
+<p><img src="/.%5Cimage-20240313135756887.png" alt="image-20240313135756887"></p>
+<ul>
+<li><code>openssl</code>：表示要使用 OpenSSL 工具执行操作。</li>
+<li><code>req</code>：表示执行证书请求和生成操作。</li>
+<li><code>-x509</code>：指示 OpenSSL 生成自签名的 X.509 证书，而不是证书请求。</li>
+<li><code>-newkey rsa:4096</code>：表示生成一个新的 RSA 密钥对，其中 RSA 算法的密钥长度为 4096 位。</li>
+<li><code>-sha256</code>：指定使用 SHA-256 算法进行证书签名，以确保证书的安全性。</li>
+<li><code>-days 3650</code>：指定生成的证书有效期为 3650 天（大约10年）。</li>
+<li><code>-keyout ca.key</code>：指定生成的私钥文件名为 <code>ca.key</code>，该私钥将用于签署证书。</li>
+<li><code>-out ca.crt</code>：指定生成的证书文件名为 <code>ca.crt</code>，这就是最终生成的自签名根证书。</li>
+</ul>
+<p>综合起来，这条命令的目的是使用 RSA 算法生成一个新的 4096 位密钥对，然后使用该密钥对生成一个自签名的根证书（CA 证书），并将私钥保存在 <code>ca.key</code> 文件中，将证书保存在 <code>ca.crt</code> 文件中。这样就生成了一个自定义的 CA 证书，可以用于签署其他证书。</p>
+<blockquote>
+<p>OpenSSL 在执行时，会先从当前目录查找配置文件，再从默认配置文件读取，因此只要在我们改的配置文件目录下执行就行。</p>
+</blockquote>
+<p>我们可以使用以下命令查看 x509 证书的解码内容和 RSA 密码。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">openssl x509 -in ca.crt -text -noout</span><br><span class="line">openssl rsa -in ca.key -text -noout</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>-text</code> ：意味着将内容解码为纯文本</li>
+<li><code>-noout</code>： 意味着不打印编码版本</li>
+</ul>
+<p><strong>证书的哪一部分表明这是 CA 的证书？</strong></p>
+<p><img src="/./image-20240313142431319.png" alt="image-20240313142431319"></p>
+<p><strong>CA:TRUE</strong> 表示该证书是一个 CA（Certificate Authority）证书，即证书拥有签发其他证书的权限。</p>
+<p><strong>证书的哪一部分表明这是一个自签名的证书？</strong></p>
+<p><img src="/./image-20240313142632441.png" alt="image-20240313142632441"></p>
+<ul>
+<li>Issuer：表示证书的颁发者信息，即签发该证书的实体。</li>
+<li>Subject：表示证书的主题信息，即该证书所属的实体。</li>
+</ul>
+<p>在这里，Subject 的信息与 Issuer 的信息相同，颁发者和所属者相同，因此是一个自签名证书。</p>
+<p><strong>在 RSA 算法中，我们有一个公共指数 e，一个私有指数 d，一个模 n，和两个秘密数 p 和 q， 使得 n &#x3D; pq。请在你的证书和密钥文件中确定这些元素的值。</strong></p>
+<p>在一个 <code>ca.key</code> 文件中，通常包括 RSA 算法中的私钥值，这些值包括：</p>
+<ol>
+<li>**Modulus (n)**：模数，即 RSA 公钥和私钥共享的大整数。</li>
+<li>**Public Exponent (e)**：公共指数，用于加密数据。</li>
+<li>**Private Exponent (d)**：私有指数，用于解密数据。</li>
+<li>**First Prime Factor (p)**：第一个素数因子，用于生成私钥。</li>
+<li>**Second Prime Factor (q)**：第二个素数因子，用于生成私钥。</li>
+<li>**First Factor CRT Exponent (dP)**：第一个因子的 CRT（Chinese Remainder Theorem）指数。</li>
+<li>**Second Factor CRT Exponent (dQ)**：第二个因子的 CRT 指数。</li>
+<li>**Coefficient (qInv)**：模数 <code>q</code> 对 <code>p</code> 的乘法逆元素。</li>
+</ol>
+<p>这些值组合在一起构成了 RSA 密钥对，其中公钥由模数 <code>n</code> 和公共指数 <code>e</code> 组成，私钥由模数 <code>n</code>、私有指数 <code>d</code>、素数因子 <code>p</code> 和 <code>q</code>、CRT 指数以及乘法逆元素组成。这些值在 <code>ca.key</code> 文件中以特定的格式存储，通常是 PEM 格式或其他密钥文件格式。</p>
+<h2 id="Task-2-Generating-a-Certificate-Request-for-Your-Web-Server"><a href="#Task-2-Generating-a-Certificate-Request-for-Your-Web-Server" class="headerlink" title="Task 2: Generating a Certificate Request for Your Web Server"></a>Task 2: Generating a Certificate Request for Your Web Server</h2><p>一个叫 ceyewan2024.com 的公司希望从我们的 CA 获得公钥证书。首先，它需要生成一个证书签名请求(CSR) ，其中基本上包括公司的公钥和身份信息。CSR 将被发送到 CA，CA 将验证请求中的身份信息，然后生成一个证书。</p>
+<p>我们只需要去掉 <code>-x509</code>，就是生成 CSR 的命令了。</p>
+<p><img src="/./image-20240313144152971.png" alt="image-20240313144152971"></p>
+<p>该命令将生成一对公钥&#x2F;私钥，然后从公钥创建一个证书签名请求。我们可以使用以下命令来查看 CSR 和私钥文件的解码内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">openssl req -in server.csr -text -noout</span><br><span class="line">openssl rsa -in server.key -text -noout</span><br></pre></td></tr></table></figure>
+
+<p>添加替代名称。许多网站都有不同的 URL，如 <a target="_blank" rel="noopener" href="http://www.ceyewan.top/">www.ceyewan.top</a> 和 ceyewan.top 等。由于主机名匹配策略由浏览器强制执行，证书中的公共名称必须与服务器的主机名匹配，否则浏览器将拒绝通信。</p>
+<p>为了允许证书有多个名称，x.509 规范定义了附加到证书的扩展名。这个扩展名称为 Subject Alternative Name (SAN)。使用 SAN 扩展名，可以在证书的 subjectAltName 字段中指定几个主机名。</p>
+<p><img src="/./image-20240313150323752.png" alt="image-20240313150323752"></p>
+<h2 id="Task-3-Generating-a-Certificate-for-your-server"><a href="#Task-3-Generating-a-Certificate-for-your-server" class="headerlink" title="Task 3: Generating a Certificate for your server"></a>Task 3: Generating a Certificate for your server</h2><p>CSR 文件需要 CA 的签名才能形成证书。在现实世界中，CSR 文件通常被发送到一个受信任的 CA 来签名。在这个实验里，我们将使用我们自己的可信 CA 来生成证书。如下命令使用 CA 的 CA.crt 和 CA.key 将证书签名请求 server.csr 转换为 x509 证书 server.crt。</p>
+<p><strong>复制扩展字段</strong>：出于安全原因，配置文件中默认不允许 openssl ca 命令将拓展字段从请求复制到最终证书。我们将配置文件副本中的相关字段的注释关闭</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313151338409.png" alt="image-20240313151338409"></p>
+<p>执行命令如下：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313151804508.png" alt="image-20240313151804508"></p>
+<p>其中，myCA_openssl.cnf 是我们刚刚修改过的配置文件。使用 policy_anything 策略，默认策略要求请求中的一些主题信息与 CA 证书中的主题信息相匹配，这个策略并不强制执行任何匹配规则。在签署证书之后，可以使用 <code>openssl x509 -in server.crt -text -noout</code> 查看证书内容。</p>
+<h2 id="Task-4-Deploying-Certificate-in-an-Apache-Based-HTTPS-Website"><a href="#Task-4-Deploying-Certificate-in-an-Apache-Based-HTTPS-Website" class="headerlink" title="Task 4: Deploying Certificate in an Apache-Based HTTPS Website"></a>Task 4: Deploying Certificate in an Apache-Based HTTPS Website</h2><p>在这个任务中，我们将看到网站如何使用公钥证书来保证网页浏览的安全。我们将建立一个基于 Apache 的 HTTPS 网站。Apache 服务器已经安装在我们的容器中，支持 HTTPS 协议。要创建一个 HTTPS 网站，我们只需要配置 Apache 服务器，这样它就知道从哪里获得私钥和证书。</p>
+<p>修改服务器容器的配置如下：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313155344817.png" alt="image-20240313155344817"></p>
+<p>我们可以知道，证书的配置文件夹地址，然后如果是 HTTPS 访问和 HTTP 访问的文件是不一样的。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313155717398.png" alt="image-20240313155717398"></p>
+<p>完成上述配置后，执行 dcbuild &amp; dcup 开启容器，进入 web 服务器容器执行  <code>service apache2 start</code> 开启网站程序。分别访问 HTTPS 和 HTTP 结果如下：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313161503451.png" alt="image-20240313161503451"></p>
+<p>因为我们还没有配置证书可信，接下来，我们在浏览器中添加证书 ca.crt，然后再访问链接，发现建立了可信连接。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314003323385.png" alt="image-20240314003323385"></p>
+<h2 id="Task-5-Launching-a-Man-In-The-Middle-Attack"><a href="#Task-5-Launching-a-Man-In-The-Middle-Attack" class="headerlink" title="Task 5: Launching a Man-In-The-Middle Attack"></a>Task 5: Launching a Man-In-The-Middle Attack</h2><blockquote>
+<p>  中间人攻击通常发生在安全通信的建立阶段，例如使用SSL&#x2F;TLS加密的HTTPS连接。攻击者会冒充服务器与客户端建立连接，同时与服务器和客户端分别建立独立的连接。攻击者可以生成自己的伪造证书，与客户端建立安全连接并将自己的伪造证书发送给客户端，同时与服务器建立另一个安全连接并将客户端的请求发送给服务器。这样，攻击者就能够在客户端和服务器之间的通信中拦截、查看和修改数据。</p>
+<p>  为了防止中间人攻击，通常使用证书颁发机构（CA）签发的可信证书来验证服务器的身份。客户端会对服务器的证书进行验证，包括验证证书的有效性、合法性和所属的颁发机构等。</p>
+</blockquote>
+<p>几种方法可以让用户的 HTTPS 请求到达我们的 Web 服务器。</p>
+<ul>
+<li>一种方法是攻击路由，这样用户的 HTTPS 请求就被路由到我们的 Web 服务器。</li>
+<li>另一种方法是攻击 DNS，所以当受害者的机器试图找出目标网络服务器的 IP 地址，它得到我们的网络服务器的 IP 地址。</li>
+</ul>
+<p>在这个任务中，我们模拟了攻击 DNS 的方法。我们只需修改受害者机器的 &#x2F;etc&#x2F;hosts 文件，通过将主机名 <a target="_blank" rel="noopener" href="http://www.example.com/">www.example.com</a> 映射到我们的恶意网络服务器，来模拟 DNS 缓存定位攻击的结果，而不是启动一个实际的 DNS 域名服务器缓存污染。</p>
+<p>因为域名和证书并不匹配，故浏览器会提示不安全。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314103445152.png" alt="image-20240314103445152"></p>
+<h2 id="Task-6-Launching-a-Man-In-The-Middle-Attack-with-a-Compromised-CA"><a href="#Task-6-Launching-a-Man-In-The-Middle-Attack-with-a-Compromised-CA" class="headerlink" title="Task 6: Launching a Man-In-The-Middle Attack with a Compromised CA"></a>Task 6: Launching a Man-In-The-Middle Attack with a Compromised CA</h2><blockquote>
+<p>  在这个任务中，我们假设在 Task 1 中创建的根 CA 受到攻击者的攻击，并且它的私钥被盗取了。因此，攻击者可以使用此 CA 的私钥生成任意证书。在这项任务中，我们将看到这种妥协的后果。请设计一个实验来证明攻击者可以成功地在任何 HTTPS 网站上启动 MITM 攻击。您可以使用在 Task 5 中创建的相同设置，但是这一次，您需要证明 MITM 攻击是成功的，也就是说，当受害者试图访问一个网站但是登录到 MITM 攻击者的假网站时，浏览器不会引起任何怀疑。</p>
+</blockquote>
+<p>在 task5 中的叙述描述了我们使用自己的<strong>自签名CA导入到浏览器</strong>的情况，但是如果<strong>根CA私钥</strong>被盗取了会有更严重的后果：</p>
+<ol>
+<li>伪造证书：攻击者可以使用根证书的私钥签发伪造的证书，模拟合法的网站或服务，使其看起来具有合法的身份和可信的安全性。这将导致用户误认为与真实网站或服务进行通信，从而暴露他们的敏感信息。</li>
+<li>中间人攻击：通过拦截通信并使用伪造的证书，攻击者可以进行中间人攻击，监视和修改通信内容，窃取敏感信息或注入恶意内容。这对用户、网站和系统的安全性构成了严重威胁。</li>
+<li>篡改和劫持：攻击者可以篡改通过伪造证书进行加密的通信内容，例如修改下载文件、注入恶意代码或劫持用户的会话。</li>
+<li>信任破裂：如果根证书的私钥被盗取，信任链中的所有证书都将受到威胁，导致整个系统的信任破裂。这将对证书基础设施的安全性和可信度产生长期的负面影响。</li>
+</ol>
+<p>实际上，攻击已经完成了，<a target="_blank" rel="noopener" href="http://www.ceyewan2024.com/">www.ceyewan2024.com</a> 如果去中间人攻击另一个由我们自签名的 CA 颁发的证书的网站，攻击是会成功的。因为我们有 CA 就能伪造一个证书，欺骗浏览器。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview"><span class="toc-number">1.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab-Environment"><span class="toc-number">2.</span> <span class="toc-text">Lab Environment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Becoming-a-Certificate-Authority-CA"><span class="toc-number">3.</span> <span class="toc-text">Task 1: Becoming a Certificate Authority (CA)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Generating-a-Certificate-Request-for-Your-Web-Server"><span class="toc-number">4.</span> <span class="toc-text">Task 2: Generating a Certificate Request for Your Web Server</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Generating-a-Certificate-for-your-server"><span class="toc-number">5.</span> <span class="toc-text">Task 3: Generating a Certificate for your server</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Deploying-Certificate-in-an-Apache-Based-HTTPS-Website"><span class="toc-number">6.</span> <span class="toc-text">Task 4: Deploying Certificate in an Apache-Based HTTPS Website</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Launching-a-Man-In-The-Middle-Attack"><span class="toc-number">7.</span> <span class="toc-text">Task 5: Launching a Man-In-The-Middle Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-6-Launching-a-Man-In-The-Middle-Attack-with-a-Compromised-CA"><span class="toc-number">8.</span> <span class="toc-text">Task 6: Launching a Man-In-The-Middle Attack with a Compromised CA</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/ccc415c2.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/ccc415c2.html&text=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/ccc415c2.html&title=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/ccc415c2.html&is_video=false&description=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Public-Key-Infrastructure-(PKI)-Lab&body=Check out this article: https://ceyewan.github.io/p/ccc415c2.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/ccc415c2.html&title=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/ccc415c2.html&title=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/ccc415c2.html&title=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/ccc415c2.html&title=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/ccc415c2.html&name=Public-Key-Infrastructure-(PKI)-Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/ccc415c2.html&t=Public-Key-Infrastructure-(PKI)-Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

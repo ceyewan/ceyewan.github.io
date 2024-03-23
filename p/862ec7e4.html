@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Overview现在，越来越多的数据是通过互联网传输的，然而，当数据通过这样一个不受保护的公共网络时，可能会被读取甚至修改。因此，考虑通信安全的应用程序需要加密数据并且检测篡改。密码算法可以用来解决该问题，有许多加密算法，即使是同一个算法，也有许多参数可以使用。为了实现互操作性，即允许不同的应用程序相互通信，这些应用程序需要遵循一个共同的标准 TLS，传输层安全，就是这样一个标准。现在大多数网络服">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Transport-Layer-Security-(TLS)-Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/862ec7e4.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="Overview现在，越来越多的数据是通过互联网传输的，然而，当数据通过这样一个不受保护的公共网络时，可能会被读取甚至修改。因此，考虑通信安全的应用程序需要加密数据并且检测篡改。密码算法可以用来解决该问题，有许多加密算法，即使是同一个算法，也有许多参数可以使用。为了实现互操作性，即允许不同的应用程序相互通信，这些应用程序需要遵循一个共同的标准 TLS，传输层安全，就是这样一个标准。现在大多数网络服">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314154222358.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314160854141.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314162222977.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314171514116.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314172852014.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314180029921.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314175609457.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314180311616.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314220922909.png">
+<meta property="article:published_time" content="2024-03-23T16:55:27.000Z">
+<meta property="article:modified_time" content="2024-03-23T16:59:17.576Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="Cryptography">
+<meta property="article:tag" content="TLS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314154222358.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Transport-Layer-Security-(TLS)-Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/7944d15b.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/ccc415c2.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/862ec7e4.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/862ec7e4.html&text=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/862ec7e4.html&title=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/862ec7e4.html&is_video=false&description=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Transport-Layer-Security-(TLS)-Lab&body=Check out this article: https://ceyewan.github.io/p/862ec7e4.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/862ec7e4.html&title=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/862ec7e4.html&title=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/862ec7e4.html&title=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/862ec7e4.html&title=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/862ec7e4.html&name=Transport-Layer-Security-(TLS)-Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/862ec7e4.html&t=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview"><span class="toc-number">1.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab-Environment"><span class="toc-number">2.</span> <span class="toc-text">Lab Environment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-TLS-Client"><span class="toc-number">3.</span> <span class="toc-text">Task 1: TLS Client</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-1-a-TLS-handshake"><span class="toc-number">3.1.</span> <span class="toc-text">Task 1.a: TLS handshake</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-1-b-CA%E2%80%99s-Certificate"><span class="toc-number">3.2.</span> <span class="toc-text">Task 1.b: CA’s Certificate</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-1-c-Experiment-with-the-hostname-check"><span class="toc-number">3.3.</span> <span class="toc-text">Task 1.c: Experiment with the hostname check</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-1-d-Sending-and-getting-Data"><span class="toc-number">3.4.</span> <span class="toc-text">Task 1.d: Sending and getting Data</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-TLS-Server"><span class="toc-number">4.</span> <span class="toc-text">Task 2: TLS Server</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-2-a-Implement-a-simple-TLS-server"><span class="toc-number">4.1.</span> <span class="toc-text">Task 2.a. Implement a simple TLS server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-2-b-Testing-the-server-program-using-browsers"><span class="toc-number">4.2.</span> <span class="toc-text">Task 2.b. Testing the server program using browsers</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-2-c-Certificate-with-multiple-names"><span class="toc-number">4.3.</span> <span class="toc-text">Task 2.c. Certificate with multiple names</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-A-Simple-HTTPS-Proxy"><span class="toc-number">5.</span> <span class="toc-text">Task 3: A Simple HTTPS Proxy</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Transport-Layer-Security-(TLS)-Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-03-23T16:55:27.000Z" class="dt-published" itemprop="datePublished">2024-03-24</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-Cryptography/">SeedLabs/Cryptography</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Cryptography/" rel="tag">Cryptography</a>, <a class="p-category" href="/tags/TLS/" rel="tag">TLS</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>现在，越来越多的数据是通过互联网传输的，然而，当数据通过这样一个不受保护的公共网络时，可能会被读取甚至修改。因此，考虑通信安全的应用程序需要加密数据并且检测篡改。密码算法可以用来解决该问题，有许多加密算法，即使是同一个算法，也有许多参数可以使用。为了实现互操作性，即允许不同的应用程序相互通信，这些应用程序需要遵循一个共同的标准 TLS，传输层安全，就是这样一个标准。现在大多数网络服务器都使用 HTTPS，它是建立在 TLS 之上的。</p>
+<h2 id="Lab-Environment"><a href="#Lab-Environment" class="headerlink" title="Lab Environment"></a>Lab Environment</h2><p>这个实验中，我们使用三台机器，一台是客户端、一台是服务端，还有一台用于代理。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">➜ dockps   </span><br><span class="line">1572ed82cb5b  client-10.9.0.5</span><br><span class="line">88e86e068b11  mitm-proxy-10.9.0.143</span><br><span class="line">9e6cdc38823b  server-10.9.0.43</span><br></pre></td></tr></table></figure>
+
+<h2 id="Task-1-TLS-Client"><a href="#Task-1-TLS-Client" class="headerlink" title="Task 1: TLS Client"></a>Task 1: TLS Client</h2><h3 id="Task-1-a-TLS-handshake"><a href="#Task-1-a-TLS-handshake" class="headerlink" title="Task 1.a: TLS handshake"></a>Task 1.a: TLS handshake</h3><p>在客户端和服务器进行安全通信之前，首先需要设置几个问题，包括使用什么加密算法和密钥、使用什么 MAC 算法、使用什么算法进行密钥交换等。这些加密参数需要客户端和服务器达成一致。这就是 TLS 握手协议的主要目的。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> ssl</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> pprint</span><br><span class="line"></span><br><span class="line">hostname = sys.argv[<span class="number">1</span>]</span><br><span class="line">port = <span class="number">443</span></span><br><span class="line">cadir = <span class="string">&#x27;/etc/ssl/certs&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Set up the TLS context</span></span><br><span class="line">context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)  <span class="comment"># 创建 TLS 上下文</span></span><br><span class="line">context.load_verify_locations(capath=cadir)  <span class="comment"># 加载 CA 证书</span></span><br><span class="line">context.verify_mode = ssl.CERT_REQUIRED  <span class="comment"># 设置验证模式为必须</span></span><br><span class="line">context.check_hostname = <span class="literal">True</span>  <span class="comment"># 检查主机名是否匹配</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Create TCP connection</span></span><br><span class="line">sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">sock.connect((hostname, port))	<span class="comment"># TCP 握手</span></span><br><span class="line"><span class="built_in">input</span>(<span class="string">&quot;After making TCP connection. Press any key to continue ...&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add the TLS</span></span><br><span class="line">ssock = context.wrap_socket(sock, server_hostname=hostname,</span><br><span class="line">                            do_handshake_on_connect=<span class="literal">False</span>)  <span class="comment"># 包装套接字为 TLS 连接</span></span><br><span class="line">ssock.do_handshake()   <span class="comment"># 开始 TLS 握手</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;=== Cipher used: &#123;&#125;&quot;</span>.<span class="built_in">format</span>(ssock.cipher()))  <span class="comment"># 打印所使用的加密算法</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;=== Server hostname: &#123;&#125;&quot;</span>.<span class="built_in">format</span>(ssock.server_hostname))  <span class="comment"># 打印服务器主机名</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;=== Server certificate:&quot;</span>)</span><br><span class="line">pprint.pprint(ssock.getpeercert())  <span class="comment"># 打印服务器证书</span></span><br><span class="line">pprint.pprint(context.get_ca_certs())  <span class="comment"># 打印已加载的 CA 证书</span></span><br><span class="line"><span class="built_in">input</span>(<span class="string">&quot;After TLS handshake. Press any key to continue ...&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 发送HTTP GET请求</span></span><br><span class="line">http_request = http_request = <span class="string">b&quot;GET / HTTP/1.1\r\nHost: &quot;</span>+hostname.encode(<span class="string">&#x27;utf-8&#x27;</span>)+<span class="string">b&quot;\r\n\r\n&quot;</span></span><br><span class="line">ssock.sendall(http_request)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 接收并打印响应</span></span><br><span class="line">response = ssock.recv(<span class="number">4096</span>)</span><br><span class="line">pprint.pprint(response.decode(<span class="string">&#x27;utf-8&#x27;</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># Close the TLS Connection</span></span><br><span class="line">ssock.shutdown(socket.SHUT_RDWR)  <span class="comment"># 关闭TLS连接的读写</span></span><br><span class="line">ssock.close()  <span class="comment"># 关闭套接字</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>客户端和服务端使用的密码如下，具体来说，它使用了 TLSv1.3 协议，并且采用了 TLS_AES_256_GCM_SHA384 算法，密钥长度为 256 位。</li>
+<li>输出的第一个证书就是服务器的证书。</li>
+<li><code>&#39;/etc/ssl/certs&#39;</code> 用于指示本地可信的 CA 证书路径。</li>
+</ul>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314154222358.png" alt="image-20240314154222358"></p>
+<h3 id="Task-1-b-CA’s-Certificate"><a href="#Task-1-b-CA’s-Certificate" class="headerlink" title="Task 1.b: CA’s Certificate"></a>Task 1.b: CA’s Certificate</h3><p>首先，将相应的证书复制到 .&#x2F;client-certs 文件夹中，我们从上面的输出中可以看到，subject 部分的 CN 值为 DigiCert Global Root CA，接下来我们去证书路径查找该证书并将其拷贝过来。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">➜ <span class="built_in">ls</span> | grep DigiCert_Global_Root_CA</span><br><span class="line">DigiCert_Global_Root_CA.pem</span><br><span class="line">➜ <span class="built_in">cp</span> DigiCert_Global_Root_CA.pem ~/SeedLab/Cryptography/Labsetup/volumes/client-certs</span><br></pre></td></tr></table></figure>
+
+<p>TLS 在验证服务器证书时会检查证书的颁发者（issuer）信息。证书的颁发者信息通常包含了颁发者的身份信息，比如颁发者的名称、证书有效期等。TLS 会根据颁发者的身份信息生成一个哈希值（hash value）。然后，TLS 会将这个哈希值作为一部分文件名，并在指定的文件夹中寻找相应的颁发者证书。为了让 TLS 能够正确地找到颁发者证书，我们需要将每个颁发者证书的文件名改为与其主题字段（subject field）生成的哈希值相匹配的名称，或者创建一个哈希值的符号链接。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314160854141.png" alt="image-20240314160854141"></p>
+<p>如上，我们生成了哈希值并且创建了符号链接，修改代码中的路径后执行，发现执行成功。</p>
+<h3 id="Task-1-c-Experiment-with-the-hostname-check"><a href="#Task-1-c-Experiment-with-the-hostname-check" class="headerlink" title="Task 1.c: Experiment with the hostname check"></a>Task 1.c: Experiment with the hostname check</h3><p><strong>Step 1</strong>：使用 dig 命令获取 <a target="_blank" rel="noopener" href="http://www.example.com/">www.example.com</a> 的 IP 地址，结果为 93.184.216.34。</p>
+<p><strong>Step 2</strong>：修改 &#x2F;etc&#x2F;hosts 文件，添加 <code>93.184.216.34 www.example2024.com</code> 条目。</p>
+<p><strong>Step 3</strong>：观察程序中 <code>context.check_hostname = False/True</code> 这两种情况的结果。</p>
+<p>可以看到，如果检查主机名，那么就连接不上；如果不检查主机名，那么可以直接连接。设置为 True 可以抵抗中间人攻击，Step 2 我们模拟了 DNS 攻击，所有去往 <a target="_blank" rel="noopener" href="http://www.example2024.com/">www.example2024.com</a> 的流量都会被误导去往 93.184.216.34 即 <a target="_blank" rel="noopener" href="http://www.example.com.如果不检查主机名,tls/">www.example.com。如果不检查主机名，TLS</a> 会正常的建立连接，我们还以为访问的是 2024，其实访问的是 example。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314162222977.png" alt="image-20240314162222977"></p>
+<h3 id="Task-1-d-Sending-and-getting-Data"><a href="#Task-1-d-Sending-and-getting-Data" class="headerlink" title="Task 1.d: Sending and getting Data"></a>Task 1.d: Sending and getting Data</h3><p>已经实现了。接收图片只需要更改一下发送和接收部分代码。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 发送HTTP GET请求</span></span><br><span class="line">http_request = <span class="string">b&quot;GET /head.jpg HTTP/1.1\r\nHost: &quot;</span> + \</span><br><span class="line">    hostname.encode(<span class="string">&#x27;utf-8&#x27;</span>)+<span class="string">b&quot;\r\n\r\n&quot;</span></span><br><span class="line">ssock.sendall(http_request)</span><br><span class="line"></span><br><span class="line">ssock.settimeout(<span class="number">3</span>) <span class="comment"># 超时时间</span></span><br><span class="line"><span class="comment"># 接收并打印响应</span></span><br><span class="line">response = <span class="string">b&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        data = ssock.recv(<span class="number">4096</span>) <span class="comment"># 阻塞，使用超时机制退出</span></span><br><span class="line">        response += data</span><br><span class="line">    <span class="keyword">except</span> socket.timeout:</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"><span class="comment"># Extract image data from response</span></span><br><span class="line">image_data = response.split(<span class="string">b&#x27;\r\n\r\n&#x27;</span>)[-<span class="number">1</span>]</span><br><span class="line"><span class="comment"># Save image to file</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;image.jpg&#x27;</span>, <span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(image_data)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Task-2-TLS-Server"><a href="#Task-2-TLS-Server" class="headerlink" title="Task 2: TLS Server"></a>Task 2: TLS Server</h2><p>在进行此任务之前，学生需要创建证书颁发机构(CA) ，并使用此 CA 的私钥为此任务创建服务器证书。如何做到这一点已经在 PKI 实验中完成了。在这个任务中，我 们假设已经创建了所有必需的证书，包括 CA 的公钥证书和私钥(CA.crt 和 CA.key) ，以及服务器的公钥证书和私钥(server.crt 和 server.key)。</p>
+<h3 id="Task-2-a-Implement-a-simple-TLS-server"><a href="#Task-2-a-Implement-a-simple-TLS-server" class="headerlink" title="Task 2.a. Implement a simple TLS server"></a>Task 2.a. Implement a simple TLS server</h3><p>服务端代码如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> ssl</span><br><span class="line"><span class="keyword">import</span> pprint</span><br><span class="line"></span><br><span class="line">html = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n</span></span><br><span class="line"><span class="string">&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;body&gt;&lt;h1&gt;This is ceyewan2024.com!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">SERVER_CERT = <span class="string">&#x27;./server-certs/mycert.crt&#x27;</span></span><br><span class="line">SERVER_PRIVATE = <span class="string">&#x27;./server-certs/mycert.key&#x27;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)  <span class="comment"># For Ubuntu 20.04 VM</span></span><br><span class="line">context.load_cert_chain(SERVER_CERT, SERVER_PRIVATE)</span><br><span class="line"></span><br><span class="line">sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, <span class="number">0</span>)</span><br><span class="line">sock.bind((<span class="string">&#x27;0.0.0.0&#x27;</span>, <span class="number">4433</span>))</span><br><span class="line">sock.listen(<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    newsock, fromaddr = sock.accept()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        ssock = context.wrap_socket(newsock, server_side=<span class="literal">True</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;TLS connection established&quot;</span>)</span><br><span class="line">        data = ssock.recv(<span class="number">1024</span>)              <span class="comment"># Read data over TLS</span></span><br><span class="line">        pprint.pprint(<span class="string">&quot;Request: &#123;&#125;&quot;</span>.<span class="built_in">format</span>(data))</span><br><span class="line">        ssock.sendall(html.encode(<span class="string">&#x27;utf-8&#x27;</span>))  <span class="comment"># Send data over TLS</span></span><br><span class="line">        ssock.shutdown(socket.SHUT_RDWR)     <span class="comment"># Close the TLS connection</span></span><br><span class="line">        ssock.close()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;TLS connection fails&quot;</span>)</span><br><span class="line">        <span class="keyword">continue</span></span><br></pre></td></tr></table></figure>
+
+<p>同样，我们需要配置 DNS 映射将服务器名称映射到 IP 地址，然后将服务器的公钥私钥复制到上述代码所指位置，将 CA 公钥文件复制到 Task 1 位置并且要做 Task 1 相同的操作。</p>
+<p>然后我们进入容器执行如下：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314171514116.png" alt="image-20240314171514116"></p>
+<h3 id="Task-2-b-Testing-the-server-program-using-browsers"><a href="#Task-2-b-Testing-the-server-program-using-browsers" class="headerlink" title="Task 2.b. Testing the server program using browsers"></a>Task 2.b. Testing the server program using browsers</h3><p>在做 PKI 实验时，已经把证书加入了，所以可以直接访问。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314172852014.png" alt="image-20240314172852014"></p>
+<h3 id="Task-2-c-Certificate-with-multiple-names"><a href="#Task-2-c-Certificate-with-multiple-names" class="headerlink" title="Task 2.c. Certificate with multiple names"></a>Task 2.c. Certificate with multiple names</h3><ol>
+<li>复制 PKI 实验的 myopenssl.cnf 文件过来。</li>
+<li>配置 server_openssl.cnf 内容如下：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[ req ]</span><br><span class="line">prompt = no</span><br><span class="line">distinguished_name = req_distinguished_name</span><br><span class="line">req_extensions = req_ext</span><br><span class="line"></span><br><span class="line">[ req_distinguished_name ]</span><br><span class="line">C = CN</span><br><span class="line">ST = Hubei</span><br><span class="line">L = Wuhan</span><br><span class="line">O = whu</span><br><span class="line">CN = www.ceyewan2024.com</span><br><span class="line">[ req_ext ]</span><br><span class="line">subjectAltName = @alt_names</span><br><span class="line">[alt_names]</span><br><span class="line">DNS.1 = www.ceyewan.com</span><br><span class="line">DNS.2 = www.example.com</span><br><span class="line">DNS.3 = *.ceyewan2024.com</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>执行下面两条指令生成新的服务器公私钥对。</li>
+</ol>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314180029921.png" alt="image-20240314180029921"></p>
+<ol start="4">
+<li>使用新的服务器公私钥对运行服务端程序，并且配置上面几个域名的 DNS 解析。</li>
+<li>去浏览器访问这几个域名，结果如下，达到了实验的目的，允许证书拥有多个主机名。</li>
+</ol>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314175609457.png" alt="image-20240314175609457"></p>
+<h2 id="Task-3-A-Simple-HTTPS-Proxy"><a href="#Task-3-A-Simple-HTTPS-Proxy" class="headerlink" title="Task 3: A Simple HTTPS Proxy"></a>Task 3: A Simple HTTPS Proxy</h2><p>代理实际上是 TLS 客户端和服务器程序的组合，对浏览器提供服务，对服务器充当客户。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314180311616.png" alt="image-20240314180311616"></p>
+<p>我们编写 proxy 程序如下，这个程序充当 client 和 example.com 的中间人，它可以直接访问 example.com，又由于它使用了 client 可信的证书，只要 client 关闭了主机名匹配检查，那么它就可以做到两端欺骗。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> ssl</span><br><span class="line"></span><br><span class="line">cadir = <span class="string">&quot;/etc/ssl/certs&quot;</span></span><br><span class="line">SERVER_CERT = <span class="string">&#x27;./server-certs/server.crt&#x27;</span></span><br><span class="line">SERVER_PRIVATE = <span class="string">&#x27;./server-certs/server.key&#x27;</span></span><br><span class="line"><span class="comment"># 等待浏览器的连接</span></span><br><span class="line">context_srv = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)  <span class="comment"># For Ubuntu 20.04 VM</span></span><br><span class="line">context_srv.load_cert_chain(SERVER_CERT, SERVER_PRIVATE)</span><br><span class="line">sock_listen = socket.socket(socket.AF_INET, socket.SOCK_STREAM, <span class="number">0</span>)</span><br><span class="line">sock_listen.bind((<span class="string">&#x27;0.0.0.0&#x27;</span>, <span class="number">443</span>))</span><br><span class="line">sock_listen.listen(<span class="number">5</span>)</span><br><span class="line">sock_for_browser, fromaddr = sock_listen.accept()</span><br><span class="line">ssock_for_browser = context_srv.wrap_socket(sock_for_browser, server_side=<span class="literal">True</span>)</span><br><span class="line"><span class="comment"># 连接服务器</span></span><br><span class="line">context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)  <span class="comment"># 创建 TLS 上下文</span></span><br><span class="line">context.load_verify_locations(capath=cadir)  <span class="comment"># 加载 CA 证书</span></span><br><span class="line">context.verify_mode = ssl.CERT_REQUIRED  <span class="comment"># 设置验证模式为必须</span></span><br><span class="line">context.check_hostname = <span class="literal">True</span>  <span class="comment"># 检查主机名是否匹配</span></span><br><span class="line">sock_for_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">sock_for_server.connect((<span class="string">&#x27;www.example.com&#x27;</span>, <span class="number">443</span>))</span><br><span class="line">ssock_for_server = context.wrap_socket(sock_for_server, server_hostname=<span class="string">&#x27;www.example.com&#x27;</span>,</span><br><span class="line">                                       do_handshake_on_connect=<span class="literal">False</span>)  <span class="comment"># 包装套接字为 TLS 连接</span></span><br><span class="line">ssock_for_server.do_handshake()   <span class="comment"># 开始 TLS 握手</span></span><br><span class="line"><span class="comment"># 四次接收发送数据</span></span><br><span class="line">request = ssock_for_browser.recv(<span class="number">9192</span>)</span><br><span class="line">ssock_for_server.sendall(request)</span><br><span class="line">response = ssock_for_server.recv(<span class="number">9192</span>)</span><br><span class="line">ssock_for_browser.sendall(response)</span><br><span class="line"><span class="built_in">print</span>(response.decode(<span class="string">&quot;utf-8&quot;</span>))</span><br><span class="line">ssock_for_browser.shutdown(socket.SHUT_RDWR)</span><br><span class="line">ssock_for_browser.close()</span><br></pre></td></tr></table></figure>
+
+<p>我们看到，proxy 可以正常访问网站，这是因为我们配置了该容器的默认 DNS 服务器为 8.8.8.8，而 client 不能访问该网站，是因为我们配置了 DNS 映射，模拟攻击。建立 SSL 连接和 proxy 捕获数据都成功了，这是很危险的，我们的所有数据都可以被 proxy 服务器看见。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314220922909.png" alt="image-20240314220922909"></p>
+<p>使用浏览器结果也是一样的，可以转发。难道浏览器也不验证证书的主机名？不是的，是因为我们配置证书的时候，就已经把 <a target="_blank" rel="noopener" href="http://www.example.com/">www.example.com</a> 加入到证书了。这也说明了如果 CA 私钥没有保密会造成多么严重的后果！</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Overview"><span class="toc-number">1.</span> <span class="toc-text">Overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab-Environment"><span class="toc-number">2.</span> <span class="toc-text">Lab Environment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-TLS-Client"><span class="toc-number">3.</span> <span class="toc-text">Task 1: TLS Client</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-1-a-TLS-handshake"><span class="toc-number">3.1.</span> <span class="toc-text">Task 1.a: TLS handshake</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-1-b-CA%E2%80%99s-Certificate"><span class="toc-number">3.2.</span> <span class="toc-text">Task 1.b: CA’s Certificate</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-1-c-Experiment-with-the-hostname-check"><span class="toc-number">3.3.</span> <span class="toc-text">Task 1.c: Experiment with the hostname check</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-1-d-Sending-and-getting-Data"><span class="toc-number">3.4.</span> <span class="toc-text">Task 1.d: Sending and getting Data</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-TLS-Server"><span class="toc-number">4.</span> <span class="toc-text">Task 2: TLS Server</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-2-a-Implement-a-simple-TLS-server"><span class="toc-number">4.1.</span> <span class="toc-text">Task 2.a. Implement a simple TLS server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-2-b-Testing-the-server-program-using-browsers"><span class="toc-number">4.2.</span> <span class="toc-text">Task 2.b. Testing the server program using browsers</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-2-c-Certificate-with-multiple-names"><span class="toc-number">4.3.</span> <span class="toc-text">Task 2.c. Certificate with multiple names</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-A-Simple-HTTPS-Proxy"><span class="toc-number">5.</span> <span class="toc-text">Task 3: A Simple HTTPS Proxy</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/862ec7e4.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/862ec7e4.html&text=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/862ec7e4.html&title=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/862ec7e4.html&is_video=false&description=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Transport-Layer-Security-(TLS)-Lab&body=Check out this article: https://ceyewan.github.io/p/862ec7e4.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/862ec7e4.html&title=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/862ec7e4.html&title=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/862ec7e4.html&title=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/862ec7e4.html&title=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/862ec7e4.html&name=Transport-Layer-Security-(TLS)-Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/862ec7e4.html&t=Transport-Layer-Security-(TLS)-Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
