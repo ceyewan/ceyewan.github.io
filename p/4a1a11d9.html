@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="双系统安装下载 manjaro kde 镜像文件，使用 rufus 将镜像写入到 U 盘中（搜索关键词即可）。在 windows 中打开磁盘管理，压缩出一个 100G 的卷（百度解决）。重启系统，狂按 F12 （不同电脑不同），选择 U 盘启动。然后就是正常的安装一个系统（驱动建议选择 free），分区的话我没搞，直接默认了。但是要注意安装位置选择之前压缩出的分区，不要把 windows 给覆盖掉">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows+Manjaro双系统的安装与配置">
+<meta property="og:url" content="https://ceyewan.github.io/p/4a1a11d9.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="双系统安装下载 manjaro kde 镜像文件，使用 rufus 将镜像写入到 U 盘中（搜索关键词即可）。在 windows 中打开磁盘管理，压缩出一个 100G 的卷（百度解决）。重启系统，狂按 F12 （不同电脑不同），选择 U 盘启动。然后就是正常的安装一个系统（驱动建议选择 free），分区的话我没搞，直接默认了。但是要注意安装位置选择之前压缩出的分区，不要把 windows 给覆盖掉">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220720190135100.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220711165255047.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220720191346008.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/2022-11-05_16-15.png">
+<meta property="article:published_time" content="2022-07-09T16:25:51.000Z">
+<meta property="article:modified_time" content="2024-03-24T14:55:24.003Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="Dev Tips">
+<meta property="article:tag" content="Dual System">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220720190135100.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Windows+Manjaro双系统的安装与配置</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/78f57b58.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/b638e272.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/4a1a11d9.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/4a1a11d9.html&text=Windows+Manjaro双系统的安装与配置"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/4a1a11d9.html&title=Windows+Manjaro双系统的安装与配置"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/4a1a11d9.html&is_video=false&description=Windows+Manjaro双系统的安装与配置"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Windows+Manjaro双系统的安装与配置&body=Check out this article: https://ceyewan.github.io/p/4a1a11d9.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/4a1a11d9.html&title=Windows+Manjaro双系统的安装与配置"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/4a1a11d9.html&title=Windows+Manjaro双系统的安装与配置"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/4a1a11d9.html&title=Windows+Manjaro双系统的安装与配置"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/4a1a11d9.html&title=Windows+Manjaro双系统的安装与配置"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/4a1a11d9.html&name=Windows+Manjaro双系统的安装与配置&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/4a1a11d9.html&t=Windows+Manjaro双系统的安装与配置"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85"><span class="toc-number">1.</span> <span class="toc-text">双系统安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E7%B3%BB%E7%BB%9F%E6%97%B6%E9%97%B4%E7%BB%9F%E4%B8%80"><span class="toc-number">2.</span> <span class="toc-text">双系统时间统一</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E8%BE%A8%E7%8E%87"><span class="toc-number">3.</span> <span class="toc-text">分辨率</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E6%BA%90"><span class="toc-number">4.</span> <span class="toc-text">软件源</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E7%B3%BB%E7%BB%9F"><span class="toc-number">5.</span> <span class="toc-text">更新系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-yay"><span class="toc-number">6.</span> <span class="toc-text">安装 yay</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E8%BE%93%E5%85%A5%E6%B3%95"><span class="toc-number">7.</span> <span class="toc-text">安装输入法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-QQ-%E5%BE%AE%E4%BF%A1%E5%92%8C%E8%85%BE%E8%AE%AF%E4%BC%9A%E8%AE%AE"><span class="toc-number">8.</span> <span class="toc-text">安装 QQ 微信和腾讯会议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-oh-my-zsh"><span class="toc-number">9.</span> <span class="toc-text">安装 oh-my-zsh</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-konsole"><span class="toc-number">10.</span> <span class="toc-text">配置 konsole</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-vscode"><span class="toc-number">11.</span> <span class="toc-text">安装 vscode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91"><span class="toc-number">12.</span> <span class="toc-text">科学上网</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-docker"><span class="toc-number">13.</span> <span class="toc-text">安装 docker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%B5%8F%E8%A7%88%E5%99%A8"><span class="toc-number">14.</span> <span class="toc-text">配置浏览器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FlameShot"><span class="toc-number">15.</span> <span class="toc-text">FlameShot</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#typora-picgo"><span class="toc-number">16.</span> <span class="toc-text">typora + picgo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E7%BE%8E%E5%8C%96"><span class="toc-number">17.</span> <span class="toc-text">系统美化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E9%BC%A0%E6%A0%87%E6%BB%9A%E5%8A%A8%E9%80%9F%E5%BA%A6"><span class="toc-number">18.</span> <span class="toc-text">配置鼠标滚动速度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%90%8C%E6%AD%A5"><span class="toc-number">19.</span> <span class="toc-text">文件同步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#clion-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">20.</span> <span class="toc-text">clion 的安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-VMware-Workstation"><span class="toc-number">21.</span> <span class="toc-text">安装 VMware-Workstation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-todesk-%E8%BF%9C%E7%A8%8B%E6%8E%A7%E5%88%B6"><span class="toc-number">22.</span> <span class="toc-text">安装 todesk 远程控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#copytranslator-%E7%BF%BB%E8%AF%91%E8%BD%AF%E4%BB%B6"><span class="toc-number">23.</span> <span class="toc-text">copytranslator 翻译软件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9F%B3%E4%B9%90%E8%BD%AF%E4%BB%B6"><span class="toc-number">24.</span> <span class="toc-text">音乐软件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">25.</span> <span class="toc-text">小结</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Windows+Manjaro双系统的安装与配置
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-07-09T16:25:51.000Z" class="dt-published" itemprop="datePublished">2022-07-10</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/ForFun/">ForFun</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Dev-Tips/" rel="tag">Dev Tips</a>, <a class="p-category" href="/tags/Dual-System/" rel="tag">Dual System</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="双系统安装"><a href="#双系统安装" class="headerlink" title="双系统安装"></a>双系统安装</h2><p>下载 <code>manjaro kde</code> 镜像文件，使用 <code>rufus</code> 将镜像写入到 U 盘中（搜索关键词即可）。在 <code>windows</code> 中打开磁盘管理，压缩出一个 <code>100G</code> 的卷（百度解决）。重启系统，狂按 <code>F12</code> （不同电脑不同），选择 U 盘启动。然后就是正常的安装一个系统（驱动建议选择 free），分区的话我没搞，直接默认了。但是要注意安装位置选择之前压缩出的分区，不要把 <code>windows</code> 给覆盖掉了！！！</p>
+<h2 id="双系统时间统一"><a href="#双系统时间统一" class="headerlink" title="双系统时间统一"></a>双系统时间统一</h2><p>因为 <code>windows</code> 和 <code>linux</code> 的时间算法不一样，那么就需要修改一下，这里我选择改 <code>linux</code>：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo timedatectl set-local-rtc true</span><br></pre></td></tr></table></figure>
+
+<h2 id="分辨率"><a href="#分辨率" class="headerlink" title="分辨率"></a>分辨率</h2><p>调整光标、分辨率、缩放等适配显示屏。</p>
+<h2 id="软件源"><a href="#软件源" class="headerlink" title="软件源"></a>软件源</h2><p>执行命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo pacman-mirrors -i -c China -m rank</span><br></pre></td></tr></table></figure>
+
+<p>选择最快（最顺眼）的一个软件源即可。如果之后安装东西有报什么不信任、密钥之类的错误，可以把 <code>/etc/pacman.conf</code> 文件里的 <code>SigLevel</code> 设置为 <code>Optional TrustAll</code> （不推荐，但管用）。</p>
+<p>也可以配置一个 <code>arch</code> 源（不建议），在文件中添加内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[archlinuxcn]</span><br><span class="line">SigLevel = Optional TrustAll</span><br><span class="line">Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch</span><br></pre></td></tr></table></figure>
+
+<h2 id="更新系统"><a href="#更新系统" class="headerlink" title="更新系统"></a>更新系统</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo pacman -Syyu</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装-yay"><a href="#安装-yay" class="headerlink" title="安装 yay"></a>安装 yay</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo pacman -Sy yay</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装输入法"><a href="#安装输入法" class="headerlink" title="安装输入法"></a>安装输入法</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装 fcitx5 框架</span></span><br><span class="line">yay -S fcitx5-im</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置环境变量</span></span><br><span class="line">nano ~/.pam_environment</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加内容如下：</span></span><br><span class="line">GTK_IM_MODULE DEFAULT=fcitx</span><br><span class="line">QT_IM_MODULE  DEFAULT=fcitx</span><br><span class="line">XMODIFIERS    DEFAULT=\@im=fcitx</span><br><span class="line">SDL_IM_MODULE DEFAULT=fcitx</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装输入法引擎</span></span><br><span class="line">yay -S fcitx5-rime</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装输入方案</span></span><br><span class="line">yay -S rime-cloverpinyin</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果出错需要执行下面这步</span></span><br><span class="line">yay -S base-devel</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建并写入ime-cloverpinyin的输入方案</span></span><br><span class="line">nano ~/.local/share/fcitx5/rime/default.custom.yaml</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加内容如下：</span></span><br><span class="line">patch:</span><br><span class="line">  &quot;menu/page_size&quot;: 7</span><br><span class="line">  schema_list:</span><br><span class="line">    - schema: clover</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装中文维基百科词库</span></span><br><span class="line">yay -S fcitx5-pinyin-zhwiki-rime</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置主题</span></span><br><span class="line">yay -S fcitx5-material-color</span><br></pre></td></tr></table></figure>
+
+<p>这个输入法会有很多 <code>emoji</code> 表情，还有我讨厌的半角全角切换，我们可以去配置文件中修改以下，配置文件在 <code>/home/ceyewan/.local/share/fcitx5/rime/build/clover.schema.yaml</code> 中，按照自己的喜好修改。我就注释了以下几行：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">emoji_suggestion:</span></span><br><span class="line">  <span class="attr">opencc_config:</span> <span class="comment"># emoji.json</span></span><br><span class="line">  <span class="attr">option_name:</span> <span class="comment"># emoji_suggestion</span></span><br><span class="line">  <span class="attr">tips:</span> <span class="comment"># all</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># - &#123;accept: &quot;Shift+space&quot;, toggle: full_shape, when: always&#125;</span></span><br></pre></td></tr></table></figure>
+
+
+<p>之前使用过一段时间的搜狗输入法，输入体验较好，使用体验较差。对中文输入支持较好，但是 bug 也多。不知道为什么，我好像装不上了，就用这个了。</p>
+<h2 id="安装-QQ-微信和腾讯会议"><a href="#安装-QQ-微信和腾讯会议" class="headerlink" title="安装 QQ 微信和腾讯会议"></a>安装 QQ 微信和腾讯会议</h2><p>微信我比较推荐使用下面这个命令安装，这个看名字应该是统信版的。QQ 的话可以使用 <code>icalingua++</code> 。这两个虽然不是特别好用，但至少还是能用的咯。我不是很推荐 <code>wine</code> ，感觉太臃肿了。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">yay -Sy wechat-uos</span><br><span class="line">sudo pacman -Sy icalingua++</span><br><span class="line">yay -Sy wemeet-bin      </span><br></pre></td></tr></table></figure>
+
+<p>其实有一个对 <code>linux</code> 支持比较好的平台，就是字节跳动的飞书。</p>
+<h2 id="安装-oh-my-zsh"><a href="#安装-oh-my-zsh" class="headerlink" title="安装 oh-my-zsh"></a>安装 oh-my-zsh</h2><p>首先，还是得先确保安装了 <code>zsh</code>，然后再安装 <code>oh-my-zsh</code> 。</p>
+<p>搜索 <code>gitee oh-my-zsh</code> 查看如何安装。下面也提供一个一行配置方法：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">REMOTE=https://gitee.com/mirrors/oh-my-zsh.git sh -c &quot;$(curl -fsSL https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh)&quot;</span><br></pre></td></tr></table></figure>
+
+<p>跟着流程走完，可以修改一下主题（其实默认的就很简洁了）：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">vim ~/.zshrc # 编辑配置文件</span><br><span class="line">ZSH_THEME=&quot;random&quot; # 找到 ZSH_THEME 修改为 random （随机），或者任何你喜欢的主题 </span><br></pre></td></tr></table></figure>
+
+<p>然后小小的配置一下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">下载 powerlevel10k 主题</span></span><br><span class="line">git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">导入主题</span></span><br><span class="line">echo &#x27;source $ZSH_CUSTOM/themes/powerlevel10k/powerlevel10k.zsh-theme&#x27; &gt;&gt;! ~/.zshrc</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改 ~/.zshrc 里的 ZSH_THEME 为 <span class="string">&quot;powerlevel10k/powerlevel10k&quot;</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">然后重新打开终端，跟着提示配置好这个主题（后续需要重新配置，执行 p10k configure 即可）</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">语法高亮</span></span><br><span class="line">git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">自动补全</span></span><br><span class="line">git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改 ~/.zshrc 里的 plugins 如下：</span></span><br><span class="line">plugins=(</span><br><span class="line">  zsh-syntax-highlighting</span><br><span class="line">  zsh-autosuggestions</span><br><span class="line">)</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">这样在输入命令时会有提示，并且还会有语法正确与否的提示</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="配置-konsole"><a href="#配置-konsole" class="headerlink" title="配置 konsole"></a>配置 konsole</h2><p>依次点击设置 -&gt; 编辑当前方案 -&gt; 外观 -&gt; 编辑，这里就可以添加一个背景壁纸（实测壁纸分辨率需要在 <code>1280 × 720</code> 左右。可能是我电脑的问题，分辨率太大了显示有问题。</p>
+<p>其他的配置在设置里慢慢折腾，看个人喜好咯。总体效果如下（全局的配置稍后会写）：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220720190135100.png" alt="image-20220720190135100"></p>
+<h2 id="安装-vscode"><a href="#安装-vscode" class="headerlink" title="安装 vscode"></a>安装 vscode</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">yay -Sy visual-studio-code-bin</span><br></pre></td></tr></table></figure>
+
+<p><code>vscode</code> 的配置就是仁者见仁智者见智了。我还是会先下载一个 <code>consolas</code> 字体，然后把代码默认字体改成这个，之前用 windows 看习惯了，不愿意再改。然后我也会关闭掉右边的 <code>minimap</code> ，因为我屏幕确实太小了。</p>
+<h2 id="科学上网"><a href="#科学上网" class="headerlink" title="科学上网"></a>科学上网</h2><p>安装 <code>v2raya</code> 好像需要一个 <code>arch</code> 源，可以把上面提到的那个源加入，安装完之后也可以再把源删了。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo pacman -Sy v2ray</span><br><span class="line">sudo pacman -Sy v2raya</span><br><span class="line">sudo systemctl start v2raya.service</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开机自启，可选</span></span><br><span class="line">sudo systenctl enable v2raya.service</span><br></pre></td></tr></table></figure>
+
+<p>然后浏览器访问网站 <code>localhost:2017</code> 你就能开心的上网了。</p>
+<h2 id="安装-docker"><a href="#安装-docker" class="headerlink" title="安装 docker"></a>安装 docker</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装 docker</span> </span><br><span class="line">sudo pacman -Sy docker</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开启 docker 服务</span></span><br><span class="line">sudo systemctl start docker.service</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开机自启，可选</span></span><br><span class="line">sudo systemctl enble docker.service</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">建立 docker 组</span></span><br><span class="line">sudo groupadd docker</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将当前用户加入 docker 组</span></span><br><span class="line">sudo usermod -aG docker $USER</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加访问和执行权限</span></span><br><span class="line">sudo chmod a+rw /var/run/docker.sock</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启一下 docker 服务</span></span><br><span class="line">sudo systemctl restart docker.service</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看是否配置过镜像加速器（显然是没有的，有的话也不会需要看这个了）</span></span><br><span class="line">systemctl cat docker | grep &#x27;\-\-registry\-mirror&#x27;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加如下镜像到指定文件</span></span><br><span class="line">sudo vim /etc/docker/daemon.json</span><br><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [</span><br><span class="line">    &quot;https://hub-mirror.c.163.com&quot;,</span><br><span class="line">    &quot;https://mirror.baidubce.com&quot;,</span><br><span class="line">    &quot;https://docker.mirrors.ustc.edu.cn&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;AppImage</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启一下服务</span></span><br><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看镜像是否生效(如果能看到刚刚添加的镜像)</span></span><br><span class="line">docker info</span><br></pre></td></tr></table></figure>
+
+<p>同样，可以使用 <code>vscode + remote-container</code>（插件） + <code>docker</code>（插件）来使用 <code>docker</code> 。</p>
+<h2 id="配置浏览器"><a href="#配置浏览器" class="headerlink" title="配置浏览器"></a>配置浏览器</h2><p>我还是喜欢用谷歌，必备的拓展：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">yay -Sy google-chrome</span><br><span class="line">xxx 新标签页（自定义新标签页）</span><br><span class="line">Adblock Plus（屏蔽广告）</span><br><span class="line">Tampermonkey(安装 csdn 插件，对抗毒瘤)</span><br></pre></td></tr></table></figure>
+
+<h2 id="FlameShot"><a href="#FlameShot" class="headerlink" title="FlameShot"></a>FlameShot</h2><p>截图软件，安装后需要配置一下截图快捷键。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo pacman -Sy flameshot</span><br></pre></td></tr></table></figure>
+
+<p>设置-&gt;快捷键-&gt;自定义快捷键-&gt;编辑-&gt;新建-&gt;全局快捷键-&gt;命令&#x2F;URL。操作为：<code>/usr/bin/flameshot gui</code>，触发器我使用的是 <code>F1</code> ，这个看个人习惯。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220711165255047.png" alt="image-20220711165255047"></p>
+<h2 id="typora-picgo"><a href="#typora-picgo" class="headerlink" title="typora + picgo"></a>typora + picgo</h2><p><code>markdown</code> 编辑器 + 图床配置。这两个都可以去 <code>github</code> 上下载 <code>AppImage</code> 文件。<code>typora</code> 图片上传服务选择 <code>PicGo(App)</code> ，路径如下，<code>/home/ceyewan/Applications/PicGo.AppImage</code>，这个路径只能自己去复制过来。当然也能使用 <code>yay</code> 来安装。</p>
+<h2 id="系统美化"><a href="#系统美化" class="headerlink" title="系统美化"></a>系统美化</h2><p>配置一下 <code>dock</code> 栏，虽然美化的终点是默认，但是我还是想折腾一下。。。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">yay -S latte-dock # 安装</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">运行 latte 后右键 dock 栏，进行一些简单的配置，将常用软件固定到 dock 栏中</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加一个面板，我选择放在最上面，用来显示必要的 wifi 功能之类的</span></span><br></pre></td></tr></table></figure>
+
+<p>打开系统设置，将我圈出来的这些东西都取下载同一个主题，这里我选择的是 <code>sweet</code> 。大家自行选择喜欢的，或者混搭风格。如果自带的主题商店打不开的话，就需要自己去网上下载主题然后解压到指定目录了。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220720191346008.png" alt="image-20220720191346008"></p>
+<h2 id="配置鼠标滚动速度"><a href="#配置鼠标滚动速度" class="headerlink" title="配置鼠标滚动速度"></a>配置鼠标滚动速度</h2><p><code>manjaro</code> 的滚动速度简直不能忍，网上搜了一番之后，结论如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo pacman -Sy imwheel</span><br><span class="line">vim ~/.imwheelrc</span><br><span class="line">  &quot;.*&quot;</span><br><span class="line">  None,      Up,   Button4, 4</span><br><span class="line">  None,      Down, Button5, 4</span><br><span class="line">  Control_L, Up,   Control_L|Button4</span><br><span class="line">  Control_L, Down, Control_L|Button5</span><br><span class="line">  Shift_L,   Up,   Shift_L|Button4</span><br><span class="line">  Shift_L,   Down, Shift_L|Button5</span><br><span class="line">imwheel # 启动</span><br></pre></td></tr></table></figure>
+
+<p>开机启动我一直没搞定，手动操作也是 ok 的，问题不大。</p>
+<h2 id="文件同步"><a href="#文件同步" class="headerlink" title="文件同步"></a>文件同步</h2><p>我们可以使用坚果云来进行文件同步，这样在 <code>manjaro</code>、<code>windows</code> 和手机上同步数据都比较方便</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">yay -Sy nutstore</span><br></pre></td></tr></table></figure>
+
+<h2 id="clion-的安装"><a href="#clion-的安装" class="headerlink" title="clion 的安装"></a>clion 的安装</h2><p>首先，我们去官网下载安装包，然后执行以下命令解压并执行程序。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tar -zxvf CLion-xxx.tar.gz</span><br><span class="line"><span class="built_in">cd</span> Clion-xxx/bin</span><br><span class="line">./clion.sh <span class="comment"># 启动程序</span></span><br></pre></td></tr></table></figure>
+
+<p>总是这样执行也不方便，在打开程序后，<code>tools -&gt; create desktop entry</code> 可以创建桌面快捷方式。下次启动就很方便了。</p>
+<h2 id="安装-VMware-Workstation"><a href="#安装-VMware-Workstation" class="headerlink" title="安装 VMware-Workstation"></a>安装 VMware-Workstation</h2><p>找不到当时参考的博客了，那篇写的真的是很简练，可惜找不到了。于是我通过查看 <code>zsh</code> 的 <code>history</code> 找到了当时执行的一些命令。这也是我这篇博客存在的意义吧，把屎里淘金的金记录下来，方便下一次的我。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看当前的内核版本</span></span><br><span class="line"><span class="built_in">uname</span> -a</span><br><span class="line">Linux ceyewan 5.15.74-3-MANJARO <span class="comment">#1 SMP PREEMPT Sat Oct 15 13:39:11 UTC 2022 x86_64 GNU/Linux</span></span><br><span class="line"><span class="comment"># 安装依赖，因为我是 5.15 大版本，所以我安装的是 linux-headers515</span></span><br><span class="line">sudo pacman -Sy linux-headers515 </span><br><span class="line">sudo pacman -Sy base-devel <span class="comment"># 在 ubuntu中这个包叫 build-essential</span></span><br><span class="line"><span class="comment"># 创建 init.d 文件夹</span></span><br><span class="line">sudo <span class="built_in">mkdir</span> /etc/init.d</span><br><span class="line"><span class="comment"># 从官网下载安装包 </span></span><br><span class="line">VMware-Workstation-Full-16.2.4-20089737.x86_64.bundle</span><br><span class="line"><span class="comment"># 安装 vmware</span></span><br><span class="line">sudo sh ./VMware-Workstation-Full-16.2.4-20089737.x86_64.bundle</span><br><span class="line"><span class="comment"># 在使用之前需要启动 vmware 相关服务</span></span><br><span class="line">sudo /etc/init.d/vmware start</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装-todesk-远程控制"><a href="#安装-todesk-远程控制" class="headerlink" title="安装 todesk 远程控制"></a>安装 todesk 远程控制</h2><p>官网有明确的安装教程，并且支持 <code>Arch linux</code>，我愿称之为良心软件。在官网下载好安装包后，执行下面这个命令就可以安装了。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo pacman -U todesk_4.1.0_x86_64.pkg.tar.zst</span><br></pre></td></tr></table></figure>
+
+<h2 id="copytranslator-翻译软件"><a href="#copytranslator-翻译软件" class="headerlink" title="copytranslator 翻译软件"></a>copytranslator 翻译软件</h2><p>看英文文献时，还是需要一个方便的翻译工具的。<a target="_blank" rel="noopener" href="https://copytranslator.github.io/">官网</a>，我们可以在官网下载 <code>AppImage</code> 也可以使用 <code>yay -Sy copytranslator</code> 安装。</p>
+<h2 id="音乐软件"><a href="#音乐软件" class="headerlink" title="音乐软件"></a>音乐软件</h2><p>目前国内的 QQ 音乐和网易云音乐都有 <code>linux</code> 版本，可以直接使用 <code>pacman</code> 或者 <code>yay</code> 进行安装。腾讯是这样的，看到网易云提供了 <code>deb</code> 包，才会开始做 <code>linux</code>。QQ 和微信没有竞品就开始摆烂。所以我选择使用 <code>spotify</code>。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/2022-11-05_16-15.png" alt="desktop"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85"><span class="toc-number">1.</span> <span class="toc-text">双系统安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8C%E7%B3%BB%E7%BB%9F%E6%97%B6%E9%97%B4%E7%BB%9F%E4%B8%80"><span class="toc-number">2.</span> <span class="toc-text">双系统时间统一</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E8%BE%A8%E7%8E%87"><span class="toc-number">3.</span> <span class="toc-text">分辨率</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E6%BA%90"><span class="toc-number">4.</span> <span class="toc-text">软件源</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E7%B3%BB%E7%BB%9F"><span class="toc-number">5.</span> <span class="toc-text">更新系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-yay"><span class="toc-number">6.</span> <span class="toc-text">安装 yay</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E8%BE%93%E5%85%A5%E6%B3%95"><span class="toc-number">7.</span> <span class="toc-text">安装输入法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-QQ-%E5%BE%AE%E4%BF%A1%E5%92%8C%E8%85%BE%E8%AE%AF%E4%BC%9A%E8%AE%AE"><span class="toc-number">8.</span> <span class="toc-text">安装 QQ 微信和腾讯会议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-oh-my-zsh"><span class="toc-number">9.</span> <span class="toc-text">安装 oh-my-zsh</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-konsole"><span class="toc-number">10.</span> <span class="toc-text">配置 konsole</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-vscode"><span class="toc-number">11.</span> <span class="toc-text">安装 vscode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91"><span class="toc-number">12.</span> <span class="toc-text">科学上网</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-docker"><span class="toc-number">13.</span> <span class="toc-text">安装 docker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%B5%8F%E8%A7%88%E5%99%A8"><span class="toc-number">14.</span> <span class="toc-text">配置浏览器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FlameShot"><span class="toc-number">15.</span> <span class="toc-text">FlameShot</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#typora-picgo"><span class="toc-number">16.</span> <span class="toc-text">typora + picgo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E7%BE%8E%E5%8C%96"><span class="toc-number">17.</span> <span class="toc-text">系统美化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E9%BC%A0%E6%A0%87%E6%BB%9A%E5%8A%A8%E9%80%9F%E5%BA%A6"><span class="toc-number">18.</span> <span class="toc-text">配置鼠标滚动速度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%90%8C%E6%AD%A5"><span class="toc-number">19.</span> <span class="toc-text">文件同步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#clion-%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">20.</span> <span class="toc-text">clion 的安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-VMware-Workstation"><span class="toc-number">21.</span> <span class="toc-text">安装 VMware-Workstation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-todesk-%E8%BF%9C%E7%A8%8B%E6%8E%A7%E5%88%B6"><span class="toc-number">22.</span> <span class="toc-text">安装 todesk 远程控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#copytranslator-%E7%BF%BB%E8%AF%91%E8%BD%AF%E4%BB%B6"><span class="toc-number">23.</span> <span class="toc-text">copytranslator 翻译软件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9F%B3%E4%B9%90%E8%BD%AF%E4%BB%B6"><span class="toc-number">24.</span> <span class="toc-text">音乐软件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">25.</span> <span class="toc-text">小结</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/4a1a11d9.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/4a1a11d9.html&text=Windows+Manjaro双系统的安装与配置"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/4a1a11d9.html&title=Windows+Manjaro双系统的安装与配置"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/4a1a11d9.html&is_video=false&description=Windows+Manjaro双系统的安装与配置"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Windows+Manjaro双系统的安装与配置&body=Check out this article: https://ceyewan.github.io/p/4a1a11d9.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/4a1a11d9.html&title=Windows+Manjaro双系统的安装与配置"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/4a1a11d9.html&title=Windows+Manjaro双系统的安装与配置"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/4a1a11d9.html&title=Windows+Manjaro双系统的安装与配置"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/4a1a11d9.html&title=Windows+Manjaro双系统的安装与配置"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/4a1a11d9.html&name=Windows+Manjaro双系统的安装与配置&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/4a1a11d9.html&t=Windows+Manjaro双系统的安装与配置"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="前几天重装了一下系统，于是从头开始配置了一下开发环境，在这里记录一下。主要就是使用虚拟机、wsl、vscode 以及 docker 这几个工具。 windows 环境 C&#x2F;C++ 开发环境配置git 安装访问官网，https:&#x2F;&#x2F;git-scm.com&#x2F; ，然后直接下载安装即可。 windows terminal 安装使用微软商店搜素下载即可。 使用 windows terminal 打">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows&#x2F;WSL&#x2F;Linux&#x2F;Docker+VSCode开发环境配置">
+<meta property="og:url" content="https://ceyewan.github.io/p/b638e272.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="前几天重装了一下系统，于是从头开始配置了一下开发环境，在这里记录一下。主要就是使用虚拟机、wsl、vscode 以及 docker 这几个工具。 windows 环境 C&#x2F;C++ 开发环境配置git 安装访问官网，https:&#x2F;&#x2F;git-scm.com&#x2F; ，然后直接下载安装即可。 windows terminal 安装使用微软商店搜素下载即可。 使用 windows terminal 打">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626162925437.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626163648872.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626164835575.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626170528881.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626175145422.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626214647085.png">
+<meta property="article:published_time" content="2022-06-26T14:28:24.000Z">
+<meta property="article:modified_time" content="2024-03-24T14:51:32.130Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="Dev Tips">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626162925437.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Windows/WSL/Linux/Docker+VSCode开发环境配置</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/4a1a11d9.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/b638e272.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/b638e272.html&text=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/b638e272.html&title=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/b638e272.html&is_video=false&description=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Windows/WSL/Linux/Docker+VSCode开发环境配置&body=Check out this article: https://ceyewan.github.io/p/b638e272.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/b638e272.html&title=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/b638e272.html&title=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/b638e272.html&title=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/b638e272.html&title=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/b638e272.html&name=Windows/WSL/Linux/Docker+VSCode开发环境配置&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/b638e272.html&t=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#windows-%E7%8E%AF%E5%A2%83-C-C-%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">windows 环境 C&#x2F;C++ 开发环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#git-%E5%AE%89%E8%A3%85"><span class="toc-number">1.1.</span> <span class="toc-text">git 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#windows-terminal-%E5%AE%89%E8%A3%85"><span class="toc-number">1.2.</span> <span class="toc-text">windows terminal 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-windows-terminal-%E6%89%93%E5%BC%80-git-bash"><span class="toc-number">1.3.</span> <span class="toc-text">使用 windows terminal 打开 git bash</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-gcc-%E5%A5%97%E4%BB%B6"><span class="toc-number">1.4.</span> <span class="toc-text">安装 gcc 套件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-vscode"><span class="toc-number">1.5.</span> <span class="toc-text">安装 vscode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#github-ssh-%E8%AE%A4%E8%AF%81"><span class="toc-number">1.6.</span> <span class="toc-text">github ssh 认证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Linux-%E7%8E%AF%E5%A2%83-C-C-%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">Linux 环境 C&#x2F;C++ 开发环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-WSL"><span class="toc-number">2.1.</span> <span class="toc-text">安装 WSL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-Ubuntu"><span class="toc-number">2.2.</span> <span class="toc-text">安装 Ubuntu</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#vscode-%E5%AE%89%E8%A3%85-remote-development-%E6%8F%92%E4%BB%B6%E7%BB%84%E4%BB%B6"><span class="toc-number">2.3.</span> <span class="toc-text">vscode 安装 remote development 插件组件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA-Linux-remote-ssh-%E8%BF%9E%E6%8E%A5"><span class="toc-number">3.</span> <span class="toc-text">虚拟机 Linux + remote ssh 连接</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-vmware-workstation"><span class="toc-number">3.1.</span> <span class="toc-text">安装 vmware workstation</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E4%B8%80%E4%B8%AA-Linux-%E5%8F%91%E8%A1%8C%E7%89%88%E7%9A%84-iso-%E9%95%9C%E5%83%8F"><span class="toc-number">3.2.</span> <span class="toc-text">下载一个 Linux 发行版的 iso 镜像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#vmware-%E5%AE%89%E8%A3%85-manjaro"><span class="toc-number">3.3.</span> <span class="toc-text">vmware 安装 manjaro</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#vscode-%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5-manjaro"><span class="toc-number">3.4.</span> <span class="toc-text">vscode 远程连接 manjaro</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#docker-remote-containers-%E8%BF%9E%E6%8E%A5"><span class="toc-number">4.</span> <span class="toc-text">docker + remote containers 连接</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-docker"><span class="toc-number">4.1.</span> <span class="toc-text">安装 docker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#docker-%E4%BD%BF%E7%94%A8"><span class="toc-number">4.2.</span> <span class="toc-text">docker 使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#vscode-%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5-container"><span class="toc-number">4.3.</span> <span class="toc-text">vscode 远程连接 container</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">小结</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Windows/WSL/Linux/Docker+VSCode开发环境配置
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-06-26T14:28:24.000Z" class="dt-published" itemprop="datePublished">2022-06-26</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/ForFun/">ForFun</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Dev-Tips/" rel="tag">Dev Tips</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>前几天重装了一下系统，于是从头开始配置了一下开发环境，在这里记录一下。主要就是使用虚拟机、<code>wsl</code>、<code>vscode</code> 以及 <code>docker</code> 这几个工具。</p>
+<h2 id="windows-环境-C-C-开发环境配置"><a href="#windows-环境-C-C-开发环境配置" class="headerlink" title="windows 环境 C&#x2F;C++ 开发环境配置"></a>windows 环境 C&#x2F;C++ 开发环境配置</h2><h3 id="git-安装"><a href="#git-安装" class="headerlink" title="git 安装"></a>git 安装</h3><p>访问官网，<code>https://git-scm.com/</code> ，然后直接下载安装即可。</p>
+<h3 id="windows-terminal-安装"><a href="#windows-terminal-安装" class="headerlink" title="windows terminal 安装"></a>windows terminal 安装</h3><p>使用微软商店搜素下载即可。</p>
+<h3 id="使用-windows-terminal-打开-git-bash"><a href="#使用-windows-terminal-打开-git-bash" class="headerlink" title="使用 windows terminal 打开 git bash"></a>使用 windows terminal 打开 git bash</h3><p>打开 <code>windows terminal</code> ，点击上方下箭头，然后设置，然后点击添加新的配置文件，内容如下：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626162925437.png" alt="image-20220626162925437"></p>
+<p>命令行和图标我是使用的默认安装路径，这个根据安装目录更改就行，外观就仁者见仁智者见智了。这时，就可以在 <code>windows terminal</code> 中使用 <code>git bash</code> 了。但是显示中文会有一点点问题（如果没有问题的话不需要执行下面的操作）。在文件 <code>&quot;C:\Program Files\Git\etc\bash.bashrc&quot;</code> 末尾添加一行 <code>export LC_ALL=en_US.UTF-8  </code> 即可。文件具体位置由安装目录决定。</p>
+<p>最终效果如下：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626163648872.png" alt="image-20220626163648872"></p>
+<h3 id="安装-gcc-套件"><a href="#安装-gcc-套件" class="headerlink" title="安装 gcc 套件"></a>安装 gcc 套件</h3><p>之前我都是从网上下载 <code>mingw</code> 文件，解压到指定目录，然后添加环境变量，感觉有点麻烦。可以从 <code>http://www.equation.com/servlet/equation.cmd?fa=fortran</code> 直接下载 <code>exe</code> 文件，傻瓜式安装即可。安装完成后打开终端，输入 <code>gcc --version</code> 、<code>g++ --version</code> 、<code>gdb --version</code> 和 <code>make --version</code> 查看是否安装成功。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626164835575.png" alt="image-20220626164835575"></p>
+<h3 id="安装-vscode"><a href="#安装-vscode" class="headerlink" title="安装 vscode"></a>安装 vscode</h3><p>访问官网，<code>https://code.visualstudio.com/</code> ，下载安装即可。安装后打开，打开后会提示是否安装中文插件，自行选择即可。我建议在某个盘下面创建一个文件夹，比如叫做 <code>CodeField</code> 用来存放所有的代码，然后在里面创建 <code>CodeCpp</code>、<code>CodePy</code> 等存放不同语言的代码。下面有一点点错误，第七点是 <code>g++ hello.cpp</code> 和 <code>./a.exe</code> 。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626170528881.png" alt="image-20220626170528881"></p>
+<p>使用 <code>vscode</code> 而不是 <code>vs</code> 或者 <code>cLion</code> 等 <code>IDE</code> 是因为，我经常要写一个一个文件的小程序，搞 <code>project</code> 太麻烦了。更重要的是，<code>vscode</code> 是宇宙第一编辑器！！！</p>
+<h3 id="github-ssh-认证"><a href="#github-ssh-认证" class="headerlink" title="github ssh 认证"></a>github ssh 认证</h3><p>写代码总要用到 <code>git</code> 吧，现在都是用 <code>ssh</code> 认证了，来配置一下吧。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 这两行初次使用需要</span></span><br><span class="line">git config --global user.name <span class="string">&quot;xxx&quot;</span></span><br><span class="line">git config --global user.email <span class="string">&quot;xxx@xxx.com&quot;</span></span><br><span class="line"><span class="comment"># 我乐意使用 ed25519 ，网上都是用 rsa ，一直回车到结束（之前生成过就没必要再生成了</span></span><br><span class="line">ssh-keygen -t ed25519 -C <span class="string">&quot;xxx@xxx.com&quot;</span></span><br><span class="line"><span class="comment"># 生成的文件在 C:\Users\xxx\.ssh</span></span><br><span class="line"><span class="comment"># 将文件夹里面的 .pub(公钥) 复制添加到 github 等的 ssh key 中</span></span><br><span class="line"><span class="comment"># 测试连接是否完成</span></span><br><span class="line">ssh -T git@github.com</span><br></pre></td></tr></table></figure>
+
+<p>到此，环境配置基本完成，你可以开心的 <code>code</code> 了，细节问题在使用中逐渐完善即可。</p>
+<h2 id="Linux-环境-C-C-开发环境配置"><a href="#Linux-环境-C-C-开发环境配置" class="headerlink" title="Linux 环境 C&#x2F;C++ 开发环境配置"></a>Linux 环境 C&#x2F;C++ 开发环境配置</h2><p>直接虚拟机或者双系统，这两个我都折腾过，还是不太方便。因此，这里主要讲在 <code>windows</code> 下使用 <code>vscode</code> 进行远程 <code>Linux</code> 环境开发。</p>
+<h3 id="安装-WSL"><a href="#安装-WSL" class="headerlink" title="安装 WSL"></a>安装 WSL</h3><p>打开终端，推荐使用 <code>windows terminal</code>，需要管理员模式打开。输入命令 <code>wsl --install</code>，等待安装完成即可。</p>
+<h3 id="安装-Ubuntu"><a href="#安装-Ubuntu" class="headerlink" title="安装 Ubuntu"></a>安装 Ubuntu</h3><p>打开微软应用商店，搜索 <code>ubuntu</code> 自行选择版本安装即可。安装完成后，在终端中一个就有 <code>ubuntu</code> 选项了，打开，完成一些基本设置，然后就有一个全新的 <code>ubuntu</code> 系统了。首先还是推荐换源，清华源是一个很好的选择，<code>https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/</code>。执行 <code>sudo nano /etc/apt/sources.list</code>，将原本内容注释掉，将清华源加入，然后退出。执行 <code>sudo apt update</code> 和 <code>sudo apt upgrade</code> 。安装 <code>gcc</code> 的命令为 <code>sudo apt install gcc</code>，其他的以此类推。</p>
+<h3 id="vscode-安装-remote-development-插件组件"><a href="#vscode-安装-remote-development-插件组件" class="headerlink" title="vscode 安装 remote development 插件组件"></a>vscode 安装 remote development 插件组件</h3><p>左侧栏第五个是插件商店，搜索安装即可。完成后，左下角会出现一个类型闪电的标，点击，然后选择 <code>new WSL windows</code> ，不出意外的话就会进入到 <code>wsl</code> 了，左下角会显示。此时在这个窗口操作就是纯正的 <code>Linux</code> 环境。<code>vscode</code> 提供了代码编辑器和终端的功能，足矣。</p>
+<h2 id="虚拟机-Linux-remote-ssh-连接"><a href="#虚拟机-Linux-remote-ssh-连接" class="headerlink" title="虚拟机 Linux + remote ssh 连接"></a>虚拟机 Linux + remote ssh 连接</h2><h3 id="安装-vmware-workstation"><a href="#安装-vmware-workstation" class="headerlink" title="安装 vmware workstation"></a>安装 vmware workstation</h3><p>这是一个让你运行虚拟机的软件，进入官网，<code>https://www.vmware.com/cn/products/workstation-pro.html</code> ，下载安装即可，这个是付费软件，但是网上激活码一搜一大堆。</p>
+<h3 id="下载一个-Linux-发行版的-iso-镜像"><a href="#下载一个-Linux-发行版的-iso-镜像" class="headerlink" title="下载一个 Linux 发行版的 iso 镜像"></a>下载一个 Linux 发行版的 iso 镜像</h3><p>我选择的是 <code>manjaro</code>，因为已经有一个 <code>ubuntu</code> 的 <code>wsl</code> 发行版了。官网  <code>https://manjaro.org/download/</code>，推荐 <code>kde</code> 版本，下载即可。</p>
+<h3 id="vmware-安装-manjaro"><a href="#vmware-安装-manjaro" class="headerlink" title="vmware 安装 manjaro"></a>vmware 安装 manjaro</h3><p>依次大概是新建虚拟机，典型，安装程序映射文件（<code>iso</code>）（选择刚刚下载的 <code>iso</code> 镜像即可），<code>Linux</code> 和其他 <code>Linux 5.x 64位</code>，然后就是自行选择了，名称啥的随意。注意内存大小和存储大小，尽量大点，推荐 <code>8G + 40G</code> 。然后就可以打开这个虚拟机了，剩下的内容和初次安装 <code>windows</code> 大差不差。</p>
+<h3 id="vscode-远程连接-manjaro"><a href="#vscode-远程连接-manjaro" class="headerlink" title="vscode 远程连接 manjaro"></a>vscode 远程连接 manjaro</h3><p><code>manjaro</code> 安装 <code>ssh</code> 服务，<code>sudo pacman -Sy openssh</code> ，然后开启服务 <code>systemctl start sshd.service &amp;&amp; systemctl enable sshd.service </code> 。执行 <code>sudo pacman -Sy net-tools</code> ，然后执行 <code>ifconfig</code> ，将 <code>ip</code> 地址记住。</p>
+<p>打开本机的 <code>vscode</code>，点击左侧的 <code>remote explorer</code> 然后将选项修改为 <code>ssh targets</code>，再点击齿轮，然后选择第一个，输入内容：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626175145422.png" alt="image-20220626175145422"></p>
+<p>第一个随便填，第二个填 <code>ip</code> 地址，第三个填用户名。然后就能远程连接了。最后，如果需要配置无密码连接需要使用 <code>ssh</code> 认证，这个东西如果用过 <code>github</code> 的话很容易搞。复制上面连接 <code>github</code> 时的 <code>.pub</code> (公钥)，在 <code>manjaro</code> 中的 <code>~/.ssh</code> 文件夹中(没有这个文件夹就创建)创建一个文件 <code>authorized_keys</code> ，将复制的 <code>key</code> 写入，即可免密连接。</p>
+<p>这样，我们只用打开虚拟机，然后就不用操作了，使用 <code>vscode</code> 远程连接即可。连接云服务器也是这样的操作。</p>
+<h2 id="docker-remote-containers-连接"><a href="#docker-remote-containers-连接" class="headerlink" title="docker + remote containers 连接"></a>docker + remote containers 连接</h2><h3 id="安装-docker"><a href="#安装-docker" class="headerlink" title="安装 docker"></a>安装 docker</h3><p>访问官网，安装即可。最好能配置换源。在设置里查找 <code>docker engine</code> ，修改内容如下：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;builder&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;gc&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;defaultKeepStorage&quot;</span><span class="punctuation">:</span> <span class="string">&quot;20GB&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;enabled&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;experimental&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;features&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;buildkit&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;registry-mirrors&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;https://docker.mirrors.ustc.edu.cn&quot;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="docker-使用"><a href="#docker-使用" class="headerlink" title="docker 使用"></a>docker 使用</h3><p>这里用配置一个 <code>mysql</code> 环境为例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查找 mysql 镜像</span></span><br><span class="line">docker search mysql</span><br><span class="line"><span class="comment"># 拉取/下载镜像</span></span><br><span class="line">docker pull [xxx] <span class="comment"># xxx 是你刚刚 search 排行第一的 NAME </span></span><br><span class="line"><span class="comment"># 列出镜像(应该可以看到刚刚下载的 mysql)</span></span><br><span class="line">docker image <span class="built_in">ls</span></span><br><span class="line"><span class="comment"># 此时你也能选择删除它</span></span><br><span class="line">docker image <span class="built_in">rm</span> [选项] &lt;镜像1&gt; [&lt;镜像2&gt; ...]</span><br><span class="line"><span class="comment"># 简单启动镜像，创建一个叫做 mysql-demo 的容器(宿主机的 3306 被本地的 mysql 用了)</span></span><br><span class="line">docker run --name mysql-demo -p 3307:3306 -e MYSQL_ROOT_PASSWORD=password -d mysql</span><br><span class="line"><span class="comment"># 查看容器，应该就能看到</span></span><br><span class="line">docker container <span class="built_in">ls</span></span><br><span class="line"><span class="comment"># 进入容器（然后就会发现终端变了，因为我们进入了容器里面的终端）</span></span><br><span class="line">docker <span class="built_in">exec</span> -it mysql-demo /bin/bash</span><br><span class="line"><span class="comment"># 然后就能愉快的使用 mysql 了</span></span><br><span class="line">mysql -u root -p password</span><br><span class="line"><span class="comment"># 当你容器运行起来了之后，也可以不进入容器，在本地远程连接容器中的数据库，注意端口</span></span><br><span class="line">mysql 127.0.0.1 -P 3307 -u root -p</span><br><span class="line"><span class="comment"># 退出容器</span></span><br><span class="line"><span class="built_in">exit</span></span><br><span class="line"><span class="comment"># 停止容器 </span></span><br><span class="line">docker stop mysql-demo</span><br><span class="line"><span class="comment"># 删除容器</span></span><br><span class="line">docker container <span class="built_in">rm</span> mysql-demo</span><br></pre></td></tr></table></figure>
+
+<h3 id="vscode-远程连接-container"><a href="#vscode-远程连接-container" class="headerlink" title="vscode 远程连接 container"></a>vscode 远程连接 container</h3><p>终端还是用不习惯，毕竟有些容器里面甚至连 <code>vim</code> 都没有，这个时候就要祭出我们的宇宙最强编辑器 <code>vscode</code> 了。安装 <code>docker</code> 和 <code>remote-container</code> 这两个插件。然后就会发现侧边栏出现了一个小鲸鱼，点开，就可以看到镜像和容器了。</p>
+<p>我们就可以使用插件来管理容器和镜像了，如果要进入镜像，<code>ctrl + shift + p</code> 打开 <code>vscode</code> 的命令行，输入 <code>Remote-container：attach to running container</code> 回车，然后就会看到当前正在运行的容器，选择需要的进入即可。本地文件传入容器，可以在创建容器时使用 <code>-v /home/xxx/xxx/:/share</code> 就会把本地的文件挂载到容器中的 <code>share</code> 文件夹下。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626214647085.png" alt="image-20220626214647085"></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>配环境真的就是一个熟练工，配过两次就会了，没配过就是一头雾水。说实话，我这一篇够别人水十多篇了，一个方面是写的很多，几乎包括了这两年折腾过的所有环境配置；另一方面，是因为我确实写的很简略，有很多都是回忆的大致操作。不明白的地方可以根据关键词搜索一下，或者联系我。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#windows-%E7%8E%AF%E5%A2%83-C-C-%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">windows 环境 C&#x2F;C++ 开发环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#git-%E5%AE%89%E8%A3%85"><span class="toc-number">1.1.</span> <span class="toc-text">git 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#windows-terminal-%E5%AE%89%E8%A3%85"><span class="toc-number">1.2.</span> <span class="toc-text">windows terminal 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-windows-terminal-%E6%89%93%E5%BC%80-git-bash"><span class="toc-number">1.3.</span> <span class="toc-text">使用 windows terminal 打开 git bash</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-gcc-%E5%A5%97%E4%BB%B6"><span class="toc-number">1.4.</span> <span class="toc-text">安装 gcc 套件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-vscode"><span class="toc-number">1.5.</span> <span class="toc-text">安装 vscode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#github-ssh-%E8%AE%A4%E8%AF%81"><span class="toc-number">1.6.</span> <span class="toc-text">github ssh 认证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Linux-%E7%8E%AF%E5%A2%83-C-C-%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">Linux 环境 C&#x2F;C++ 开发环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-WSL"><span class="toc-number">2.1.</span> <span class="toc-text">安装 WSL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-Ubuntu"><span class="toc-number">2.2.</span> <span class="toc-text">安装 Ubuntu</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#vscode-%E5%AE%89%E8%A3%85-remote-development-%E6%8F%92%E4%BB%B6%E7%BB%84%E4%BB%B6"><span class="toc-number">2.3.</span> <span class="toc-text">vscode 安装 remote development 插件组件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA-Linux-remote-ssh-%E8%BF%9E%E6%8E%A5"><span class="toc-number">3.</span> <span class="toc-text">虚拟机 Linux + remote ssh 连接</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-vmware-workstation"><span class="toc-number">3.1.</span> <span class="toc-text">安装 vmware workstation</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E4%B8%80%E4%B8%AA-Linux-%E5%8F%91%E8%A1%8C%E7%89%88%E7%9A%84-iso-%E9%95%9C%E5%83%8F"><span class="toc-number">3.2.</span> <span class="toc-text">下载一个 Linux 发行版的 iso 镜像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#vmware-%E5%AE%89%E8%A3%85-manjaro"><span class="toc-number">3.3.</span> <span class="toc-text">vmware 安装 manjaro</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#vscode-%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5-manjaro"><span class="toc-number">3.4.</span> <span class="toc-text">vscode 远程连接 manjaro</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#docker-remote-containers-%E8%BF%9E%E6%8E%A5"><span class="toc-number">4.</span> <span class="toc-text">docker + remote containers 连接</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-docker"><span class="toc-number">4.1.</span> <span class="toc-text">安装 docker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#docker-%E4%BD%BF%E7%94%A8"><span class="toc-number">4.2.</span> <span class="toc-text">docker 使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#vscode-%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5-container"><span class="toc-number">4.3.</span> <span class="toc-text">vscode 远程连接 container</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">小结</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/b638e272.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/b638e272.html&text=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/b638e272.html&title=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/b638e272.html&is_video=false&description=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Windows/WSL/Linux/Docker+VSCode开发环境配置&body=Check out this article: https://ceyewan.github.io/p/b638e272.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/b638e272.html&title=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/b638e272.html&title=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/b638e272.html&title=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/b638e272.html&title=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/b638e272.html&name=Windows/WSL/Linux/Docker+VSCode开发环境配置&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/b638e272.html&t=Windows/WSL/Linux/Docker+VSCode开发环境配置"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
