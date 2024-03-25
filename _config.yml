@@ -4,8 +4,14 @@
 
 # Site
 title: Ceyewan's Blog
-subtitle: ''
-description: 'ceyewan 折腾过的好玩的教程、信息安全、计算机技术的个人小站'
+subtitle: '总之岁月漫长，然而值得等待！'
+description: 'Ceyewan, 信息安全专业在校本科生, 喜欢折腾一些乱七八糟的, 有意思的就会记录下来。  
+
+或许我产出的大部分内容都是互联网垃圾, 或许很少有人能看到这里. 而你, 或许就是那个愿意停留两秒的有缘人. 
+
+- [ForFun](https://ceyewan.github.io/categories/ForFun/): 折腾过的好玩的教程  
+
+- [SeedLabs](https://ceyewan.github.io): 一些安全方面的小实验'
 keywords:
 author: ceyewan
 language: en
