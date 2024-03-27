@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Background两阶段锁    GROWING：锁的增长阶段，即加锁阶段。   SHRINKING：锁的释放阶段，即解锁阶段。  五种锁类型    S 锁：共享锁。   IS 锁：意向共享锁，读取行时需要对表加 IS 锁。   X 锁：排他锁。   IX 锁：意向排他锁，写行时需要对表加 IX 锁。   SIX 锁：共享意向排他锁，读取全表，并且会对部分行加写锁。  隔离级别：    REPE">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CMU15445 - Project 4 - Concurrency Control">
+<meta property="og:url" content="https://ceyewan.github.io/p/997e1890.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="Background两阶段锁    GROWING：锁的增长阶段，即加锁阶段。   SHRINKING：锁的释放阶段，即解锁阶段。  五种锁类型    S 锁：共享锁。   IS 锁：意向共享锁，读取行时需要对表加 IS 锁。   X 锁：排他锁。   IX 锁：意向排他锁，写行时需要对表加 IX 锁。   SIX 锁：共享意向排他锁，读取全表，并且会对部分行加写锁。  隔离级别：    REPE">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230320155042928.png">
+<meta property="article:published_time" content="2024-03-27T06:34:40.010Z">
+<meta property="article:modified_time" content="2024-03-27T06:35:10.901Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="CMU15445">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230320155042928.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>CMU15445 - Project 4 - Concurrency Control</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/d38b2590.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/997e1890.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/997e1890.html&text=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/997e1890.html&title=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/997e1890.html&is_video=false&description=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15445 - Project 4 - Concurrency Control&body=Check out this article: https://ceyewan.github.io/p/997e1890.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/997e1890.html&title=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/997e1890.html&title=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/997e1890.html&title=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/997e1890.html&title=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/997e1890.html&name=CMU15445 - Project 4 - Concurrency Control&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/997e1890.html&t=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Background"><span class="toc-number">1.</span> <span class="toc-text">Background</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lock-Manager"><span class="toc-number">2.</span> <span class="toc-text">Lock Manager</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Deadlock-Detection"><span class="toc-number">3.</span> <span class="toc-text">Deadlock Detection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Concurrent-Query-Execution"><span class="toc-number">4.</span> <span class="toc-text">Concurrent Query Execution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">5.</span> <span class="toc-text">结果</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        CMU15445 - Project 4 - Concurrency Control
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-03-27T06:34:40.010Z" class="dt-published" itemprop="datePublished">2024-03-27</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/CMU15445/">CMU15445</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/CMU15445/" rel="tag">CMU15445</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h3 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h3><p>两阶段锁</p>
+<blockquote>
+<p>  GROWING：锁的增长阶段，即加锁阶段。</p>
+<p>  SHRINKING：锁的释放阶段，即解锁阶段。</p>
+</blockquote>
+<p>五种锁类型</p>
+<blockquote>
+<p>  S 锁：共享锁。</p>
+<p>  IS 锁：意向共享锁，读取行时需要对表加 IS 锁。</p>
+<p>  X 锁：排他锁。</p>
+<p>  IX 锁：意向排他锁，写行时需要对表加 IX 锁。</p>
+<p>  SIX 锁：共享意向排他锁，读取全表，并且会对部分行加写锁。</p>
+</blockquote>
+<p>隔离级别：</p>
+<blockquote>
+<p>  REPEATABLE_READ：可重复读，事务从开始到结束，读到的东西自始至终都是一样。</p>
+<p>  READ_COMMITTED：读提交，事务可以读到其他事务已经提交了的数据。</p>
+<p>  READ_UNCOMMITTED：读未提交，事务可以读到其他事务还没有提交的数据。</p>
+</blockquote>
+<h3 id="Lock-Manager"><a href="#Lock-Manager" class="headerlink" title="Lock Manager"></a>Lock Manager</h3><p><strong>LockTable</strong></p>
+<ol>
+<li><p>检查 <code>txn</code> 状态</p>
+<p>可重复读,在 <code>SHRINKING</code> 状态不允许使用锁,<code>GROWING</code> 状态可以加任何锁。</p>
+<p>读提交,在 <code>SHRINKING</code> 状态只能加 <code>S/IS</code> 锁,<code>GROWING</code> 状态可以加任何锁。</p>
+<p>读未提交,不允许 <code>S/IS/SIX</code> 锁,<code>SHRINKING</code> 状态不允许加锁。</p>
+</li>
+<li><p>获取 <code>table</code> 对应的 <code>lock request queue</code></p>
+<p><code>table_lock_map_</code> 维护了一个 <code>table</code> 到 <code>lock request queue</code> 的映射关系。在获取时需要对 <code>map</code> 加锁，获取后立即释放该锁。不存在映射关系则创建。</p>
+</li>
+<li><p>判断是否为锁升级</p>
+<p>对 <code>lock request queue</code> 加锁后，遍历在 <code>queue</code> 上的所有事务，找到 <code>txn_id</code> 相等的。判断是否为锁升级。如果有其他事务在升级，直接 <code>ABORTED</code>；如果事务锁模式不变，直接返回 <code>true</code>；升级只能从 <code>IS -&gt; S/X/IX/SIX、S-&gt; X/SIX、IX-&gt;X/SIX、SIX -&gt; X</code>，其他升级全部 <code>ABORTED</code>。</p>
+<p>是锁升级的话，在 <code>request queue</code> 和 <code>txn-&gt;Get[Shared/...]TableLockSet()</code> 中删除原有锁。</p>
+</li>
+<li><p>接下来 <code>new</code> 一个 <code>request</code>，将其加入 <code>request queue</code>。</p>
+</li>
+<li><p>接下来，就是经典的条件变量 + 互斥锁模型了</p>
+<p>首先拿到 <code>lock_request_queue</code> 的锁，然后等待为事务赋予在 <code>table</code> 上想要的锁，如果没有成功，那么就 <code>wait</code>。被唤醒后，发现被 <code>ABORTED</code> 了（可能是死锁检测把它给 <code>ban</code> 了），直接退出，取消拿锁。调用 <code>notify_all()</code> 通知所以正在等待该资源的线程。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">std::unique_lock&lt;std::mutex&gt; <span class="title">lock</span><span class="params">(lock_request_queue-&gt;latch_)</span></span>;</span><br><span class="line">...</span><br><span class="line"><span class="keyword">while</span> (!lock_request_queue-&gt;<span class="built_in">GrantLockForTable</span>(txn, lock_mode)) &#123;</span><br><span class="line">  lock_request_queue-&gt;cv_.<span class="built_in">wait</span>(lock);</span><br><span class="line">  <span class="keyword">if</span> (txn-&gt;<span class="built_in">GetState</span>() == TransactionState::ABORTED) &#123;</span><br><span class="line">    <span class="built_in">RemoveRequest</span>();</span><br><span class="line">    lock_request_queue-&gt;cv_.<span class="built_in">notify_all</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>GrantLockForTable()</code> 函数，为事务赋予锁。</p>
+<p>遍历 <code>request queue</code> 拿到 <code>granted_set</code>，和当前事务的 <code>lock_request</code>。判断所有 <code>greated</code> 的锁和当前的 <code>lock_request</code> 是否兼容。<code>IS</code> 和 <code>X</code> 不兼容，<code>IX</code> 和 <code>S/SIX/X</code> 不兼容，<code>S</code> 和 <code>IX/SIX/X</code> 不兼容，<code>SIX</code> 和 <code>IX/SIX/X/S</code> 不兼容，<code>X</code> 和所有都不兼容。</p>
+<p>然后判断优先级。如果是锁升级，优先级最高，那么赋予锁并将 <code>upgrading</code> 设为 <code>INVALID_TXN_ID</code>；因为锁是 <code>FIFO</code> 顺序满足，查看当前事务前所有正在等待的事务记为 <code>wait list</code>，如果和前面的 <code>wait</code> 都兼容，那么可以认为优先级也是最高的。（文档说了，所有兼容的锁需要一起被赋予）。</p>
+</li>
+<li><p>文档中的 <code>Bookkeeping</code> 操作，就是在 <code>txn-&gt;Get[Shared/...]TableLockSet()</code> 中记录拿到的或者删除的锁。</p>
+</li>
+</ol>
+<p><strong>LockRow</strong></p>
+<p>和上面几乎完全相同，行锁只支持 <code>S</code> 和 <code>X</code> 锁。在加 <code>S</code> 锁时，需要保证对表有锁（任意锁都行）；在加 <code>X</code> 锁时，需要保证对表有 <code>X/IX/SIX</code> 锁。</p>
+<p><strong>UnLockTable</strong></p>
+<ol>
+<li>如果事务行读锁或者行写锁不为空的话，不能释放表锁</li>
+<li>拿到 <code>lock_request_queue</code></li>
+<li>遍历找到表锁，然后删除即可。注意需要在 <code>lock_request_queue</code> 和 <code>txn-&gt;Get[Shared/...]TableLockSet()</code> 中删除。</li>
+<li>在可重复读隔离级别下， <code>S/X</code> 锁的释放会导致事务进入 <code>SHRINKING</code> 状态；在读提交和读未提交状态，<code>X</code> 锁的释放会导致事务进入 <code>SHRINKING</code> 状态。</li>
+</ol>
+<h3 id="Deadlock-Detection"><a href="#Deadlock-Detection" class="headerlink" title="Deadlock Detection"></a>Deadlock Detection</h3><ol>
+<li><p><code>LockManger</code> 后台维护一个死锁检测线程</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">LockManager</span>() &#123;</span><br><span class="line">  enable_cycle_detection_ = <span class="literal">true</span>;</span><br><span class="line">  cycle_detection_thread_ = <span class="keyword">new</span> std::<span class="built_in">thread</span>(&amp;LockManager::RunCycleDetection, <span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>RunCycleDetection()</code> 中维护一个循环，循环条件是 <code>enable_cycle_detection_</code> 每次循环开始前先等待一会 <code>std::this_thread::sleep_for(cycle_detection_interval)</code></p>
+</li>
+<li><p>遍历 <code>table lock map</code> 得到在 <code>table</code> 锁上的 <code>wait</code> 关系。具体来说，<code>txn_i</code> 没有 <code>granted</code> 锁，而 <code>txn_j</code> 却 <code>granted</code> 了锁，且 <code>txn_i</code> 和 <code>txn_j</code> 不兼容，那么 <code>txn_i wait for txn_j</code>。将这组边调用 <code>AddEdge</code> 加入 <code>wait for</code> 图中。</p>
+</li>
+<li><p>接着遍历 <code>row lock map</code> 执行同样的操作。</p>
+</li>
+<li><p><code>while(HasCycle(&amp;txn_id))</code> 得到 <code>wait for</code> 图中环 <code>txn_id</code> 最大的那个 <code>txn_id</code>，遍历该事务上的 <code>Get[Shared][Row]LockSet</code>，释放所有的锁，或者简单粗暴的将事务的状态设为 <code>ABORTED</code>。因为可能有多个环，我们都要打破，所以使用 <code>while</code> 循环。</p>
+</li>
+<li><p><code>HasCycle</code> 实际上调用的 <code>DFS</code> 来检测环的存在。记录已经访问过的节点，如果有搜到已经访问过的节点，说明成环了。</p>
+</li>
+<li><p>调用 <code>RemoveEdge</code> 移除 <code>wait for</code> 图上和 <code>txn_id</code> 有关的所有边。</p>
+</li>
+<li><p><code>notify_all</code> 正在等待这个事务持有资源的其他事务。</p>
+</li>
+</ol>
+<h3 id="Concurrent-Query-Execution"><a href="#Concurrent-Query-Execution" class="headerlink" title="Concurrent Query Execution"></a>Concurrent Query Execution</h3><p>在 <code>SeqScan、Insert、Delete</code> 三个算子中添加并发控制，因为只有这三个算子是直接操控数据的。</p>
+<p>分别按照隔离级别，对表加 <code>IS/IX</code> 锁，并且还需要对行加 <code>S/X</code> 锁。</p>
+<h3 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h3><p>有两个测试没过，留到后续有时间再补上吧。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230320155042928.png" alt="image-20230320155042928"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Background"><span class="toc-number">1.</span> <span class="toc-text">Background</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lock-Manager"><span class="toc-number">2.</span> <span class="toc-text">Lock Manager</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Deadlock-Detection"><span class="toc-number">3.</span> <span class="toc-text">Deadlock Detection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Concurrent-Query-Execution"><span class="toc-number">4.</span> <span class="toc-text">Concurrent Query Execution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">5.</span> <span class="toc-text">结果</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/997e1890.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/997e1890.html&text=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/997e1890.html&title=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/997e1890.html&is_video=false&description=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15445 - Project 4 - Concurrency Control&body=Check out this article: https://ceyewan.github.io/p/997e1890.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/997e1890.html&title=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/997e1890.html&title=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/997e1890.html&title=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/997e1890.html&title=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/997e1890.html&name=CMU15445 - Project 4 - Concurrency Control&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/997e1890.html&t=CMU15445 - Project 4 - Concurrency Control"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

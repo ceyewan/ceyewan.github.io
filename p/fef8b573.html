@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="实验说明 https:&#x2F;&#x2F;15445.courses.cs.cmu.edu&#x2F;fall2022&#x2F;project1&#x2F;  这个项目是实现一个 buffer pool，缓冲池负责将物理页在主内存和磁盘之间来回移动，从而允许 DBMS 支持大于系统可用内存量的数据库。系统通过唯一标识符 page_id_t 向缓冲池请求一个页面，缓冲池从内存或者磁盘中检索该页面后返回给系统。 缓冲池的实现需要是线程安全的，也">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CMU15445 - Project 1 - Buffer Pool Manager">
+<meta property="og:url" content="https://ceyewan.github.io/p/fef8b573.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="实验说明 https:&#x2F;&#x2F;15445.courses.cs.cmu.edu&#x2F;fall2022&#x2F;project1&#x2F;  这个项目是实现一个 buffer pool，缓冲池负责将物理页在主内存和磁盘之间来回移动，从而允许 DBMS 支持大于系统可用内存量的数据库。系统通过唯一标识符 page_id_t 向缓冲池请求一个页面，缓冲池从内存或者磁盘中检索该页面后返回给系统。 缓冲池的实现需要是线程安全的，也">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221024233205570.png">
+<meta property="article:published_time" content="2024-03-27T06:34:30.039Z">
+<meta property="article:modified_time" content="2024-03-27T06:34:49.459Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="CMU15445">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>CMU15445 - Project 1 - Buffer Pool Manager</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/3e7296f5.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/6f3503f7.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/fef8b573.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/fef8b573.html&text=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/fef8b573.html&title=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/fef8b573.html&is_video=false&description=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15445 - Project 1 - Buffer Pool Manager&body=Check out this article: https://ceyewan.github.io/p/fef8b573.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/fef8b573.html&title=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/fef8b573.html&title=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/fef8b573.html&title=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/fef8b573.html&title=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/fef8b573.html&name=CMU15445 - Project 1 - Buffer Pool Manager&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/fef8b573.html&t=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">实验说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Extendible-Hash-Table"><span class="toc-number">2.</span> <span class="toc-text">Extendible Hash Table</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LRU-K-Replacement-Policy"><span class="toc-number">3.</span> <span class="toc-text">LRU-K Replacement Policy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Buffer-Pool-Manager-Instance"><span class="toc-number">4.</span> <span class="toc-text">Buffer Pool Manager Instance</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">5.</span> <span class="toc-text">结果</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        CMU15445 - Project 1 - Buffer Pool Manager
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-03-27T06:34:30.039Z" class="dt-published" itemprop="datePublished">2024-03-27</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/CMU15445/">CMU15445</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/CMU15445/" rel="tag">CMU15445</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h3 id="实验说明"><a href="#实验说明" class="headerlink" title="实验说明"></a>实验说明</h3><blockquote>
+<p><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project1/">https://15445.courses.cs.cmu.edu/fall2022/project1/</a></p>
+</blockquote>
+<p>这个项目是实现一个 <code>buffer pool</code>，缓冲池负责将物理页在主内存和磁盘之间来回移动，从而允许 DBMS 支持大于系统可用内存量的数据库。系统通过唯一标识符 <code>page_id_t</code> 向缓冲池请求一个页面，缓冲池从内存或者磁盘中检索该页面后返回给系统。</p>
+<p>缓冲池的实现需要是线程安全的，也就是说支持并发操作。</p>
+<h3 id="Extendible-Hash-Table"><a href="#Extendible-Hash-Table" class="headerlink" title="Extendible Hash Table"></a>Extendible Hash Table</h3><blockquote>
+<p>参考资料：<a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/extendible-hashing-dynamic-approach-to-dbms/">https://www.geeksforgeeks.org/extendible-hashing-dynamic-approach-to-dbms/</a></p>
+</blockquote>
+<p>可拓展哈希的结构如下： </p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image.png" alt="img"></p>
+<ul>
+<li>目录：存储指向桶的指针。</li>
+<li>桶：哈希键值对，如果局部深度小于全局深度时，一个桶可能包含不止一个指针指向它。</li>
+<li>全局深度：和目录相关联，也就是哈希后取的比特数。</li>
+<li>局部深度：和桶关联，表示桶中的数据是哈希后取低 <code>x</code> 位得到的。</li>
+</ul>
+<p>最复杂的就是插入数据了，流程如下：</p>
+<ol>
+<li>将 <code>key</code> 哈希后，如果全局深度为 <code>n</code>，那么取低 <code>n</code> 位比特。比如 <code>n = 4</code> 时，哈希出来的结果为 <code>xxx0011</code>，表示这个 <code>key</code> 应该存储到 <code>dir[0011]</code> 指向的桶中。</li>
+<li>如果桶已经满了，那么比较全局深度和局部深度的大小。</li>
+<li>如果相等，<code>dir</code> 目录项扩容一倍，全局深度相应增加 <code>1</code> 。新增的那些 <code>dir[i]</code> 指向 <code>dir[i - PreDirSize]</code>。比如开始时全局深度为 <code>2</code>，那么 <code>dir</code> 大小为 <code>4</code>，扩容后大小为 <code>8</code>，其中 <code>dir[5]</code> 应该指向 <code>dir[1]</code>。因为 <code>5</code> 中对应的 <code>key</code> 哈希值低 <code>3</code> 位为 <code>101</code>，在还没扩容之前，低 <code>2</code> 位为 <code>01</code>。也就意味着，现在本该存储在 <code>dir[5]</code> 中的 <code>key</code> 之前存在 <code>dir[1]</code> 中，我们直接将 <code>dir[5] = dir[1]</code>，共用。当全局深度比局部深度大 <code>n</code> 时，有 <code>2^n</code> 个 <code>dir</code> 目录项共用这个桶。</li>
+<li><code>dir</code> 扩容后，再次尝试插入，这个时候桶还是满的，不过局部深度比全局深度小。</li>
+<li>如果局部深度比全局深度小，我们将局部深度增加 <code>1</code> ，比如原来是 <code>2</code> ，现在变成 <code>3</code>，那么里面的 <code>key</code> 哈希值低两位都是相同的，第 <code>3</code> 位的 <code>0</code> 和 <code>1</code> 可以把这里面的 <code>key</code> 分成两部分。</li>
+<li>分完之后，让 <code>dir</code> 中低 <code>3</code> 位是 <code>0xx</code> 和 <code>1xx</code> 的目录项分别指向拆分后的桶。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> K, <span class="keyword">typename</span> V&gt;</span><br><span class="line"><span class="type">void</span> ExtendibleHashTable&lt;K, V&gt;::<span class="built_in">Insert</span>(<span class="type">const</span> K &amp;key, <span class="type">const</span> V &amp;value) &#123;</span><br><span class="line">  latch_.<span class="built_in">lock</span>();</span><br><span class="line">  <span class="comment">// 桶分裂一次不一定够，可能分裂结果是 0 n，那么还得继续分裂，所以我用了个循环</span></span><br><span class="line">  <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="type">size_t</span> index = <span class="keyword">this</span>-&gt;<span class="built_in">IndexOf</span>(key);</span><br><span class="line">    <span class="type">bool</span> flag = dir_[index]-&gt;<span class="built_in">Insert</span>(key, value); <span class="comment">// 尝试插入</span></span><br><span class="line">    <span class="keyword">if</span> (flag) &#123;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">GetLocalDepthInternal</span>(index) != <span class="built_in">GetGlobalDepthInternal</span>()) &#123; <span class="comment">// 如果不等，那么桶分裂</span></span><br><span class="line">      <span class="built_in">RedistributeBucket</span>(dir_[index]);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123; <span class="comment">// 如果相等，那么目录项需要增加（相等的话需要目录项扩容和桶分裂，桶分裂下次循环执行</span></span><br><span class="line">      global_depth_++;</span><br><span class="line">      <span class="type">size_t</span> dir_size = dir_.<span class="built_in">size</span>();</span><br><span class="line">      <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; dir_size; i++) &#123;</span><br><span class="line">        <span class="comment">// 4 5 6 7 应该分别指向 0 1 2 3，因为他们的低位相同</span></span><br><span class="line">        <span class="comment">// 意味着在 global_depth 没有增加时存储在同一个桶</span></span><br><span class="line">        dir_.<span class="built_in">emplace_back</span>(dir_[i]); </span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  latch_.<span class="built_in">unlock</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面是桶分裂函数，如果之前有 <code>2n</code> 个 <code>dir</code> 目录项指向这个桶，分裂后两个桶分别有 <code>n</code> 个目录项：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> K, <span class="keyword">typename</span> V&gt;</span><br><span class="line"><span class="keyword">auto</span> ExtendibleHashTable&lt;K, V&gt;::<span class="built_in">RedistributeBucket</span>(std::shared_ptr&lt;Bucket&gt; bucket) -&gt; <span class="type">void</span> &#123;</span><br><span class="line">  bucket-&gt;<span class="built_in">IncrementDepth</span>(); <span class="comment">// 局部深度增加 1</span></span><br><span class="line">  <span class="type">int</span> depth = bucket-&gt;<span class="built_in">GetDepth</span>();</span><br><span class="line">  num_buckets_++; <span class="comment">// bucket 的数量增加 1 个</span></span><br><span class="line">  <span class="function">std::shared_ptr&lt;Bucket&gt; <span class="title">p</span><span class="params">(<span class="keyword">new</span> Bucket(bucket_size_, depth))</span></span>; <span class="comment">// 创建新的 bucket</span></span><br><span class="line">  <span class="comment">// 原来的哈希值，比如说是 001</span></span><br><span class="line">  <span class="type">size_t</span> preidx = std::<span class="built_in">hash</span>&lt;K&gt;()((*(bucket-&gt;<span class="built_in">GetItems</span>().<span class="built_in">begin</span>())).first) &amp; ((<span class="number">1</span> &lt;&lt; (depth - <span class="number">1</span>)) - <span class="number">1</span>);</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span> it = bucket-&gt;<span class="built_in">GetItems</span>().<span class="built_in">begin</span>(); it != bucket-&gt;<span class="built_in">GetItems</span>().<span class="built_in">end</span>();) &#123;</span><br><span class="line">    <span class="comment">// 现在的哈希值，因为深度加 1 了，多一比特，那么可以是 1001 或者 0001</span></span><br><span class="line">    <span class="type">size_t</span> idx = std::<span class="built_in">hash</span>&lt;K&gt;()((*it).first) &amp; ((<span class="number">1</span> &lt;&lt; depth) - <span class="number">1</span>);</span><br><span class="line">    <span class="comment">// 如果是 1001 删除，并添加到新的 bucket 中</span></span><br><span class="line">    <span class="keyword">if</span> (idx != preidx) &#123;</span><br><span class="line">      p-&gt;<span class="built_in">Insert</span>((*it).first, (*it).second);  <span class="comment">// 1xxx</span></span><br><span class="line">      bucket-&gt;<span class="built_in">GetItems</span>().<span class="built_in">erase</span>(it++);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      it++;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; dir_.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">    <span class="comment">// 1001，低 3 位是 001，低 4 位不是 0001（1001），这些 dir 需要指向新的 bucket</span></span><br><span class="line">    <span class="keyword">if</span> ((i &amp; ((<span class="number">1</span> &lt;&lt; (depth - <span class="number">1</span>)) - <span class="number">1</span>)) == preidx &amp;&amp; (i &amp; ((<span class="number">1</span> &lt;&lt; depth) - <span class="number">1</span>)) != preidx) &#123;</span><br><span class="line">      dir_[i] = p;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="LRU-K-Replacement-Policy"><a href="#LRU-K-Replacement-Policy" class="headerlink" title="LRU-K Replacement Policy"></a>LRU-K Replacement Policy</h3><p><code>LRU-K</code> 替换策略负责跟踪缓冲池中的页使用情况。<code>lRU-K</code> 算法记录最近 <code>K</code> 次访问，如果不满 <code>K</code> 次用 <code>+inf</code> 填充，当需要驱逐一个 <code>frame</code> 帧时，我们选择往前第 <code>K</code> 次访问的时间戳最小的那个帧访问。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 判断 s 是不是比 t 更应该删去</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">LRUKReplacer::Judge</span><span class="params">(<span class="type">frame_id_t</span> s, <span class="type">frame_id_t</span> t)</span> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (hash_[s].time_.<span class="built_in">size</span>() &lt; k_ &amp;&amp; hash_[t].time_.<span class="built_in">size</span>() == k_) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (hash_[s].time_.<span class="built_in">size</span>() == k_ &amp;&amp; hash_[t].time_.<span class="built_in">size</span>() &lt; k_) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 都满或者都不满就比最远的那个谁更远（也就是时间更小）</span></span><br><span class="line">  <span class="keyword">return</span> hash_[s].time_.<span class="built_in">front</span>() &lt; hash_[t].time_.<span class="built_in">front</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">LRUKReplacer::Evict</span><span class="params">(<span class="type">frame_id_t</span> *frame_id)</span> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  *frame_id = <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span> &amp;kv : hash_) &#123;</span><br><span class="line">    <span class="keyword">if</span> (kv.second.evictable_) &#123; <span class="comment">// 可以被 evict</span></span><br><span class="line">      <span class="keyword">if</span> (*frame_id == <span class="number">-1</span> || <span class="built_in">Judge</span>(kv.first, *frame_id)) &#123; <span class="comment">// 可以修改 *frame_id</span></span><br><span class="line">        *frame_id = kv.first;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (*frame_id != <span class="number">-1</span>) &#123;</span><br><span class="line">    hash_.<span class="built_in">erase</span>(*frame_id);</span><br><span class="line">    curr_size_--;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 数据结构我是这么定义的，每个帧都记录访问时间和是否可 evict</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Frameinfo</span> &#123;</span><br><span class="line">  <span class="type">bool</span> evictable_&#123;<span class="literal">false</span>&#125;; <span class="comment">// 标记帧是否可以 evict 驱逐</span></span><br><span class="line">  std::queue&lt;<span class="type">size_t</span>&gt; time_; <span class="comment">// size &lt;= k</span></span><br><span class="line">&#125;;</span><br><span class="line">std::unordered_map&lt;<span class="type">frame_id_t</span>, <span class="keyword">struct</span> Frameinfo&gt; hash_;</span><br></pre></td></tr></table></figure>
+
+<p><code>RecordAccess</code> 方法，为帧添加一次访问时间，如果超过 <code>k</code> 了需要删除最早的那个，并且每次调用这个方法我们将 <code>current_timestamp_++</code> 表示时间的流逝。</p>
+<p><code>SetEvictable</code> 方法，设置 <code>evict</code> 的值，如果从 <code>false</code> 到 <code>true</code>，那么 <code>curr_size_</code> 需要增加，反之，需要减少。</p>
+<p><code>Remove</code> 方法，注意 <code>evictable_ == false</code> 不能删除时，需要抛出异常，<code>throw &quot;Remove a non-evictable frame!&quot;;</code>。</p>
+<h3 id="Buffer-Pool-Manager-Instance"><a href="#Buffer-Pool-Manager-Instance" class="headerlink" title="Buffer Pool Manager Instance"></a>Buffer Pool Manager Instance</h3><p>缓冲池管理器 <code>BufferPoolManagerInstance</code> 负责从 DiskManager 获取数据库页并将其存储在内存中和将脏页写入磁盘。它使用 <code>ExtendibleHashTable</code> 作为将 <code>page_id</code> 映射到 <code>frame_id</code> 的哈希表，使用 <code>LRUKReplace</code> 跟踪 <code>page</code> 对象的访问时间，在需要释放一个帧给新的 <code>page</code> 腾出空间时由 <code>LRUKReplace</code> 来决定驱逐哪个 <code>page</code>。</p>
+<p><code>NewPgImp</code> 方法，先从 <code>free_list_</code> 查找空闲帧，没找到再调用 <code>replacer_.Evict</code> 查找空闲帧，找到的帧如果是脏页需要写回数据。调用 <code>AllocatePage()</code> 分配 <code>page_id</code> ，将分配的 <code>frame</code> 插入 <code>replacer_</code> 和 <code>page_table_</code>，并设置一些元数据。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BufferPoolManagerInstance::FetchPgImp</span><span class="params">(<span class="type">page_id_t</span> page_id)</span> -&gt; Page * </span>&#123;</span><br><span class="line">  <span class="type">frame_id_t</span> frame_id = <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">if</span> (page_table_-&gt;<span class="built_in">Find</span>(page_id, frame_id)) &#123;</span><br><span class="line">    <span class="comment">// </span></span><br><span class="line">    replacer_-&gt;<span class="built_in">RecordAccess</span>(frame_id);</span><br><span class="line">    replacer_-&gt;<span class="built_in">SetEvictable</span>(frame_id, <span class="literal">false</span>);</span><br><span class="line">    pages_[frame_id].pin_count_ += <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">auto</span> p = &amp;pages_[frame_id];</span><br><span class="line">    <span class="keyword">return</span> p;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 找个新页</span></span><br><span class="line">  <span class="keyword">if</span> (!free_list_.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">    frame_id = free_list_.<span class="built_in">front</span>();</span><br><span class="line">    free_list_.<span class="built_in">pop_front</span>();</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (replacer_-&gt;<span class="built_in">Evict</span>(&amp;frame_id)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (pages_[frame_id].<span class="built_in">IsDirty</span>()) &#123;</span><br><span class="line">      disk_manager_-&gt;<span class="built_in">WritePage</span>(pages_[frame_id].<span class="built_in">GetPageId</span>(), pages_[frame_id].<span class="built_in">GetData</span>());</span><br><span class="line">    &#125;</span><br><span class="line">    page_table_-&gt;<span class="built_in">Remove</span>(pages_[frame_id].<span class="built_in">GetPageId</span>());</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    latch_.<span class="built_in">unlock</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  page_table_-&gt;<span class="built_in">Insert</span>(page_id, frame_id);</span><br><span class="line">  pages_[frame_id].page_id_ = page_id;</span><br><span class="line">  pages_[frame_id].pin_count_ = <span class="number">1</span>;</span><br><span class="line">  pages_[frame_id].is_dirty_ = <span class="literal">false</span>;</span><br><span class="line">  pages_[frame_id].<span class="built_in">ResetMemory</span>();</span><br><span class="line">  <span class="comment">// 把数据读过来</span></span><br><span class="line">  disk_manager_-&gt;<span class="built_in">ReadPage</span>(page_id, pages_[frame_id].<span class="built_in">GetData</span>());</span><br><span class="line">  replacer_-&gt;<span class="built_in">RecordAccess</span>(frame_id);</span><br><span class="line">  replacer_-&gt;<span class="built_in">SetEvictable</span>(frame_id, <span class="literal">false</span>);</span><br><span class="line">  <span class="keyword">auto</span> p = &amp;pages_[frame_id];</span><br><span class="line">  latch_.<span class="built_in">unlock</span>();</span><br><span class="line">  <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>UnpinPgImp</code> 方法，将 <code>pin_count_--</code>，如果变成 <code>0</code> 了需要 <code>SetEvictable</code>。</p>
+<p><code>FlushAllPgsImp</code> 方法遍历 <code>frame_id</code>，从 <code>page</code> 中得到 <code>page_id</code>，如果这一对键值对在 <code>page_table_</code> 中，说明是合法数据，需要 <code>Flush</code> 。</p>
+<p><code>DeletePgImp</code> 方法，需要考虑是否 <code>pin</code> 了，也就是 <code>evictable</code>，如果可以删，那么 <code>replacer_</code>、<code>free_list_</code>、<code>page_table_</code></p>
+<h3 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h3><p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221024233205570.png" alt="image-20221024233205570"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E8%AF%B4%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">实验说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Extendible-Hash-Table"><span class="toc-number">2.</span> <span class="toc-text">Extendible Hash Table</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LRU-K-Replacement-Policy"><span class="toc-number">3.</span> <span class="toc-text">LRU-K Replacement Policy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Buffer-Pool-Manager-Instance"><span class="toc-number">4.</span> <span class="toc-text">Buffer Pool Manager Instance</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">5.</span> <span class="toc-text">结果</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/fef8b573.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/fef8b573.html&text=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/fef8b573.html&title=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/fef8b573.html&is_video=false&description=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15445 - Project 1 - Buffer Pool Manager&body=Check out this article: https://ceyewan.github.io/p/fef8b573.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/fef8b573.html&title=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/fef8b573.html&title=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/fef8b573.html&title=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/fef8b573.html&title=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/fef8b573.html&name=CMU15445 - Project 1 - Buffer Pool Manager&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/fef8b573.html&t=CMU15445 - Project 1 - Buffer Pool Manager"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

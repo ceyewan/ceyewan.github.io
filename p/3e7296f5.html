@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="概述本实验是在数据库系统中实现一个索引。索引负责快速数据检索，而不必搜索数据库表中的每一行，为快速随机查找和高效访问有序记录提供了基础。 在这个 project 中需要实现 B+ 树动态索引结构。它是一个平衡的树，其中 internalpages 指导搜索，leafpages 包含实际的数据。因为树形结构是动态增长和收缩的，所以需要处理 split 和 merge 的逻辑。在这个实验中，我们主要需">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CMU15445 - Project 2 - B+Tree Index">
+<meta property="og:url" content="https://ceyewan.github.io/p/3e7296f5.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="概述本实验是在数据库系统中实现一个索引。索引负责快速数据检索，而不必搜索数据库表中的每一行，为快速随机查找和高效访问有序记录提供了基础。 在这个 project 中需要实现 B+ 树动态索引结构。它是一个平衡的树，其中 internalpages 指导搜索，leafpages 包含实际的数据。因为树形结构是动态增长和收缩的，所以需要处理 split 和 merge 的逻辑。在这个实验中，我们主要需">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230318195835436.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230318201446382.png">
+<meta property="article:published_time" content="2024-03-27T06:34:33.659Z">
+<meta property="article:modified_time" content="2024-03-27T06:34:56.788Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="CMU15445">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230318195835436.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>CMU15445 - Project 2 - B+Tree Index</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/d38b2590.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/fef8b573.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/3e7296f5.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/3e7296f5.html&text=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/3e7296f5.html&is_video=false&description=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15445 - Project 2 - B+Tree Index&body=Check out this article: https://ceyewan.github.io/p/3e7296f5.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/3e7296f5.html&name=CMU15445 - Project 2 - B+Tree Index&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/3e7296f5.html&t=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-1-B-Tree-Pages"><span class="toc-number">2.</span> <span class="toc-text">Task #1 - B+Tree Pages</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task2-B-Tree-Data-Structure"><span class="toc-number">3.</span> <span class="toc-text">Task2 B+Tree Data Structure</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-3-Index-Iterator"><span class="toc-number">4.</span> <span class="toc-text">Task #3 - Index Iterator</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-4-Concurrent-Index"><span class="toc-number">5.</span> <span class="toc-text">Task #4 - Concurrent Index</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">6.</span> <span class="toc-text">结果</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        CMU15445 - Project 2 - B+Tree Index
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-03-27T06:34:33.659Z" class="dt-published" itemprop="datePublished">2024-03-27</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/CMU15445/">CMU15445</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/CMU15445/" rel="tag">CMU15445</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>本实验是在数据库系统中实现一个索引。索引负责快速数据检索，而不必搜索数据库表中的每一行，为快速随机查找和高效访问有序记录提供了基础。</p>
+<p>在这个 project 中需要实现 <code>B+</code> 树动态索引结构。它是一个平衡的树，其中 <code>internalpages</code> 指导搜索，<code>leafpages</code> 包含实际的数据。因为树形结构是动态增长和收缩的，所以需要处理 <code>split</code> 和 <code>merge</code> 的逻辑。在这个实验中，我们主要需要实现 B+Tree 的插入、删除、查找这三种操作，迭代器和并发操作。</p>
+<h3 id="Task-1-B-Tree-Pages"><a href="#Task-1-B-Tree-Pages" class="headerlink" title="Task #1 - B+Tree Pages"></a>Task #1 - B+Tree Pages</h3><p>B+树有两种页，一种是内部页 <code>InternalPage</code>，还有一种是叶子页 <code>LeafPage</code>。其中页中数据全部都是 <code>k-v</code> 对，对于内部页来说 <code>v</code> 是子页的 <code>page_id</code>，对于叶子页来说 <code>v</code> 是 <code>RID</code>，是 B+ 树中存储的唯一的数据。</p>
+<p><code>LeafPage</code> 有 <code>m</code> 对 <code>k-v</code> 对，而 <code>InternalPage</code> 有 <code>n</code> 个 <code>k</code>， <code>n + 1</code> 个 <code>v</code>。其中 <code>array_[i].second</code> 子树中的元素 <code>rid</code> 满足 <code>array_[i].key &lt;= rid &lt; array_[i + 1].key</code> ，所以 <code>array_[0]</code> 没有 <code>key</code>。</p>
+<p><code>MappingType array_[1]</code> 是 <code>flexible array</code>，在为类分配空间时，除了已经使用的空间， <code>flexible array</code> 会自动填充剩下的空间。因此，它只能出现在类的最后一个成员。 </p>
+<p>由于数据在 page 中均为有序排列，在查找时，最好使用二分查找。</p>
+<h3 id="Task2-B-Tree-Data-Structure"><a href="#Task2-B-Tree-Data-Structure" class="headerlink" title="Task2 B+Tree Data Structure"></a>Task2 B+Tree Data Structure</h3><p><strong>Search</strong></p>
+<p>在 B+ 树中，递归的查找，找到 <code>key</code> 所在的 <code>leafpage</code>，并从 <code>page</code> 中二分查找到 <code>key</code>。 </p>
+<p>在实现中，对 <code>page</code> 的 <code>new</code>、<code>fetch</code>、<code>unpin</code> 等操作，均需要使用 Project 1 中实现 <code>BufferPoolManager</code> 来实现。 </p>
+<p><strong>Insert</strong></p>
+<p>前面的步骤和 <code>Search</code> 相同，找到 <code>key</code> 要插入的 <code>leafpage</code> 和 <code>index</code>。插入后，如果没满，结束。如果满了，<code>new</code> 一个新的 <code>page</code>，将一半数据转移到 <code>new page</code> 中，更新 <code>next_page_id</code> 用于维护 <code>Iterator</code>。获取 <code>parent page</code>，将 <code>new page</code> 插入 <code>parent page</code> 中，如果 <code>parent page</code> 满了。利用额外空间将数据插入后，调用分裂，递归的插入 <code>parent page</code> 的 <code>parent</code> 中。</p>
+<p>这里我们对 <code>leafpage</code> 和 <code>internalpage</code> 的处理是不同的，<code>leafpage</code> 满 <code>maxsize</code> 就调用分裂，也就是说 <code>leafpage</code> 的 <code>size</code> 最大为 <code>maxsize - 1</code>。而 <code>internalpage</code> 的 <code>size</code> 可以是 <code>maxsize</code>（因为如果不可以，<code>maxsize</code> 为 3 时调用分裂，一定会分裂出一个 <code>size</code> 为 1 的 <code>page</code>，这是不被允许的）。因此我们在向 <code>internalpage</code> 插入数据时，可能会溢出，需要额外空间辅助，在额外空间插入后调用分裂。</p>
+<p>注意插入可能导致递归分裂，一直到 <code>root page</code>，<code>root page</code> 分裂时需要一个 <code>new</code> 一个新的 <code>rootpage</code>。</p>
+<p><strong>Delete</strong></p>
+<p>前面的步骤和 <code>Search</code> 相同，找到 <code>key</code> 的 <code>leafpage</code> 和 <code>index</code>。删除后，如果够 <code>minsize</code> 就结束。如果不够，需要查找 <code>bother page</code>，如果可以和 <code>bother page</code> 合并，那么合并，合并后父页也需要调用删除。如果不能合并，那么说明 <code>bother page</code> 比 <code>minsize</code> 大，调用重新分配函数，从 <code>bother page</code> 中拿一个 <code>k-v</code> 对给 <code>page</code>。需要分类讨论 <code>bother page</code> 在 <code>page</code> 的前还是后。</p>
+<p>注意删除可能导致递归合并，一直到 <code>root page</code>，还需要考虑 <code>root page</code> 的最小值不受 <code>minsize</code> 约束。如果 <code>root page</code> 同时还是 <code>leafpage</code> 那么最小可以是 1 ，删除后需要 <code>delete page</code>。如果 <code>root page</code> 不是 <code>leafpage</code> 那么最小可以是 2，删除后为 1，无效 <code>internalpage</code>，需要删除，并将 <code>childpage</code> 设为 <code>rootpage</code>。</p>
+<p>实现难度较大，细节很多很多。</p>
+<h3 id="Task-3-Index-Iterator"><a href="#Task-3-Index-Iterator" class="headerlink" title="Task #3 - Index Iterator"></a>Task #3 - Index Iterator</h3><p>迭代器的实现比较简单。其实迭代器就是一个封装了一些方法的“指针”。<code>begin()</code> 我们使用 B+ 树的第一个 <code>key</code> 来构造即可；<code>begin(key)</code> 使用特定的 <code>key</code> 来构造；<code>end()</code> 使用最后一个 <code>key</code> 后一个来构造即可。也就是说，<code>Iterator</code> 由 <code>leafpage_id</code> 和 <code>index</code> 两个值决定。+<code>+</code> 运算只需要 <code>index++</code> 即可。如果到了最后一个 <code>index</code> 就通过 <code>next_page_id</code> 拿到后一个 <code>leafpage_id</code> 并将 <code>index</code> 设为 0。</p>
+<h3 id="Task-4-Concurrent-Index"><a href="#Task-4-Concurrent-Index" class="headerlink" title="Task #4 - Concurrent Index"></a>Task #4 - Concurrent Index</h3><p><code>latch crabbing</code> 的意思是，像螃蟹一样，移动一只脚，放下，移动另一只脚，再放下。先锁住 <code>parent page</code>，然后锁住 <code>child page</code>，在 <code>child page</code> 是安全的情况下，释放 <code>parent page</code>。</p>
+<p><strong>Search</strong></p>
+<p>像上面一样，不断操作，最终只拥有 <code>leafpage</code> 的锁。</p>
+<p><strong>Insert &amp; Delete</strong></p>
+<p>如果 <code>child page</code> 安全，就释放 <code>parent page</code> 的锁。安全的定义是，在插入时，<code>child page</code> 插入后不会分裂；在删除时，<code>child page</code> 删除后不会合并。就可以释放 <code>parent page</code> 的锁了。</p>
+<p>最终，<code>findleafpage</code> 会拿到一串锁，我们使用 <code>transaction</code> 来管理这些锁住的 <code>page</code>。在插入和删除时可以使用，最后统一释放。</p>
+<blockquote>
+<p>  优化方案之一：读锁和写锁的使用。</p>
+<p>  优化方案之二：乐观锁，我们假定不会触发合并或者分裂，Insert 和 Delete 像 Search 一样获得锁。最后发现会触发这些操作，就重来一次，按照上面讲的悲观锁。</p>
+</blockquote>
+<p>在线测试时，有一个测试案例一直过不了，于是我把 findleafpage 加了一把锁，可以通过。在 20 年的测试中，两种方案都能通过。在测试中，加大锁的方案速度不仅没慢，反而比不加锁更快，这就很迷惑了，可能是反而降低了锁冲突吧。</p>
+<h3 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h3><p><strong>Checkpoint 1</strong>：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230318195835436.png" alt="image-20230318195835436"></p>
+<p><strong>Checkpoint 2</strong>：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230318201446382.png" alt="image-20230318201446382"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-1-B-Tree-Pages"><span class="toc-number">2.</span> <span class="toc-text">Task #1 - B+Tree Pages</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task2-B-Tree-Data-Structure"><span class="toc-number">3.</span> <span class="toc-text">Task2 B+Tree Data Structure</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-3-Index-Iterator"><span class="toc-number">4.</span> <span class="toc-text">Task #3 - Index Iterator</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-4-Concurrent-Index"><span class="toc-number">5.</span> <span class="toc-text">Task #4 - Concurrent Index</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">6.</span> <span class="toc-text">结果</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/3e7296f5.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/3e7296f5.html&text=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/3e7296f5.html&is_video=false&description=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15445 - Project 2 - B+Tree Index&body=Check out this article: https://ceyewan.github.io/p/3e7296f5.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/3e7296f5.html&name=CMU15445 - Project 2 - B+Tree Index&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/3e7296f5.html&t=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="环境搭建 实验说明：   https:&#x2F;&#x2F;15445.courses.cs.cmu.edu&#x2F;fall2022&#x2F;project0&#x2F;   下载源代码：  git clone https:&#x2F;&#x2F;github.com&#x2F;cmu-db&#x2F;bustub.git   安装依赖  可以在本地安装，那么只需要执行 sudo .&#x2F;build_support&#x2F;packages.sh 即可（要求是 ubuntu 系统）；同时我">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CMU15445 - Project 0 - C++ Primer">
+<meta property="og:url" content="https://ceyewan.github.io/p/6f3503f7.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="环境搭建 实验说明：   https:&#x2F;&#x2F;15445.courses.cs.cmu.edu&#x2F;fall2022&#x2F;project0&#x2F;   下载源代码：  git clone https:&#x2F;&#x2F;github.com&#x2F;cmu-db&#x2F;bustub.git   安装依赖  可以在本地安装，那么只需要执行 sudo .&#x2F;build_support&#x2F;packages.sh 即可（要求是 ubuntu 系统）；同时我">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/graph.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221022001511026.png">
+<meta property="article:published_time" content="2024-03-27T06:34:08.619Z">
+<meta property="article:modified_time" content="2024-03-27T06:34:26.858Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="CMU15445">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/graph.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>CMU15445 - Project 0 - C++ Primer</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/fef8b573.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/f78f4144.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/6f3503f7.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/6f3503f7.html&text=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/6f3503f7.html&title=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/6f3503f7.html&is_video=false&description=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15445 - Project 0 - C++ Primer&body=Check out this article: https://ceyewan.github.io/p/6f3503f7.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/6f3503f7.html&title=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/6f3503f7.html&title=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/6f3503f7.html&title=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/6f3503f7.html&title=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/6f3503f7.html&name=CMU15445 - Project 0 - C++ Primer&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/6f3503f7.html&t=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-number">1.</span> <span class="toc-text">环境搭建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C-%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">2.</span> <span class="toc-text">C++ 前置知识</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Insert-%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">Insert 方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Remove-%E6%96%B9%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">Remove 方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GetValue-%E6%96%B9%E6%B3%95"><span class="toc-number">5.</span> <span class="toc-text">GetValue 方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">6.</span> <span class="toc-text">结果</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        CMU15445 - Project 0 - C++ Primer
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-03-27T06:34:08.619Z" class="dt-published" itemprop="datePublished">2024-03-27</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/CMU15445/">CMU15445</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/CMU15445/" rel="tag">CMU15445</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h3 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h3><ol>
+<li>实验说明：</li>
+</ol>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/fall2022/project0/">https://15445.courses.cs.cmu.edu/fall2022/project0/</a></p>
+</blockquote>
+<ol start="2">
+<li>下载源代码：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone https://github.com/cmu-db/bustub.git</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>安装依赖</li>
+</ol>
+<p>可以在本地安装，那么只需要执行 <code>sudo ./build_support/packages.sh</code> 即可（要求是 <code>ubuntu</code> 系统）；同时我们也注意到，提供了 <code>Dockerfile</code> 文件，因此，我们可以直接使用 <code>docker</code> 来配置环境，执行下面几条命令，然后就能在 <code>vscode</code> 中使用了。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">docker build . -t bustub</span><br><span class="line">docker create -t -i --name bustub -v $(pwd):/bustub bustub bash</span><br></pre></td></tr></table></figure>
+
+<p>进入容器（或者在本地安装完依赖）后，编译代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mkdir build</span><br><span class="line">cd build</span><br><span class="line">cmake ..</span><br><span class="line">make [-j 8] # 指定线程</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>项目说明</li>
+</ol>
+<blockquote>
+<p>这个实验要求我们实现一个并发 <code>trie</code> 树，主要实现插入、删除和查找这三个算法。可以参考 <code>leetcode</code> 的 <code>trie</code> 树（前缀树）的题。数据在 <code>trie</code> 树中以 <code>key-value</code> 键值对形式存储，键是非空可变长度的字符串。例如，考虑在 <code>trie</code> 中插入 <code>kv</code> 对 <code>(&quot;ab&quot;, 1)</code> 和 <code>(&quot;ac&quot;, &quot;val&quot;)</code>，树的结构如下：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/graph.png" alt="Trie example"></p>
+</blockquote>
+<h3 id="C-前置知识"><a href="#C-前置知识" class="headerlink" title="C++ 前置知识"></a>C++ 前置知识</h3><p>这个 project 主要目的就是测试 C++ 水平，所以语言和代码贴的比较多。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">explicit</span> <span class="title">TrieNode</span><span class="params">(<span class="type">char</span> key_char)</span> : key_char_(key_char) &#123;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>explicit</code> 这个关键字用来说明这个类的构造不支持隐式类型转换。举个例子吧：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    std::string name;</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">Person</span><span class="params">(<span class="type">const</span> std::string &amp;name_)</span> : name(name_) &#123;</span>&#125;</span><br><span class="line">    <span class="built_in">Person</span>(<span class="type">int</span> age_) : <span class="built_in">age</span>(age_) &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Person a = <span class="number">22</span>; <span class="comment">// 隐式构造，存在这样的构造函数</span></span><br><span class="line"><span class="comment">// Person b = std::string(&quot;ceyewan&quot;); wrong，明确了不能使用隐式构造</span></span><br><span class="line"><span class="function">Person <span class="title">b</span><span class="params">(<span class="string">&quot;ceyewan&quot;</span>)</span></span>; <span class="comment">// 只能这样构造</span></span><br><span class="line">std::cout &lt;&lt; a.age &lt;&lt; <span class="string">&quot;\n&quot;</span> &lt;&lt; b.name &lt;&lt; std::endl;</span><br></pre></td></tr></table></figure>
+
+<p>同样，这样初始化不仅代码风格简单，而且可以避免性能浪费，如果不这样的话，<code>“ceyewan“</code>（<code>const char*</code> 类型）会调用 <code>string</code> 的构造函数得到 <code>name_</code>，然后再次调用 <code>string</code> 的构造函数得到 <code>name</code>。</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">TrieNode</span>(TrieNode &amp;&amp;other_trie_node) <span class="keyword">noexcept</span> &#123;</span><br><span class="line">    <span class="keyword">this</span>-&gt;key_char_ = other_trie_node.key_char_;</span><br><span class="line">    <span class="keyword">this</span>-&gt;is_end_ = other_trie_node.is_end_;</span><br><span class="line">    <span class="keyword">this</span>-&gt;children_ = std::<span class="built_in">move</span>(other_trie_node.children_);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>noexcept</code> 简单的理解成阻止抛出异常。</p>
+<p>这里，我们使用了右值引用，因为 <code>children_</code> 中存储的是 <code>unique_ptr</code> 不能使用拷贝构造，只能使用移动构造。<code>move</code> 函数的作用就是将参数强制转换为右值，用于移动。</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">IsEndNode</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> is_end_; &#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>const</code> 表示类中的这个函数不能修改类，可以理解为只读属性。我们可以重载函数，当 <code>const Entity</code> 就会调用有 <code>const</code> 的，普通的 <code>Entity</code> 对象调用没用 <code>const</code> 的。如果我们想在 <code>const</code> 的方法中修改类的某个成员，需要把这个类成员标记为 <code>mutable</code> 。</p>
+<p>优点在于安全，保证 <code>const Entity</code> 就一定是 <code>const</code> 的。</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">std::unique_ptr&lt;TrieNode&gt; *<span class="title">InsertChildNode</span><span class="params">(<span class="type">char</span> key_char, std::unique_ptr&lt;TrieNode&gt; &amp;&amp;child)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (children_.<span class="built_in">count</span>(key_char) &gt; <span class="number">0</span> || child-&gt;<span class="built_in">GetKeyChar</span>() != key_char) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    children_[key_char] = std::<span class="built_in">move</span>(child);</span><br><span class="line">    <span class="keyword">return</span> &amp;children_[key_char];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>std::unique_ptr&lt;TrieNode&gt;</code> 表示 <code>TrieNode</code> 类型的智能独占指针，所以返回的时候只能返回指向这个指针的指针，如果返回它，那么指针本身就被销毁了。</p>
+<p><code>children_[key_char] = std::move(child);</code> 使用 <code>move</code> 函数来进行移动构造，<code>child</code> 作为一个右值引用，执行完这个语句就消亡了。独占指针，只有一份！！！</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">TrieNodeWithValue</span>(TrieNode &amp;&amp;trieNode, T value) : <span class="built_in">TrieNode</span>(std::forward&lt;TrieNode&gt;(trieNode)) &#123;</span><br><span class="line">    value_ = value;</span><br><span class="line">    is_end_ = <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>TrieNode(std::forward&lt;TrieNode&gt;(trieNode))</code> 是 <code>TrieNode</code> 的移动构造函数，上面写了。</p>
+<p><code>std::forward&lt;type&gt;()</code> 和 <code>move</code> 的差不多，但是有区别，简单来说，遇到右值就转发右值并启动移动语义，遇到左值就转发左值启动复制语义。</p>
+</blockquote>
+<h3 id="Insert-方法"><a href="#Insert-方法" class="headerlink" title="Insert 方法"></a>Insert 方法</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Insert</span><span class="params">(<span class="type">const</span> std::string &amp;key, T value)</span> </span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">size_t</span> key_size = key.<span class="built_in">size</span>();</span><br><span class="line">    <span class="keyword">if</span> (key_size == <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    latch_.<span class="built_in">WLock</span>();</span><br><span class="line">    <span class="keyword">auto</span> curr = &amp;root_; <span class="comment">// unique_ptr 我们只能使用它的指针</span></span><br><span class="line">    std::unique_ptr&lt;TrieNode&gt; *parent;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; key_size; i++) &#123;</span><br><span class="line">      <span class="comment">// 如果没有这个字符，就插入这个字符</span></span><br><span class="line">      <span class="comment">// curr-&gt;get() 等价于　(*curr).get() </span></span><br><span class="line">      <span class="keyword">if</span> (curr-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">GetChildNode</span>(key[i]) == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">        curr-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">InsertChildNode</span>(key[i], std::<span class="built_in">make_unique</span>&lt;TrieNode&gt;(key[i]));</span><br><span class="line">      &#125;</span><br><span class="line">      parent = curr;</span><br><span class="line">      curr = curr-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">GetChildNode</span>(key[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (curr-&gt;<span class="built_in">get</span>()-&gt;<span class="built_in">IsEndNode</span>()) &#123;</span><br><span class="line">      latch_.<span class="built_in">WUnlock</span>();</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// **curr 就是 TrieNode，然后强转右值引用，构造 TrieNodeWithValue </span></span><br><span class="line">    <span class="comment">// 并通过 make_unique 方法返回智能指针</span></span><br><span class="line">    <span class="keyword">auto</span> new_node = std::make_unique&lt;TrieNodeWithValue&lt;T&gt;&gt;(std::<span class="built_in">move</span>(**curr), value);</span><br><span class="line">    (*parent)-&gt;<span class="built_in">RemoveChildNode</span>(key[key_size - <span class="number">1</span>]);</span><br><span class="line">    <span class="comment">// 这里插入的实际上是 TrieNodeWithValue</span></span><br><span class="line">    (*parent)-&gt;<span class="built_in">InsertChildNode</span>(key[key_size - <span class="number">1</span>], std::<span class="built_in">move</span>(new_node)); </span><br><span class="line">    latch_.<span class="built_in">WUnlock</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>遍历 <code>key</code> 寻找路径，如果缺少了就插入就可。到了最后一个节点，如果是 <code>EndNode</code> 说明重复插入了，直接返回。否则，删除原来的 <code>node</code>，插入新的 <code>node</code>，插入的 <code>node</code> 实际上是 <code>TrieNodeWithValue&lt;T&gt;</code> 类型。</p>
+<h3 id="Remove-方法"><a href="#Remove-方法" class="headerlink" title="Remove 方法"></a>Remove 方法</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">RemoveHelper</span><span class="params">(std::unique_ptr&lt;TrieNode&gt; *curr, <span class="type">size_t</span> i, <span class="type">const</span> std::string &amp;key, <span class="type">bool</span> *success)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 最后一个节点，SetEndNode(false)，success 设为 true 表示成功，返回这个 node 还有子节点或者是 EedNode 吗，这用来给父节点判断这个节点能不能删除</span></span><br><span class="line">    <span class="keyword">if</span> (i == key.<span class="built_in">size</span>()) &#123;</span><br><span class="line">      *success = <span class="literal">true</span>;</span><br><span class="line">      (*curr)-&gt;<span class="built_in">SetEndNode</span>(<span class="literal">false</span>);</span><br><span class="line">      <span class="keyword">return</span> !(*curr)-&gt;<span class="built_in">HasChildren</span>() &amp;&amp; !(*curr)-&gt;<span class="built_in">IsEndNode</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 路线走不通</span></span><br><span class="line">    <span class="keyword">if</span> ((*curr)-&gt;<span class="built_in">GetChildNode</span>(key[i]) == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">      *success = <span class="literal">false</span>;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">bool</span> can_remove = <span class="built_in">RemoveHelper</span>((*curr)-&gt;<span class="built_in">GetChildNode</span>(key[i]), i + <span class="number">1</span>, key, success);</span><br><span class="line">    <span class="keyword">if</span> (!*success) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 子节点可以删除，那么就删除子节点</span></span><br><span class="line">    <span class="keyword">if</span> (can_remove) &#123;</span><br><span class="line">      (*curr)-&gt;<span class="built_in">RemoveChildNode</span>(key[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> !(*curr)-&gt;<span class="built_in">HasChildren</span>() &amp;&amp; !(*curr)-&gt;<span class="built_in">IsEndNode</span>();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">Remove</span><span class="params">(<span class="type">const</span> std::string &amp;key)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (key.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">auto</span> curr = &amp;root_;</span><br><span class="line">    <span class="type">bool</span> success;</span><br><span class="line">    latch_.<span class="built_in">WLock</span>();</span><br><span class="line">    <span class="built_in">RemoveHelper</span>(curr, <span class="number">0</span>, key, &amp;success);</span><br><span class="line">    latch_.<span class="built_in">WUnlock</span>();</span><br><span class="line">    <span class="keyword">return</span> success;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>按照意思就是我们要递归的删除节点，既然需要递归，我们就要一个 <code>helper</code> 函数，当然了，直接写个栈充当函数栈也行。<code>success</code> 用来说明删除是否成功，而 <code>remove_helper</code> 函数的返回值用来告诉 <code>parent</code> 这个 <code>child</code> 是否可以 <code>remove</code>。</p>
+<h3 id="GetValue-方法"><a href="#GetValue-方法" class="headerlink" title="GetValue 方法"></a>GetValue 方法</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">  <span class="function">T <span class="title">GetValue</span><span class="params">(<span class="type">const</span> std::string &amp;key, <span class="type">bool</span> *success)</span> </span>&#123;</span><br><span class="line">    latch_.<span class="built_in">RLock</span>();</span><br><span class="line">    <span class="keyword">auto</span> curr = &amp;root_;</span><br><span class="line">    <span class="type">size_t</span> key_size = key.<span class="built_in">size</span>();</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; key_size; i++) &#123;</span><br><span class="line">      <span class="comment">// 路线走不通</span></span><br><span class="line">      <span class="keyword">if</span> ((*curr)-&gt;<span class="built_in">GetChildNode</span>(key[i]) == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">        *success = <span class="literal">false</span>;</span><br><span class="line">        latch_.<span class="built_in">RUnlock</span>();</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">T</span>();</span><br><span class="line">      &#125;</span><br><span class="line">      curr = (*curr)-&gt;<span class="built_in">GetChildNode</span>(key[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!(*curr)-&gt;<span class="built_in">IsEndNode</span>()) &#123;</span><br><span class="line">      *success = <span class="literal">false</span>;</span><br><span class="line">      latch_.<span class="built_in">RUnlock</span>();</span><br><span class="line">      <span class="keyword">return</span> <span class="built_in">T</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// curr-&gt;get() 会得到一个指向 node 的普通指针，dynamic_cast 转 TrieNodeWithValue&lt;T&gt; 指针</span></span><br><span class="line">    <span class="comment">// 如果 T 不同也不能转成功哦</span></span><br><span class="line">    <span class="comment">// dynamic_cast 只支持下转上（继承关系），但是这里为什么能转成功呢？</span></span><br><span class="line">    <span class="comment">// 因为 curr-&gt;get() 指向的指针看起来是 TrieNode,但是因为是 EndNode 所以实际上是 TrieNodeWithValue</span></span><br><span class="line">    <span class="comment">// dynamic_cast 借助 RTTI 信息能检测出来，所以转换会成功</span></span><br><span class="line">    <span class="keyword">auto</span> tmp_node = <span class="keyword">dynamic_cast</span>&lt;TrieNodeWithValue&lt;T&gt; *&gt;(curr-&gt;<span class="built_in">get</span>());</span><br><span class="line">    <span class="keyword">if</span> (tmp_node != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">      *success = <span class="literal">true</span>;</span><br><span class="line">      latch_.<span class="built_in">RUnlock</span>();</span><br><span class="line">      <span class="keyword">return</span> tmp_node-&gt;<span class="built_in">GetValue</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    *success = <span class="literal">false</span>;</span><br><span class="line">    latch_.<span class="built_in">RUnlock</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">T</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h3><p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221022001511026.png" alt="image-20221022001511026"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-number">1.</span> <span class="toc-text">环境搭建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C-%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">2.</span> <span class="toc-text">C++ 前置知识</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Insert-%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">Insert 方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Remove-%E6%96%B9%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">Remove 方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#GetValue-%E6%96%B9%E6%B3%95"><span class="toc-number">5.</span> <span class="toc-text">GetValue 方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-number">6.</span> <span class="toc-text">结果</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/6f3503f7.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/6f3503f7.html&text=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/6f3503f7.html&title=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/6f3503f7.html&is_video=false&description=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15445 - Project 0 - C++ Primer&body=Check out this article: https://ceyewan.github.io/p/6f3503f7.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/6f3503f7.html&title=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/6f3503f7.html&title=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/6f3503f7.html&title=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/6f3503f7.html&title=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/6f3503f7.html&name=CMU15445 - Project 0 - C++ Primer&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/6f3503f7.html&t=CMU15445 - Project 0 - C++ Primer"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
