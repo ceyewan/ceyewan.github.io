@@ -1,5 +1,5 @@
 ---
-title: CMU15445 - Project 0 - C++ Primer
+title: CMU15445-Project0-C++-Primer
 categories:
   - CMU15445
 tags:

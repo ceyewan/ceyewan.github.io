@@ -1,5 +1,5 @@
 ---
-title: CMU15445 - Project 1 - Buffer Pool Manager
+title: CMU15445-Project1-Buffer-Pool-Manager
 categories:
   - CMU15445
 tags:

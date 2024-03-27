@@ -1,5 +1,5 @@
 ---
-title: CMU15445 - Project 4 - Concurrency Control
+title: CMU15445-Project4-Concurrency-Control
 categories:
   - CMU15445
 tags:

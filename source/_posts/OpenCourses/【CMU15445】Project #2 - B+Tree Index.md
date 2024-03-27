@@ -1,5 +1,5 @@
 ---
-title: CMU15445 - Project 2 - B+Tree Index
+title: CMU15445-Project2-B+Tree-Index
 categories:
   - CMU15445
 tags:

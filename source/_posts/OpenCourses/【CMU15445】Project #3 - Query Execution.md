@@ -1,5 +1,5 @@
 ---
-title: CMU15445 - Project 3 Query Execution
+title: CMU15445-Project3-Query-Execution
 categories:
   - CMU15445
 tags:
