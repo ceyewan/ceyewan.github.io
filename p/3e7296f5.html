@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
     <meta name="description" content="概述本实验是在数据库系统中实现一个索引。索引负责快速数据检索，而不必搜索数据库表中的每一行，为快速随机查找和高效访问有序记录提供了基础。 在这个 project 中需要实现 B+ 树动态索引结构。它是一个平衡的树，其中 internalpages 指导搜索，leafpages 包含实际的数据。因为树形结构是动态增长和收缩的，所以需要处理 split 和 merge 的逻辑。在这个实验中，我们主要需">
 <meta property="og:type" content="article">
-<meta property="og:title" content="CMU15445 - Project 2 - B+Tree Index">
+<meta property="og:title" content="CMU15445-Project2-B+Tree-Index">
 <meta property="og:url" content="https://ceyewan.github.io/p/3e7296f5.html">
 <meta property="og:site_name" content="Ceyewan&#39;s Blog">
 <meta property="og:description" content="概述本实验是在数据库系统中实现一个索引。索引负责快速数据检索，而不必搜索数据库表中的每一行，为快速随机查找和高效访问有序记录提供了基础。 在这个 project 中需要实现 B+ 树动态索引结构。它是一个平衡的树，其中 internalpages 指导搜索，leafpages 包含实际的数据。因为树形结构是动态增长和收缩的，所以需要处理 split 和 merge 的逻辑。在这个实验中，我们主要需">
@@ -16,7 +16,7 @@
 <meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230318195835436.png">
 <meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230318201446382.png">
 <meta property="article:published_time" content="2024-03-27T06:34:33.659Z">
-<meta property="article:modified_time" content="2024-03-27T06:34:56.788Z">
+<meta property="article:modified_time" content="2024-03-27T06:40:16.309Z">
 <meta property="article:author" content="ceyewan">
 <meta property="article:tag" content="CMU15445">
 <meta name="twitter:card" content="summary">
@@ -40,7 +40,7 @@
       
     
     <!-- title -->
-    <title>CMU15445 - Project 2 - B+Tree Index</title>
+    <title>CMU15445-Project2-B+Tree-Index</title>
     <!-- async scripts -->
     <!-- Google Analytics -->
 
@@ -116,16 +116,16 @@
     <div id="share" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/3e7296f5.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/3e7296f5.html&text=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/3e7296f5.html&is_video=false&description=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=CMU15445 - Project 2 - B+Tree Index&body=Check out this article: https://ceyewan.github.io/p/3e7296f5.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/3e7296f5.html&name=CMU15445 - Project 2 - B+Tree Index&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/3e7296f5.html&t=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/3e7296f5.html&text=CMU15445-Project2-B+Tree-Index"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445-Project2-B+Tree-Index"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/3e7296f5.html&is_video=false&description=CMU15445-Project2-B+Tree-Index"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15445-Project2-B+Tree-Index&body=Check out this article: https://ceyewan.github.io/p/3e7296f5.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445-Project2-B+Tree-Index"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445-Project2-B+Tree-Index"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445-Project2-B+Tree-Index"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445-Project2-B+Tree-Index"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/3e7296f5.html&name=CMU15445-Project2-B+Tree-Index&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/3e7296f5.html&t=CMU15445-Project2-B+Tree-Index"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -145,7 +145,7 @@
   <header>
     
     <h1 class="posttitle p-name" itemprop="name headline">
-        CMU15445 - Project 2 - B+Tree Index
+        CMU15445-Project2-B+Tree-Index
     </h1>
 
 
@@ -253,16 +253,16 @@
     <div id="share-footer" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/3e7296f5.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/3e7296f5.html&text=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/3e7296f5.html&is_video=false&description=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=CMU15445 - Project 2 - B+Tree Index&body=Check out this article: https://ceyewan.github.io/p/3e7296f5.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/3e7296f5.html&name=CMU15445 - Project 2 - B+Tree Index&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/3e7296f5.html&t=CMU15445 - Project 2 - B+Tree Index"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/3e7296f5.html&text=CMU15445-Project2-B+Tree-Index"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445-Project2-B+Tree-Index"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/3e7296f5.html&is_video=false&description=CMU15445-Project2-B+Tree-Index"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CMU15445-Project2-B+Tree-Index&body=Check out this article: https://ceyewan.github.io/p/3e7296f5.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445-Project2-B+Tree-Index"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445-Project2-B+Tree-Index"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445-Project2-B+Tree-Index"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/3e7296f5.html&title=CMU15445-Project2-B+Tree-Index"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/3e7296f5.html&name=CMU15445-Project2-B+Tree-Index&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/3e7296f5.html&t=CMU15445-Project2-B+Tree-Index"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
