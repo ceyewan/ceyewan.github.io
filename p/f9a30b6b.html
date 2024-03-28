@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Manipulating Environment Variables我们可以使用 printenv 或者 env 这两个命令查看环境变量，也可以使用 printenv xxx 或者 env | grep xxx 查看特定的环境变量。 我们也能使用 export 或者 unset 这两个命令来设置或者 unset 环境变量。 Passing Environment Variables from Pa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Environment-Variable-and-Set-UID-Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/f9a30b6b.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="Manipulating Environment Variables我们可以使用 printenv 或者 env 这两个命令查看环境变量，也可以使用 printenv xxx 或者 env | grep xxx 查看特定的环境变量。 我们也能使用 export 或者 unset 这两个命令来设置或者 unset 环境变量。 Passing Environment Variables from Pa">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221104235053444.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221104235644117.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105000937101.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105001337944.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105003828483.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105010124705.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105010720561.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105012801367.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105014621221.png">
+<meta property="article:published_time" content="2022-11-04T17:54:28.000Z">
+<meta property="article:modified_time" content="2024-03-28T16:22:46.284Z">
+<meta property="article:author" content="ceyewan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221104235053444.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Environment-Variable-and-Set-UID-Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/826ab436.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/4a1a11d9.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/f9a30b6b.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/f9a30b6b.html&text=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/f9a30b6b.html&title=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/f9a30b6b.html&is_video=false&description=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Environment-Variable-and-Set-UID-Lab&body=Check out this article: https://ceyewan.github.io/p/f9a30b6b.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/f9a30b6b.html&title=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/f9a30b6b.html&title=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/f9a30b6b.html&title=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/f9a30b6b.html&title=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/f9a30b6b.html&name=Environment-Variable-and-Set-UID-Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/f9a30b6b.html&t=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Manipulating-Environment-Variables"><span class="toc-number">1.</span> <span class="toc-text">Manipulating Environment Variables</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Passing-Environment-Variables-from-Parent-Process-to-Child-Process"><span class="toc-number">2.</span> <span class="toc-text">Passing Environment Variables from Parent Process to Child Process</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Environment-Variables-and-execve"><span class="toc-number">3.</span> <span class="toc-text">Environment Variables and execve()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Environment-Variables-and-system"><span class="toc-number">4.</span> <span class="toc-text">Environment Variables and system()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Environment-Variable-and-Set-UID-Programs"><span class="toc-number">5.</span> <span class="toc-text">Environment Variable and Set-UID Programs</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-PATH-Environment-Variable-and-Set-UID-Programs"><span class="toc-number">6.</span> <span class="toc-text">The PATH Environment Variable and Set-UID Programs</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-LD-PRELOAD-Environment-Variable-and-Set-UID-Programs"><span class="toc-number">7.</span> <span class="toc-text">The LD_PRELOAD Environment Variable and Set-UID Programs</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Invoking-External-Programs-Using-system-versus-execve"><span class="toc-number">8.</span> <span class="toc-text">Invoking External Programs Using system() versus execve()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Capability-Leaking"><span class="toc-number">9.</span> <span class="toc-text">Capability Leaking</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Environment-Variable-and-Set-UID-Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-04T17:54:28.000Z" class="dt-published" itemprop="datePublished">2022-11-05</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-SoftwareSecurity/">SeedLabs/SoftwareSecurity</a>
+    </div>
+
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Manipulating-Environment-Variables"><a href="#Manipulating-Environment-Variables" class="headerlink" title="Manipulating Environment Variables"></a>Manipulating Environment Variables</h2><p>我们可以使用 <code>printenv</code> 或者 <code>env</code> 这两个命令查看环境变量，也可以使用 <code>printenv xxx</code> 或者 <code>env | grep xxx</code> 查看特定的环境变量。</p>
+<p>我们也能使用 <code>export</code> 或者 <code>unset</code> 这两个命令来设置或者 <code>unset</code> 环境变量。</p>
+<h2 id="Passing-Environment-Variables-from-Parent-Process-to-Child-Process"><a href="#Passing-Environment-Variables-from-Parent-Process-to-Child-Process" class="headerlink" title="Passing Environment Variables from Parent Process to Child Process"></a>Passing Environment Variables from Parent Process to Child Process</h2><p>我们编写程序如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// filename : myprintenv.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="type">char</span> **environ;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">printenv</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (environ[i] != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, environ[i]);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">pid_t</span> childPid;</span><br><span class="line">    <span class="keyword">switch</span> (childPid = fork()) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="number">0</span>: <span class="comment">/* child process */</span></span><br><span class="line">            <span class="comment">// printenv();</span></span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">default</span>: <span class="comment">/* parent process */</span></span><br><span class="line">            printenv();</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译后使用 <code>./a.out &gt; parent.txt</code> 将父进程的环境变量保存到文件中，修改代码输出子进程的环境变量，编译后执行 <code>./a.out &gt; child.txt</code> 命令，最后使用 <code>diff child.txt parent.txt</code> 比较两个文件，没有输出信息，说明父子进程的环境变量完全相同，子进程完全继承父进程的环境变量。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221104235053444.png" alt="image-20221104235053444"></p>
+<h2 id="Environment-Variables-and-execve"><a href="#Environment-Variables-and-execve" class="headerlink" title="Environment Variables and execve()"></a>Environment Variables and execve()</h2><p>编写程序如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// filename : myenv.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="type">char</span> **environ;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">char</span> *argv[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    argv[<span class="number">0</span>] = <span class="string">&quot;/usr/bin/env&quot;</span>;</span><br><span class="line">    argv[<span class="number">1</span>] = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// execve(&quot;/usr/bin/env&quot;, argv, environ);</span></span><br><span class="line">	execve(<span class="string">&quot;/usr/bin/env&quot;</span>, argv, <span class="literal">NULL</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里使用了 <code>execve</code> 系统调用执行了 <code>env</code> 命令，编译执行后没有输出；我们将第三个参数修改为 <code>environ</code> 再次编译执行，输出了环境变量。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221104235644117.png" alt="image-20221104235644117"></p>
+<p>这说明了 <code>execve</code> 系统调用可以通过第三个参数来指定是否继承父进程的环境变量。并且 <code>execve</code> 永不返回。</p>
+<h2 id="Environment-Variables-and-system"><a href="#Environment-Variables-and-system" class="headerlink" title="Environment Variables and system()"></a>Environment Variables and system()</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    system(<span class="string">&quot;/usr/bin/env&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译执行之，可以看到它输出了环境变量，也就是说 <code>system</code> 环境变量默认继承环境变量。<code>system()</code> 会调用 <code>fork()</code> 产生子进程，由子进程来调用 <code>/bin/sh-c string</code> 来执行参数 <code>string</code> 字符串所代表的命令，此命令执行完后随即返回原调用的进程。</p>
+<h2 id="Environment-Variable-and-Set-UID-Programs"><a href="#Environment-Variable-and-Set-UID-Programs" class="headerlink" title="Environment Variable and Set-UID Programs"></a>Environment Variable and Set-UID Programs</h2><p>我们编写一个打印当前进程环境变量的程序，并修改之为 <code>Set-UID</code> 程序，</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="keyword">extern</span> <span class="type">char</span> **environ;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (environ[i] != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, environ[i]);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105000937101.png" alt="image-20221105000937101"></p>
+<p>其中 <code>4755</code> 中的 4 就是说明它是一个特权程序。</p>
+<p>然后，我们在环境变量中添加一条自定义的数据，<code>export MY_NAME=ceyewan</code> 然后执行特权程序：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105001337944.png" alt="image-20221105001337944"></p>
+<p>结果如上，这说明特权程序会使用当前用户的环境变量，那么这也就意味着给了用户使坏的机会。</p>
+<h2 id="The-PATH-Environment-Variable-and-Set-UID-Programs"><a href="#The-PATH-Environment-Variable-and-Set-UID-Programs" class="headerlink" title="The PATH Environment Variable and Set-UID Programs"></a>The PATH Environment Variable and Set-UID Programs</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123; system(<span class="string">&quot;ls&quot;</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看上面这个小程序，其实就是执行 <code>ls</code> 命令，我们将这个程序设为一个特权程序，然后呢？</p>
+<p>随便写一个小代码，比如我写的就这一行 <code>printf(&quot;I am the bad ls!\n&quot;);</code> 并将其编译为一个叫做 <code>ls</code> 的可执行文件。最后我们使用 <code>export PATH=$pwd:$PATH</code> 将当前目录加入到环境目录中。</p>
+<p>这个时候，我们执行上面这个代码，它调用的 <code>ls</code> 会是哪个？实验一下看看就知道了。主要就是因为这里使用的<strong>不是绝对路径</strong>，并且还是 <code>system</code> 这种<strong>直接继承环境变量的不安全的系统调用</strong>。导致查找的时候先查找到了我们写的恶意程序。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105003828483.png" alt="image-20221105003828483"></p>
+<blockquote>
+<p>在 <code>Ubuntu</code> 中 <code>system(cmd)</code> 会调用 <code>/bin/sh</code> 来执行 <code>cmd</code>，而 <code>/bin/sh</code> 有防御机制，导致实验不成功。可以使用 <code>sudo ln -sf /bin/zsh /bin/sh</code> 将 <code>sh</code> 链接到 <code>zsh</code> 上，而 <code>zsh</code> 是不安全的。 </p>
+</blockquote>
+<h2 id="The-LD-PRELOAD-Environment-Variable-and-Set-UID-Programs"><a href="#The-LD-PRELOAD-Environment-Variable-and-Set-UID-Programs" class="headerlink" title="The LD_PRELOAD Environment Variable and Set-UID Programs"></a>The LD_PRELOAD Environment Variable and Set-UID Programs</h2><p>首先我们写一个 <code>sleep</code> 恶意代码，</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">sleep</span><span class="params">(<span class="type">int</span> t)</span> &#123; <span class="built_in">printf</span>(<span class="string">&quot;I am the bad sleeping\n&quot;</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<p>并将其编译为一个动态链接库，最后，将我们的链接库加入到 <code>LD_PRELOAD</code> 中，<code>preload</code> 优先加载的意思嘛。</p>
+<p>编写代码如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123; sleep(<span class="number">1</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译执行后的结果竟然是：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105010124705.png" alt="image-20221105010124705"></p>
+<p>我们可以看到，普通程序和特权程序相同的代码居然执行结果是不同的，为什么呢？我也不知道。不过肯定是可以知道的，将代码修改为输出环境变量，就可以看到<strong>特权程序没有这个环境变量</strong>。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105010720561.png" alt="image-20221105010720561"></p>
+<h2 id="Invoking-External-Programs-Using-system-versus-execve"><a href="#Invoking-External-Programs-Using-system-versus-execve" class="headerlink" title="Invoking External Programs Using system() versus execve()"></a>Invoking External Programs Using system() versus execve()</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line">    <span class="type">char</span> *v[<span class="number">3</span>];</span><br><span class="line">    <span class="type">char</span> *command;</span><br><span class="line">    <span class="keyword">if</span> (argc &lt; <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Please type a file name.\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    v[<span class="number">0</span>] = <span class="string">&quot;/bin/cat&quot;</span>;</span><br><span class="line">    v[<span class="number">1</span>] = argv[<span class="number">1</span>];</span><br><span class="line">    v[<span class="number">2</span>] = <span class="literal">NULL</span>;</span><br><span class="line">    command = <span class="built_in">malloc</span>(<span class="built_in">strlen</span>(v[<span class="number">0</span>]) + <span class="built_in">strlen</span>(v[<span class="number">1</span>]) + <span class="number">2</span>);</span><br><span class="line">    <span class="built_in">sprintf</span>(command, <span class="string">&quot;%s %s&quot;</span>, v[<span class="number">0</span>], v[<span class="number">1</span>]);</span><br><span class="line">    <span class="comment">// Use only one of the followings.</span></span><br><span class="line">    system(command);</span><br><span class="line">    <span class="comment">// execve(v[0], v, NULL);</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>比如系统提供一个如上逻辑的特权程序给我们，保证我们只有查看的权限，没有执行权限。但是能搞乱的吗？</p>
+<p>能的，比如我们传参为 <code>filename &amp;&amp; rm filename</code>，或者为 <code>filename &amp;&amp; xxx filename</code> 然后 <code>xxx</code> 是我们写的恶意代码，并且将路径加入到 <code>PATH</code> 中。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105012801367.png" alt="image-20221105012801367"></p>
+<p>强制删除文件并且不抛出提醒，删的了无痕迹。但是 <code>execve</code> 就不行了，规定了第一个参数是命令，第二个参数是参数列表，第三个参数是环境变量。所以说，短的方便但是危险。</p>
+<h2 id="Capability-Leaking"><a href="#Capability-Leaking" class="headerlink" title="Capability Leaking"></a>Capability Leaking</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#include &lt;fcntl.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;unistd.h&gt;</span></span><br><span class="line"></span><br><span class="line">void <span class="function"><span class="title">main</span></span>() &#123;</span><br><span class="line">    int fd;</span><br><span class="line">    char *v[2];</span><br><span class="line"></span><br><span class="line">    /* Assume that root.txt is an important system file,</span><br><span class="line">     * and it is owned by root with permission 0644.</span><br><span class="line">     * Before running this program, you should create</span><br><span class="line">     * the file root.txt first. */</span><br><span class="line">    fd = open(<span class="string">&quot;root.txt&quot;</span>, O_RDWR | O_APPEND);</span><br><span class="line">    <span class="keyword">if</span> (fd == -1) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Cannot open root.txt\n&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(0);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // Print out the file descriptor value</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;fd is %d\n&quot;</span>, fd);</span><br><span class="line"></span><br><span class="line">    // Permanently <span class="built_in">disable</span> the privilege by making the</span><br><span class="line">    // effective uid the same as the real uid</span><br><span class="line">    setuid(getuid());</span><br><span class="line"></span><br><span class="line">    // Execute /bin/sh</span><br><span class="line">    v[0] = <span class="string">&quot;/bin/sh&quot;</span>;</span><br><span class="line">    v[1] = 0;</span><br><span class="line">    execve(v[0], v, 0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看代码，特权程序打开了文件后，主动调用了 <code>setuid(getuid())</code> 放弃了自己的特权，并进入了 <code>/bin/sh</code>，但是，真的放弃了吗？我们执行看看。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221105014621221.png" alt="image-20221105014621221"></p>
+<p>我们可以看到，在 <code>sh</code> 中确实放弃了权限，无法执行 <code>echo bbbbb &gt; root.txt</code>，但是，我们忘记关闭文件了，对文件描述符来说我们还是有写的权限，因此可以执行 <code>echo bbbbb &gt;&amp; 3</code> 向文件描述符中写入。</p>
+<blockquote>
+<p>为了遵循最小特权原则，如果不再需要这些特权，<code>Set-UID</code> 程序通常会永久地放弃其根本特权。此外，有时程序需要将其控制移交给用户；在这种情况下，必须撤销根特权。可以使用 <code>setuid()</code> 系统调用来撤销特权。</p>
+<p>当取消特权时，常见的错误之一是能力泄漏。当进程仍然处于特权状态时，可能已经获得了一些特权功能； 当特权被降级时，如果程序不清理这些功能，它们仍然可以被非特权进程访问。换句话说，虽然进程的有效 用户 <code>ID</code> 变得非特权，但进程仍然具有特权，因为它具有特权功能。</p>
+</blockquote>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Manipulating-Environment-Variables"><span class="toc-number">1.</span> <span class="toc-text">Manipulating Environment Variables</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Passing-Environment-Variables-from-Parent-Process-to-Child-Process"><span class="toc-number">2.</span> <span class="toc-text">Passing Environment Variables from Parent Process to Child Process</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Environment-Variables-and-execve"><span class="toc-number">3.</span> <span class="toc-text">Environment Variables and execve()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Environment-Variables-and-system"><span class="toc-number">4.</span> <span class="toc-text">Environment Variables and system()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Environment-Variable-and-Set-UID-Programs"><span class="toc-number">5.</span> <span class="toc-text">Environment Variable and Set-UID Programs</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-PATH-Environment-Variable-and-Set-UID-Programs"><span class="toc-number">6.</span> <span class="toc-text">The PATH Environment Variable and Set-UID Programs</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-LD-PRELOAD-Environment-Variable-and-Set-UID-Programs"><span class="toc-number">7.</span> <span class="toc-text">The LD_PRELOAD Environment Variable and Set-UID Programs</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Invoking-External-Programs-Using-system-versus-execve"><span class="toc-number">8.</span> <span class="toc-text">Invoking External Programs Using system() versus execve()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Capability-Leaking"><span class="toc-number">9.</span> <span class="toc-text">Capability Leaking</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/f9a30b6b.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/f9a30b6b.html&text=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/f9a30b6b.html&title=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/f9a30b6b.html&is_video=false&description=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Environment-Variable-and-Set-UID-Lab&body=Check out this article: https://ceyewan.github.io/p/f9a30b6b.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/f9a30b6b.html&title=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/f9a30b6b.html&title=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/f9a30b6b.html&title=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/f9a30b6b.html&title=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/f9a30b6b.html&name=Environment-Variable-and-Set-UID-Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/f9a30b6b.html&t=Environment-Variable-and-Set-UID-Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

