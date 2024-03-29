@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="实验目的在 ubuntu 下实现内核 HOOK 功能，观察 HOOK 的系统调用。 实验环境$ uname -aLinux iZ2ze7oih8je6v1aqfloc2Z 4.15.0-48-generic #51-Ubuntu SMP Wed Apr 3 08:28:49 UTC 2019 x86_64 x86_64 x86_64 GNU&#x2F;Linux  实验原理基本概念Hook 技术又叫做钩子函">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux-Kernel-Hook实验">
+<meta property="og:url" content="https://ceyewan.github.io/p/cd5eaf9.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="实验目的在 ubuntu 下实现内核 HOOK 功能，观察 HOOK 的系统调用。 实验环境$ uname -aLinux iZ2ze7oih8je6v1aqfloc2Z 4.15.0-48-generic #51-Ubuntu SMP Wed Apr 3 08:28:49 UTC 2019 x86_64 x86_64 x86_64 GNU&#x2F;Linux  实验原理基本概念Hook 技术又叫做钩子函">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221112153439707.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221112162032034.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221112165021059.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221112165848565.png">
+<meta property="article:published_time" content="2022-11-12T09:16:09.000Z">
+<meta property="article:modified_time" content="2024-03-29T17:07:59.557Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="Hook">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221112153439707.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Linux-Kernel-Hook实验</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/b0280669.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/354eb348.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/cd5eaf9.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/cd5eaf9.html&text=Linux-Kernel-Hook实验"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/cd5eaf9.html&title=Linux-Kernel-Hook实验"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/cd5eaf9.html&is_video=false&description=Linux-Kernel-Hook实验"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Linux-Kernel-Hook实验&body=Check out this article: https://ceyewan.github.io/p/cd5eaf9.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/cd5eaf9.html&title=Linux-Kernel-Hook实验"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/cd5eaf9.html&title=Linux-Kernel-Hook实验"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/cd5eaf9.html&title=Linux-Kernel-Hook实验"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/cd5eaf9.html&title=Linux-Kernel-Hook实验"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/cd5eaf9.html&name=Linux-Kernel-Hook实验&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/cd5eaf9.html&t=Linux-Kernel-Hook实验"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E7%9B%AE%E7%9A%84"><span class="toc-number">1.</span> <span class="toc-text">实验目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E7%8E%AF%E5%A2%83"><span class="toc-number">2.</span> <span class="toc-text">实验环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E5%8E%9F%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text">实验原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">3.1.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%97%E5%88%B0-sys-call-table-%E7%9A%84%E5%86%85%E5%AD%98%E4%BD%8D%E7%BD%AE"><span class="toc-number">3.2.</span> <span class="toc-text">得到 sys_call_table 的内存位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%97%AD%E5%86%99%E4%BF%9D%E6%8A%A4"><span class="toc-number">3.3.</span> <span class="toc-text">关闭写保护</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9-sys-call-table"><span class="toc-number">3.4.</span> <span class="toc-text">修改 sys_call_table</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%81%A2%E5%A4%8D-sys-call-table"><span class="toc-number">3.5.</span> <span class="toc-text">恢复 sys_call_table</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F"><span class="toc-number">3.6.</span> <span class="toc-text">注意</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E5%86%85%E5%AE%B9%E5%92%8C%E6%AD%A5%E9%AA%A4"><span class="toc-number">4.</span> <span class="toc-text">实验内容和步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E6%BA%90%E7%A0%81%EF%BC%9A"><span class="toc-number">4.1.</span> <span class="toc-text">下载源码：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90%E6%BA%90%E7%A0%81"><span class="toc-number">4.2.</span> <span class="toc-text">分析源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E4%BB%A3%E7%A0%81"><span class="toc-number">4.3.</span> <span class="toc-text">执行代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%86-mkdir-hook-%E4%B8%BA-rmdir"><span class="toc-number">4.4.</span> <span class="toc-text">将 mkdir hook 为 rmdir</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%80%83%E4%B8%8E%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">思考与总结</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Linux-Kernel-Hook实验
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-12T09:16:09.000Z" class="dt-published" itemprop="datePublished">2022-11-12</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/linux-kernel/">linux-kernel</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Hook/" rel="tag">Hook</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="实验目的"><a href="#实验目的" class="headerlink" title="实验目的"></a>实验目的</h2><p>在 ubuntu 下实现内核 HOOK 功能，观察 HOOK 的系统调用。</p>
+<h2 id="实验环境"><a href="#实验环境" class="headerlink" title="实验环境"></a>实验环境</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">uname</span> -a</span></span><br><span class="line">Linux iZ2ze7oih8je6v1aqfloc2Z 4.15.0-48-generic #51-Ubuntu SMP Wed Apr 3 08:28:49 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux</span><br></pre></td></tr></table></figure>
+
+<h2 id="实验原理"><a href="#实验原理" class="headerlink" title="实验原理"></a>实验原理</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>Hook 技术又叫做钩子函数，在系统没有调用该函数之前，钩子程序就先捕获该消息，钩子函数先得到控制权，这时钩子函数既可以加工处理（改变）该函数的执行行为，还可以强制结束消息的传递。简单来说，就是把系统的程序拉出来变成我们自己执行代码片段。我们通过修改 sys_call_table 来修改函数的执行行为。</p>
+<h3 id="得到-sys-call-table-的内存位置"><a href="#得到-sys-call-table-的内存位置" class="headerlink" title="得到 sys_call_table 的内存位置"></a>得到 sys_call_table 的内存位置</h3><p>我们使用暴力搜索地址的方法来查找 <code>sys_call_table</code> 的地址。<code>PAGE_OFFSET</code> 是内核内存空间的起始地址，并且因为 <code>sys_close</code> 是导出函数，我们可以直接得到他的地址（它的系统调用号 <code>__NR_close</code>）。<code>sys_call_table</code> 是一个一维数组，当我们遍历每一种可能时，如果 <code>entry[__NR_close] == (unsigned long *)sys_close</code>，说明 <code>entry</code> 正好就是系统调用表。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">long</span> **<span class="title function_">get_sys_call_table</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> **entry = (<span class="type">unsigned</span> <span class="type">long</span> **)PAGE_OFFSET;</span><br><span class="line">    <span class="keyword">for</span> (; (<span class="type">unsigned</span> <span class="type">long</span>)entry &lt; ULONG_MAX; entry += <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (entry[__NR_close] == (<span class="type">unsigned</span> <span class="type">long</span> *)sys_close) &#123;</span><br><span class="line">            <span class="keyword">return</span> entry;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="关闭写保护"><a href="#关闭写保护" class="headerlink" title="关闭写保护"></a>关闭写保护</h3><p>写保护指的是写入只读内存时出错。这个特性可以通过 <code>CR0</code> 寄存器控制：开启或者关闭，只需要修改一个比特，也就是从 0 开始数的第 16 个比特。我们可以使用 <code>read_cr0/write_cr0</code> 来读取&#x2F;写入 <code>CR0</code> 寄存器，免去我们自己写内联汇编的麻烦。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">disable_write_protection</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> cr0 = read_cr0();</span><br><span class="line">    clear_bit(<span class="number">16</span>, &amp;cr0);</span><br><span class="line">    write_cr0(cr0);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">enable_write_protection</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> cr0 = read_cr0();</span><br><span class="line">    set_bit(<span class="number">16</span>, &amp;cr0);</span><br><span class="line">    write_cr0(cr0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改-sys-call-table"><a href="#修改-sys-call-table" class="headerlink" title="修改 sys_call_table"></a>修改 sys_call_table</h3><p>首先，将真实的系统调用备份为 <code>real_open、real_unlik、real_unlinkat</code>，并且将系统调用修改为我们自己的函数。这样，在调用系统调用号为 <code>__NR_open</code> 的系统调用时，会调用我们的 <code>fake_open</code> 而不是 <code>real_open</code>。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">disable_write_protection();</span><br><span class="line">real_open = (<span class="type">void</span> *)sys_call_table[__NR_open];</span><br><span class="line">sys_call_table[__NR_open] = (<span class="type">unsigned</span> <span class="type">long</span> *)fake_open;</span><br><span class="line">real_unlink = (<span class="type">void</span> *)sys_call_table[__NR_unlink];</span><br><span class="line">sys_call_table[__NR_unlink] = (<span class="type">unsigned</span> <span class="type">long</span> *)fake_unlink;</span><br><span class="line">real_unlinkat = (<span class="type">void</span> *)sys_call_table[__NR_unlinkat];</span><br><span class="line">sys_call_table[__NR_unlinkat] = (<span class="type">unsigned</span> <span class="type">long</span> *)fake_unlinkat;</span><br><span class="line">enable_write_protection();</span><br></pre></td></tr></table></figure>
+
+<h3 id="恢复-sys-call-table"><a href="#恢复-sys-call-table" class="headerlink" title="恢复 sys_call_table"></a>恢复 sys_call_table</h3><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">disable_write_protection();</span><br><span class="line">sys_call_table[__NR_open] = (<span class="type">unsigned</span> <span class="type">long</span> *)real_open;</span><br><span class="line">sys_call_table[__NR_unlink] = (<span class="type">unsigned</span> <span class="type">long</span> *)real_unlink;</span><br><span class="line">sys_call_table[__NR_unlinkat] = (<span class="type">unsigned</span> <span class="type">long</span> *)real_unlinkat;</span><br><span class="line">enable_write_protection();</span><br></pre></td></tr></table></figure>
+
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>这里我们的系统调用不能是直接写一个函数就行了，而要写一个内核模块，这样才能被系统在任何情况下调用。用我们的模块替换掉系统模块。从而实现 hook（或者说<strong>劫持</strong>）。</p>
+<h2 id="实验内容和步骤"><a href="#实验内容和步骤" class="headerlink" title="实验内容和步骤"></a>实验内容和步骤</h2><h3 id="下载源码："><a href="#下载源码：" class="headerlink" title="下载源码："></a>下载源码：</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/jha/linux-kernel-hook.git</span><br></pre></td></tr></table></figure>
+
+<h3 id="分析源码"><a href="#分析源码" class="headerlink" title="分析源码"></a>分析源码</h3><p>最主要的代码就是 <code>module.c</code>，创建一个内核模块。这个模块的 <code>__init</code> 函数主要是 <code>sys_hook_init</code> 和 <code>sys_hook_add64</code> 函数。这样，注册模块时就可以将我们的 hook 函数注册进内核。</p>
+<p><code>hooks.c</code> 和 <code>hook.h</code> 就是写了一个 <code>mkdir_hook</code> 函数，作用就是劫持系统调用 <code>mkdir</code> 转而调用我们的 <code>hook_mkdir</code>，而我们的 <code>mkdir</code> 做的就是打印一条日志信息后调用 <code>sys_mkdir</code>。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">asmlinkage <span class="type">int</span> <span class="title function_">mkdir_hook</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *path, <span class="type">int</span> mode)</span> &#123;</span><br><span class="line">    <span class="type">sys_mkdir_t</span> sys_mkdir;</span><br><span class="line">    printk(KERN_INFO <span class="string">&quot;call mkdir now\n&quot;</span>);</span><br><span class="line">    sys_mkdir = (<span class="type">sys_mkdir_t</span>)sys_hook_get_orig64(lkh_sys_hook, __NR_mkdir);</span><br><span class="line">    <span class="keyword">return</span> sys_mkdir(path, mode);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>sys_hook.c</code> 和 <code>sys_hook.h</code> 主要实现了下面这几个函数，用来方便的实现 hook 函数的增添、删除等操作。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> sys_hook *<span class="title function_">sys_hook_init</span><span class="params">(<span class="type">uintptr_t</span> k32, <span class="type">uintptr_t</span> k64)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">bool_t</span> <span class="title function_">sys_hook_add64</span><span class="params">(<span class="keyword">struct</span> sys_hook *, <span class="type">unsigned</span> <span class="type">int</span> syscall_id, <span class="type">void</span> *func)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">bool_t</span> <span class="title function_">sys_hook_del64</span><span class="params">(<span class="keyword">struct</span> sys_hook *, <span class="type">unsigned</span> <span class="type">int</span> syscall_id)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">uintptr_t</span> <span class="title function_">sys_hook_get_orig64</span><span class="params">(<span class="keyword">struct</span> sys_hook *, <span class="type">unsigned</span> <span class="type">int</span> syscall_id)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">sys_hook_free</span><span class="params">(<span class="keyword">struct</span> sys_hook *hook)</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="执行代码"><a href="#执行代码" class="headerlink" title="执行代码"></a>执行代码</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">make # 编译生成 lkh.ko</span><br><span class="line">sudo sh ./load.sh # 将 lkh.ko 模块注册到内核</span><br><span class="line">mkdir 1 &amp;&amp; mkdir 2 &amp;&amp; mkdir 3 # 调用 mkdir 测试</span><br><span class="line">sudo rmmod lkh # 从内核移除模块</span><br><span class="line">dmesg # 查看日志</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221112153439707.png" alt="image-20221112153439707"></p>
+<h3 id="将-mkdir-hook-为-rmdir"><a href="#将-mkdir-hook-为-rmdir" class="headerlink" title="将 mkdir hook 为 rmdir"></a>将 mkdir hook 为 rmdir</h3><p>这样没什么意思，我们要搞点乱的。这里我选择 hook（劫持） <code>mkdir</code> 这个系统调用到 <code>rmdir</code> 这个系统调用。这样从而实现虽然是调用 <code>mkdir</code> 但是实际上调用了 <code>rmdir</code> 的现象。</p>
+<p>首先，修改一些代码：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// module.c 在下面这一行中添加 rmdir 这一行，第三个参数没什么用，所以我们就不写了</span></span><br><span class="line">sys_hook_add64(lkh_sys_hook, __NR_mkdir, (<span class="type">void</span> *)mkdir_hook);</span><br><span class="line">sys_hook_add64(lkh_sys_hook, __NR_rmdir, (<span class="type">void</span> *)mkdir_hook);</span><br><span class="line"></span><br><span class="line"><span class="comment">// hook.c 将 __NR_mkdir 修改为 __NR_rmdir</span></span><br><span class="line">asmlinkage <span class="type">int</span> <span class="title function_">mkdir_hook</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *path, <span class="type">int</span> mode)</span> &#123;</span><br><span class="line">    <span class="type">sys_mkdir_t</span> sys_mkdir;</span><br><span class="line">    printk(KERN_INFO <span class="string">&quot;call mkdir now\n&quot;</span>);</span><br><span class="line">    sys_mkdir = (<span class="type">sys_mkdir_t</span>)sys_hook_get_orig64(lkh_sys_hook, __NR_rmdir);</span><br><span class="line">    <span class="keyword">return</span> sys_mkdir(path, mode);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>只需要修改这么一点点，我们就可以得到一种截然不同的结果：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221112162032034.png" alt="image-20221112162032034"></p>
+<p>可以看到我先创建了 <code>dir1 dir2 dir3</code> 这 3 个文件夹，然后加载模块到内核，加载后执行 <code>mkdir dir1 dir2</code> 不仅没有报 <code>File exists</code> 的错，反而将这两个文件夹删除了。在将模块移除后，<code>mkdir</code> 又恢复了正常。</p>
+<h2 id="思考与总结"><a href="#思考与总结" class="headerlink" title="思考与总结"></a>思考与总结</h2><p><code>KERN_ALERT</code> 的作用？</p>
+<p>这是一种消息打印的级别，KERN_ALERT 对于的级别是 1，而我们另一个用到 KERN_INFO 的级别是 6。数字越小面积别越高。printk 输出跟输出的日志级别有关系，当输出日志级别比控制台的级别高时，就会显示在控制台上，当比控制台低时，则会记录在 <code>/var/log/message</code> 中。</p>
+<p>本实验中提到了几种获取 <code>sys_call_table</code> 地址的方法，请思考它们的优缺点？</p>
+<p>方法一：从 <code>/boot/System.map</code> 中读取。打开文件，将其中的内容拷贝下来就可以了，如 <a target="_blank" rel="noopener" href="https://tnichols.org/2015/10/19/Hooking-the-Linux-System-Call-Table/">Hooking the Linux System Call Table</a> 所说：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221112165021059.png" alt="image-20221112165021059"></p>
+<p>方法二：从使用了 sys_call_table 的某些未导出函数的机器码里面进行特征搜索。<a target="_blank" rel="noopener" href="https://kernelhacking.com/rodrigo/docs/StMichael/kernel-land-rootkits.pdf">Kernel-Land Rootkits</a>。难度较高。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221112165848565.png" alt="image-20221112165848565"></p>
+<p>方法三：暴力搜索，就像最上面写的算法，优点是简单理解操作，缺点是时间复杂度比较高。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E7%9B%AE%E7%9A%84"><span class="toc-number">1.</span> <span class="toc-text">实验目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E7%8E%AF%E5%A2%83"><span class="toc-number">2.</span> <span class="toc-text">实验环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E5%8E%9F%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text">实验原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">3.1.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%97%E5%88%B0-sys-call-table-%E7%9A%84%E5%86%85%E5%AD%98%E4%BD%8D%E7%BD%AE"><span class="toc-number">3.2.</span> <span class="toc-text">得到 sys_call_table 的内存位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%97%AD%E5%86%99%E4%BF%9D%E6%8A%A4"><span class="toc-number">3.3.</span> <span class="toc-text">关闭写保护</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9-sys-call-table"><span class="toc-number">3.4.</span> <span class="toc-text">修改 sys_call_table</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%81%A2%E5%A4%8D-sys-call-table"><span class="toc-number">3.5.</span> <span class="toc-text">恢复 sys_call_table</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F"><span class="toc-number">3.6.</span> <span class="toc-text">注意</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E5%86%85%E5%AE%B9%E5%92%8C%E6%AD%A5%E9%AA%A4"><span class="toc-number">4.</span> <span class="toc-text">实验内容和步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E6%BA%90%E7%A0%81%EF%BC%9A"><span class="toc-number">4.1.</span> <span class="toc-text">下载源码：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90%E6%BA%90%E7%A0%81"><span class="toc-number">4.2.</span> <span class="toc-text">分析源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E4%BB%A3%E7%A0%81"><span class="toc-number">4.3.</span> <span class="toc-text">执行代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%86-mkdir-hook-%E4%B8%BA-rmdir"><span class="toc-number">4.4.</span> <span class="toc-text">将 mkdir hook 为 rmdir</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%80%83%E4%B8%8E%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">思考与总结</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/cd5eaf9.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/cd5eaf9.html&text=Linux-Kernel-Hook实验"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/cd5eaf9.html&title=Linux-Kernel-Hook实验"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/cd5eaf9.html&is_video=false&description=Linux-Kernel-Hook实验"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Linux-Kernel-Hook实验&body=Check out this article: https://ceyewan.github.io/p/cd5eaf9.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/cd5eaf9.html&title=Linux-Kernel-Hook实验"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/cd5eaf9.html&title=Linux-Kernel-Hook实验"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/cd5eaf9.html&title=Linux-Kernel-Hook实验"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/cd5eaf9.html&title=Linux-Kernel-Hook实验"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/cd5eaf9.html&name=Linux-Kernel-Hook实验&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/cd5eaf9.html&t=Linux-Kernel-Hook实验"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="内核基本数据结构Task_struct（进程结构） 源代码：&#x2F;linux&#x2F;include&#x2F;linux&#x2F;sched.h 中 1000 行附近。  这个数据结构就是 PCB ，包含了进程的所有信息。这个结构体有大概 400 行代码，我们只需要了解一下我们需要的即可，主要包括以下内容： struct task_struct &#123;	volatile long">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux-Kernel内核基本数据结构及内存管理原理分析">
+<meta property="og:url" content="https://ceyewan.github.io/p/240405cc.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="内核基本数据结构Task_struct（进程结构） 源代码：&#x2F;linux&#x2F;include&#x2F;linux&#x2F;sched.h 中 1000 行附近。  这个数据结构就是 PCB ，包含了进程的所有信息。这个结构体有大概 400 行代码，我们只需要了解一下我们需要的即可，主要包括以下内容： struct task_struct &#123;	volatile long">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220923142347210.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/v2-90378f7a3b2bbaa6aad693d73544b862_r.jpg">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/v2-d5733809d6fb153e7c1ee03962d90013_1440w.webp">
+<meta property="article:published_time" content="2022-10-17T03:25:27.000Z">
+<meta property="article:modified_time" content="2024-03-29T17:10:43.891Z">
+<meta property="article:author" content="ceyewan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220923142347210.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Linux-Kernel内核基本数据结构及内存管理原理分析</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/becdd9d7.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/e0247305.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/240405cc.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/240405cc.html&text=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/240405cc.html&title=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/240405cc.html&is_video=false&description=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Linux-Kernel内核基本数据结构及内存管理原理分析&body=Check out this article: https://ceyewan.github.io/p/240405cc.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/240405cc.html&title=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/240405cc.html&title=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/240405cc.html&title=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/240405cc.html&title=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/240405cc.html&name=Linux-Kernel内核基本数据结构及内存管理原理分析&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/240405cc.html&t=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">内核基本数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-struct%EF%BC%88%E8%BF%9B%E7%A8%8B%E7%BB%93%E6%9E%84%EF%BC%89"><span class="toc-number">1.1.</span> <span class="toc-text">Task_struct（进程结构）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#super-block%EF%BC%88%E8%B6%85%E7%BA%A7%E5%9D%97%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">super_block（超级块）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#inode"><span class="toc-number">1.3.</span> <span class="toc-text">inode</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">内存管理原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%B5%E8%A1%A8"><span class="toc-number">2.1.</span> <span class="toc-text">页表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%A9%E7%90%86%E9%A1%B5%E9%9D%A2"><span class="toc-number">2.2.</span> <span class="toc-text">物理页面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Buddy-%E7%AE%97%E6%B3%95"><span class="toc-number">2.3.</span> <span class="toc-text">Buddy 算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Slab-%E7%AE%97%E6%B3%95"><span class="toc-number">2.4.</span> <span class="toc-text">Slab 算法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">小结</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Linux-Kernel内核基本数据结构及内存管理原理分析
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-10-17T03:25:27.000Z" class="dt-published" itemprop="datePublished">2022-10-17</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/linux-kernel/">linux-kernel</a>
+    </div>
+
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="内核基本数据结构"><a href="#内核基本数据结构" class="headerlink" title="内核基本数据结构"></a>内核基本数据结构</h2><h3 id="Task-struct（进程结构）"><a href="#Task-struct（进程结构）" class="headerlink" title="Task_struct（进程结构）"></a>Task_struct（进程结构）</h3><blockquote>
+<p>源代码：&#x2F;linux&#x2F;include&#x2F;linux&#x2F;sched.h 中 1000 行附近。</p>
+</blockquote>
+<p>这个数据结构就是 PCB ，包含了进程的所有信息。这个结构体有大概 400 行代码，我们只需要了解一下我们需要的即可，主要包括以下内容：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> &#123;</span></span><br><span class="line">	<span class="keyword">volatile</span> <span class="type">long</span> state;	<span class="comment">/* -1 unrunnable, 0 runnable, &gt;0 stopped */</span></span><br><span class="line">	<span class="type">void</span> *<span class="built_in">stack</span>;</span><br><span class="line">	<span class="type">atomic_t</span> usage;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> flags;	 <span class="comment">/* per process flags, defined below */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> ptrace;</span><br><span class="line">        <span class="type">pid_t</span> pid;</span><br><span class="line">	<span class="type">pid_t</span> tgid;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> __<span class="title">rcu</span> *<span class="title">real_parent</span>;</span> <span class="comment">/* real parent process */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> __<span class="title">rcu</span> *<span class="title">parent</span>;</span> <span class="comment">/* recipient of SIGCHLD, wait4() reports */</span></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * children/sibling forms the list of my natural children</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">children</span>;</span>	<span class="comment">/* list of my children */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">sibling</span>;</span>	<span class="comment">/* linkage in my parent&#x27;s children list */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>state：表示进程状态(-1 就绪态，0 运行态，&gt;0 停止态)</li>
+<li>stack：进程内核栈</li>
+<li>usage：有几个进程在使用此结构（这是一个原子变量）</li>
+<li>flags：标记，反映一个进程的状态信息，但不是运行状态。</li>
+<li>ptrace：关于实现断点调试，跟踪进程运行的系统调用</li>
+<li>pid，tgid：进程标识符和进程组标识符</li>
+<li>parent，children：父进程和子进程</li>
+</ul>
+<p>结构体中剩下的一些成员还包括性能诊断工具、进程调度、时间与定时器、信号处理和文件系统信息等。</p>
+<h3 id="super-block（超级块）"><a href="#super-block（超级块）" class="headerlink" title="super_block（超级块）"></a>super_block（超级块）</h3><blockquote>
+<p>源代码：&#x2F;linux&#x2F;include&#x2F;linux&#x2F;fs.h 中 1200 行附近。</p>
+</blockquote>
+<p>超级块中包含的信息描述了文件系统的布局，每个文件系统都只有一个超级块。当启动或挂载其他文件系统时，它们的超级块也会被读入内存。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">super_block</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span>	<span class="title">s_list</span>;</span>		<span class="comment">/* Keep this first */</span></span><br><span class="line">	<span class="type">dev_t</span>			s_dev;		<span class="comment">/* search index; _not_ kdev_t */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span>		s_blocksize_bits;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span>		s_blocksize;</span><br><span class="line">	<span class="type">loff_t</span>			s_maxbytes;	<span class="comment">/* Max file size */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span>		s_flags;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span>		s_magic;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">dentry</span>		*<span class="title">s_root</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">rw_semaphore</span>	<span class="title">s_umount</span>;</span></span><br><span class="line">	<span class="type">int</span>			s_count;</span><br><span class="line">	<span class="type">atomic_t</span>		s_active;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>s_list：是一个双向循环链表，把所有的 super_block 连接起来，这个 list 上边就是所有在 linux 上记录的文件系统。</li>
+<li>s_dev：包含该具体文件系统的块设备标识符。</li>
+<li>s_blocksize：文件系统中数据块大小，以字节为单位</li>
+<li>s_blocksize：上面的 size 大小占用位数</li>
+<li>s_maxbytes：允许的最大的文件大小</li>
+<li>s_flags：安装标识</li>
+<li>s_magic：区别于其他文件系统的标识</li>
+<li>s_count，s_active：对超级块的使用计数和引用计数</li>
+</ul>
+<h3 id="inode"><a href="#inode" class="headerlink" title="inode"></a>inode</h3><blockquote>
+<p>源代码：&#x2F;linux&#x2F;include&#x2F;linux&#x2F;fs.h 中第 500 行附近。</p>
+</blockquote>
+<p>每个文件都有一个 inode ，其主要功能就是给出文件数据块所在的位置，存放关于文件的一般信息。要打开一个文件，需要先找到它的 inode 。主要内容如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">inode</span> &#123;</span></span><br><span class="line">	<span class="type">umode_t</span>			i_mode;</span><br><span class="line">	<span class="type">kuid_t</span>			i_uid;</span><br><span class="line">	<span class="type">kgid_t</span>			i_gid;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span>		i_flags;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span>       i_ino;</span><br><span class="line">    <span class="type">loff_t</span>          i_size;</span><br><span class="line">    <span class="type">blkcnt_t</span>        i_blocks;</span><br><span class="line">    <span class="type">atomic_t</span>        i_count;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>i_mode：文件的访问权限，如 rwxrwxrwx</li>
+<li>i_uid，i_gid：inode 拥有者和拥有者组 id</li>
+<li>i_flags：标志</li>
+<li>i_ino：inode 号，唯一确定一个文件</li>
+<li>i_size：文件大小</li>
+<li>i_blocks：文件使用块的数目</li>
+<li>i_count：引用计数</li>
+</ul>
+<h2 id="内存管理原理"><a href="#内存管理原理" class="headerlink" title="内存管理原理"></a>内存管理原理</h2><h3 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h3><p>linux 从线性内存地址到物理内存地址采用的寻址方法是如图所示的多级页表寻址：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220923142347210.png" alt="image-20220923142347210"></p>
+<p>采用页表来寻址可以可以屏蔽物理内存的不连续性，虽然我们的程序零碎的分布在物理内存的各个位置，但是页表可以营造一种虚拟地址连续的假象。</p>
+<p>采用多级页表，可以减小页表的大小，加快寻址速度。有映射的就建立起页表，没有的就不用，可以避免页表过大。</p>
+<h3 id="物理页面"><a href="#物理页面" class="headerlink" title="物理页面"></a>物理页面</h3><p>接下来，我们看一下物理页，使用 page 来表示，每个物理页由一个 page 唯一决定。我们设置一个 mem_map[] 数组管理内存页面 page 。page 这个结构体定义在：</p>
+<blockquote>
+<p>&#x2F;include&#x2F;linux&#x2F;mm_types.h 中第 50 行附近。</p>
+</blockquote>
+<p>主要的内容如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">page</span> &#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> flags;        <span class="comment">/* Atomic flags */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">address_space</span> *<span class="title">mapping</span>;</span></span><br><span class="line">    <span class="type">atomic_t</span> _mapcount;</span><br><span class="line">    <span class="type">atomic_t</span> _refcount;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> active;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">page</span> *<span class="title">next</span>;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>flag：用来存放页的状态，是否脏页，是否锁定，是否换出。</li>
+<li>mapping：指向与该页相关的 address_space 对象。</li>
+<li>mapcount：被页表映射的次数，也就是说该 page 同时被多少个进程共享。</li>
+<li>refcount：引用计数，表示内核中引用该 page 的次数。当该值为 0 时, 表示没有引用该 page 的位置。</li>
+<li>active：经常被访问的处于活跃状态的页面。</li>
+<li>next：指向 slab 链表的指针。</li>
+</ul>
+<p>因为每一个物理页都有一个 page 结构体，所以需要尽可能的节省空间，因此，page 结构体中使用了很多 union 联合体。</p>
+<h3 id="Buddy-算法"><a href="#Buddy-算法" class="headerlink" title="Buddy 算法"></a>Buddy 算法</h3><blockquote>
+<p>源代码：&#x2F;mm&#x2F;page_alloc.c 中</p>
+</blockquote>
+<p>代码比较复杂，总体思路是把所有的空闲页框分组为 n 个块链表，每个块链表分别包含大小为 1，2，4，8，16，32，64… 个连续页框的页框块。每个页框块的第一个页框的物理地址是该块大小的整数倍。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/v2-90378f7a3b2bbaa6aad693d73544b862_r.jpg" alt="buddy"></p>
+<p><strong>分配算法</strong>：比如我们我们需要分配一个 640MB （512 + 128）的内存大小，会查找大小为 1024MB 的页框块，分配 640MB 后还剩余 384（256 + 128）MB，我们把剩下的拆分后分配给大小为 256MB 和 128MB 的页框块链表。这样，可以避免内存的浪费。</p>
+<p><strong>回收算法</strong>：当我们上面的内存使用完成后，会被释放，同时检查被分配给其他页框块链表的内存空间，如果都没有被使用，则会合并内存，重新得到一个大小为 1024MB 的页框块。</p>
+<h3 id="Slab-算法"><a href="#Slab-算法" class="headerlink" title="Slab 算法"></a>Slab 算法</h3><p>buddy 算法解决了大内存空间的分配问题，而 slab 算法就是用来解决小内存空间的分配问题。</p>
+<p>slab分配器分配内存以字节为单位，基于伙伴分配器的大内存进一步细分成小内存分配。换句话说，slab 分配器仍然从 Buddy 分配器中申请内存，之后自己对申请来的内存细分管理。slab 分配器的第二个任务是维护常用对象的缓存，因为很多小内存对象频繁的构造和销毁，如果直接从缓存器中分配可以减少构造时的初始化时间，销毁后存储在缓存器中，供下次构造使用。slab 分配器的最后一项任务是提高 CPU 硬件缓存的利用率。 如果将对象包装到 slab 中后仍有剩余空间，则将剩余空间用于为 slab 着色。 slab 着色是一种尝试使不同 slab 中的对象使用 CPU 硬件缓存中不同行的方案。</p>
+<p>使用如下三个函数来分配和回收内存：</p>
+<ul>
+<li>分配内存：void * kmalloc (size_t size,gfp_t flags);</li>
+<li>重新分配内存：void *krealloc(const void *p, size_t new_size, gfp_t flags);</li>
+<li>释放内存：void kfree ( const void * objp);</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">slab</span> &#123;</span></span><br><span class="line">  	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">list</span>;</span> <span class="comment">// 将slab链接到各个slab链表上面</span></span><br><span class="line">  	<span class="type">unsigned</span> <span class="type">long</span> colouroff; <span class="comment">// slab中第一个对象偏移</span></span><br><span class="line">  	<span class="type">void</span> *s_mem; <span class="comment">// slab中第一个对象地址</span></span><br><span class="line">  	<span class="type">unsigned</span> <span class="type">int</span> inuse; <span class="comment">// 有多少对象正在被使用</span></span><br><span class="line">  	<span class="type">kmem_bufctl_t</span> <span class="built_in">free</span>; <span class="comment">// 下一个空闲对象的下标</span></span><br><span class="line">  	<span class="type">unsigned</span> <span class="type">short</span> nodeid; <span class="comment">// 用于寻址在高速缓存中kmem_list3的下标</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>每个内存缓存对应一个kmem_cache实例。</li>
+<li>每个内存节点对应一个kmem_cache_node实例。</li>
+<li>kmem_cache实例的成员cpu_slab指向arrary_cache实例。每个处理器对应一个arrary_cache实例，称为数组缓存，用来缓存刚刚释放的对象，分配时首先从当前处理器的数据缓存分配，避免每次都要从slab分配，减少链表操作的锁操作，提高分配速度。</li>
+</ul>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/v2-d5733809d6fb153e7c1ee03962d90013_1440w.webp" alt="img"></p>
+<p>用 struct kmem_cache 结构描述的一段内存就称作一个 slab 缓存池。一个slab缓存池就像是一箱牛奶，一箱牛奶中有很多瓶牛奶，每瓶牛奶就是一个 slab 。在初始时，所有牛奶都是新的，都存在 slabs_free 链表中。分配内存的时候，就相当于从牛奶箱中拿一瓶牛奶，若把一瓶牛奶喝完，该牛奶就会被加入到 slabs_full 中不能再分配；若只喝了一半就放回到 slabs_partial 中。牛奶可能会喝完（不考虑 slab 内存 free 的情况，因为自己不能生产牛奶（捂脸）），当箱子空的时候，你就需要去超市再买一箱回来。超市就相当于buddy 分配器。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>linux 内核的基本数据结构包括进程控制的核心数据结构 task_struct 和文件系统的核心数据结构 super_boclk 以及文件的唯一标识 inode 等；内存管理包括虚拟地址到物理地址的映射—-页表和物理内存的两种内存管理方法 slab 和 buddy。这两种方法分别解决了小内存和大内存空间的分配问题。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">内核基本数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Task-struct%EF%BC%88%E8%BF%9B%E7%A8%8B%E7%BB%93%E6%9E%84%EF%BC%89"><span class="toc-number">1.1.</span> <span class="toc-text">Task_struct（进程结构）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#super-block%EF%BC%88%E8%B6%85%E7%BA%A7%E5%9D%97%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">super_block（超级块）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#inode"><span class="toc-number">1.3.</span> <span class="toc-text">inode</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">内存管理原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%B5%E8%A1%A8"><span class="toc-number">2.1.</span> <span class="toc-text">页表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%A9%E7%90%86%E9%A1%B5%E9%9D%A2"><span class="toc-number">2.2.</span> <span class="toc-text">物理页面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Buddy-%E7%AE%97%E6%B3%95"><span class="toc-number">2.3.</span> <span class="toc-text">Buddy 算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Slab-%E7%AE%97%E6%B3%95"><span class="toc-number">2.4.</span> <span class="toc-text">Slab 算法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">小结</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/240405cc.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/240405cc.html&text=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/240405cc.html&title=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/240405cc.html&is_video=false&description=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Linux-Kernel内核基本数据结构及内存管理原理分析&body=Check out this article: https://ceyewan.github.io/p/240405cc.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/240405cc.html&title=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/240405cc.html&title=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/240405cc.html&title=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/240405cc.html&title=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/240405cc.html&name=Linux-Kernel内核基本数据结构及内存管理原理分析&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/240405cc.html&t=Linux-Kernel内核基本数据结构及内存管理原理分析"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

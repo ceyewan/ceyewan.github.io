@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="使用 C 语言在 linux 系统下实现了一个简易的字符设备驱动程序，熟悉了驱动程序的开发流程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux-Kernel字符设备驱动程序实验">
+<meta property="og:url" content="https://ceyewan.github.io/p/becdd9d7.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="使用 C 语言在 linux 系统下实现了一个简易的字符设备驱动程序，熟悉了驱动程序的开发流程。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101233450347.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101233555420.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101233757919.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101234624555.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101235144887.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101235328176.png">
+<meta property="og:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101235710583.png">
+<meta property="article:published_time" content="2022-11-01T16:29:27.000Z">
+<meta property="article:modified_time" content="2024-03-29T17:08:28.317Z">
+<meta property="article:author" content="ceyewan">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101233450347.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>Linux-Kernel字符设备驱动程序实验</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/26f928ab.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/240405cc.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/becdd9d7.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/becdd9d7.html&text=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/becdd9d7.html&title=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/becdd9d7.html&is_video=false&description=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Linux-Kernel字符设备驱动程序实验&body=Check out this article: https://ceyewan.github.io/p/becdd9d7.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/becdd9d7.html&title=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/becdd9d7.html&title=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/becdd9d7.html&title=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/becdd9d7.html&title=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/becdd9d7.html&name=Linux-Kernel字符设备驱动程序实验&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/becdd9d7.html&t=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E5%86%99%E4%BB%A3%E7%A0%81%E5%92%8C-Makefile-%E6%96%87%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">编写代码和 Makefile 文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E8%BD%BD%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8"><span class="toc-number">2.</span> <span class="toc-text">加载字符设备驱动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="toc-number">3.</span> <span class="toc-text">测试驱动程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%B8%E8%BD%BD%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="toc-number">4.</span> <span class="toc-text">卸载驱动程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%92%8C%E6%80%9D%E8%80%83"><span class="toc-number">5.</span> <span class="toc-text">问题和思考</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-number">6.</span> <span class="toc-text">参考链接</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Linux-Kernel字符设备驱动程序实验
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-01T16:29:27.000Z" class="dt-published" itemprop="datePublished">2022-11-02</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/linux-kernel/">linux-kernel</a>
+    </div>
+
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p><strong>字符设备：</strong> 是指只能一个字节一个字节进行读写操作的设备，不能随机读取设备中的某一数据、读取数据要按照先后数据。字符设备是面向流的设备，常见的字符设备有鼠标、键盘、串口、控制台和LED等。</p>
+<p>一般每个字符设备或者块设备都会在 <code>/dev</code> 目录（可以是任意目录，这样是为了统一）下对应一个设备文件。<code>linux</code> 用户层程序通过设备文件来使用驱动程序操作字符设备或块设备。**<code>linux</code> 下一切都是文件。**</p>
+<h3 id="编写代码和-Makefile-文件"><a href="#编写代码和-Makefile-文件" class="headerlink" title="编写代码和 Makefile 文件"></a>编写代码和 Makefile 文件</h3><p>内核的源代码文件,</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// filename: mydriver.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/ctype.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/delay.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/device.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/io.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/irq.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/uaccess.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUFF_SIZE 1024</span></span><br><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> major;</span><br><span class="line"><span class="type">static</span> <span class="type">char</span> buff[BUFF_SIZE];</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">mydriver_open</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">struct</span> file *file)</span> &#123;</span><br><span class="line">    printk(<span class="string">&quot;mydriver_open is called. \n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">ssize_t</span> <span class="title function_">mydriver_read</span><span class="params">(<span class="keyword">struct</span> file *file, <span class="type">char</span> __user *buf, <span class="type">size_t</span> size,</span></span><br><span class="line"><span class="params">                      <span class="type">loff_t</span> *ppos)</span> &#123;</span><br><span class="line">    printk(<span class="string">&quot;mydriver_read is called. \n&quot;</span>);</span><br><span class="line">    copy_to_user(buf, buff, size);</span><br><span class="line">    <span class="keyword">return</span> size;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">ssize_t</span> <span class="title function_">mydriver_write</span><span class="params">(<span class="keyword">struct</span> file *file, <span class="type">const</span> <span class="type">char</span> __user *buf, <span class="type">size_t</span> size,</span></span><br><span class="line"><span class="params">                       <span class="type">loff_t</span> *ppos)</span> &#123;</span><br><span class="line">    printk(<span class="string">&quot;mydriver_write is called. \n&quot;</span>);</span><br><span class="line">    copy_from_user(buff, buf, size);</span><br><span class="line">    <span class="keyword">return</span> size;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当执行这些函数时，模块会调用的函数</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">mydriver_ops</span> =</span> &#123;</span><br><span class="line">    .open = mydriver_open,</span><br><span class="line">    .read = mydriver_read,</span><br><span class="line">    .write = mydriver_write,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">mydriver_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(<span class="string">&quot;mydriver_init is called. \n&quot;</span>);</span><br><span class="line">    <span class="comment">// 注册设备，major 是操作系统给设备分配的一个设备号，第二个参数是设备名称</span></span><br><span class="line">    major = register_chrdev(<span class="number">0</span>, <span class="string">&quot;mydriver&quot;</span>, &amp;mydriver_ops);</span><br><span class="line">    printk(<span class="string">&quot;register_chrdev. major = %d\n&quot;</span>, major);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> __exit <span class="title function_">mydriver_exit</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(<span class="string">&quot;mydriver_exit is called. \n&quot;</span>);</span><br><span class="line">    <span class="comment">// 卸载设备，参数为主设备号和设备名</span></span><br><span class="line">    unregister_chrdev(major, <span class="string">&quot;mydriver&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">MODULE_LICENSE(<span class="string">&quot;GPL&quot;</span>);</span><br><span class="line">module_init(mydriver_init); <span class="comment">// 指定模块的起始函数</span></span><br><span class="line">module_exit(mydriver_exit); <span class="comment">// 指定模块的退出函数</span></span><br></pre></td></tr></table></figure>
+
+<p>对应的 <code>Makefile</code> 文件，</p>
+<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line"><span class="keyword">ifneq</span> (<span class="variable">$(KERNELRELEASE)</span>,)</span><br><span class="line">	obj-m := mydriver.o <span class="comment"># 目的文件</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">	KERNELDIR ?= /lib/modules/<span class="variable">$(<span class="built_in">shell</span> uname -r)</span>/build <span class="comment"># 内核源码目录</span></span><br><span class="line">	PWD := <span class="variable">$(<span class="built_in">shell</span> pwd)</span> <span class="comment"># 当前工作目录</span></span><br><span class="line"><span class="section">default:</span></span><br><span class="line">	<span class="variable">$(MAKE)</span> -C <span class="variable">$(KERNELDIR)</span> M=<span class="variable">$(PWD)</span> modules <span class="comment"># 调用内核源码位置的 makefile 来编译当前程序</span></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	<span class="variable">$(MAKE)</span> -C <span class="variable">$(KERNELDIR)</span> M=<span class="variable">$(PWD)</span> clean <span class="comment"># 调用内核源码位置的 makefile 来清除编译残留</span></span><br><span class="line"><span class="keyword">endif</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="加载字符设备驱动"><a href="#加载字符设备驱动" class="headerlink" title="加载字符设备驱动"></a>加载字符设备驱动</h3><ol>
+<li>执行 <code>make</code> 命令，我们会得到 <code>mydriver.ko</code> 驱动文件：</li>
+</ol>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101233450347.png" alt="image-20221101233450347"></p>
+<ol start="2">
+<li>使用 <code>insmod</code> 加载驱动模块，可以看到 <code>/proc/devices</code> 中已经有了我们的设备和设备号。</li>
+</ol>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101233555420.png" alt="image-20221101233555420"></p>
+<ol start="3">
+<li>我们也可以使用 <code>dmesg</code> 指令来查看驱动模块的日志信息：</li>
+</ol>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101233757919.png" alt="image-20221101233757919"></p>
+<p>可以看到，这里已经执行了 <code>init</code> 函数和设备注册函数。</p>
+<ol start="4">
+<li>在 <code>/dev</code> 目录下，还不存在这个设备的节点，需要我们手动创建。</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo <span class="built_in">mknod</span> -m 660 /dev/mydriver c 510 0 </span><br><span class="line"><span class="comment"># -m 660 设置文件权限为 660 c 表示字符设备，之后是主设备号和次设备号</span></span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>查看到 <code>/dev/mydriver</code> 是否创建成功。</li>
+</ol>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101234624555.png" alt="image-20221101234624555"></p>
+<h3 id="测试驱动程序"><a href="#测试驱动程序" class="headerlink" title="测试驱动程序"></a>测试驱动程序</h3><p>到目前为止，我们的驱动程序已经完成了，接下来我们编写代码测试它。</p>
+<ol>
+<li>测试代码，依次执行了 <code>open</code>、<code>write</code>、<code>read</code> 这三个函数（<code>close</code> 我太懒了）</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// filename： test.c </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="type">int</span> ret;</span><br><span class="line">    <span class="type">char</span> read_data[<span class="number">10</span>];</span><br><span class="line">    <span class="type">char</span> write_data[<span class="number">10</span>] = <span class="string">&quot;ceyewan&quot;</span>;</span><br><span class="line">    <span class="type">int</span> fd = open(<span class="string">&quot;/dev/mydriver&quot;</span>, O_RDWR);</span><br><span class="line">    <span class="keyword">if</span> (<span class="number">-1</span> != fd) &#123;</span><br><span class="line">        ret = write(fd, write_data, <span class="number">8</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;write ret = %d \n&quot;</span>, ret);</span><br><span class="line">        ret = read(fd, read_data, <span class="number">8</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;read ret = %d \n&quot;</span>, ret);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;read : %s\n&quot;</span>, read_data);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;open /dev/mydriver failed! \n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>执行测试代码，注意，需要有 <code>root</code> 权限才能正确执行</li>
+</ol>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101235144887.png" alt="image-20221101235144887"></p>
+<ol start="3">
+<li>使用 <code>dmesg</code> 命令查看系统日志，可以看到执行了 <code>mydriver_open</code>、<code>mydriver_write</code>、<code>mydriver_read</code> 三个函数</li>
+</ol>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101235328176.png" alt="image-20221101235328176"></p>
+<h3 id="卸载驱动程序"><a href="#卸载驱动程序" class="headerlink" title="卸载驱动程序"></a>卸载驱动程序</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo rmmod mydriver <span class="comment"># 从 /proc/devices 中移除</span></span><br><span class="line">sudo <span class="built_in">rm</span> /dev/mydriver <span class="comment"># 删除 /dev/mydriver</span></span><br></pre></td></tr></table></figure>
+
+<p>同样我们可以使用 <code>dmesg</code> 命令查看日志，可以看到 <code>mydriver_exit</code> 函数被执行。</p>
+<p><img src="https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20221101235710583.png" alt="image-20221101235710583"></p>
+<h3 id="问题和思考"><a href="#问题和思考" class="headerlink" title="问题和思考"></a>问题和思考</h3><ol>
+<li>内核模块和用户程序有什么区别，需要注意哪些安全问题？</li>
+</ol>
+<p>内核模块运行在内核空间，用户程序运行在用户空间。内核模块结束时要做一些清除性的工作，并且需要严格避免溢出和野指针的问题，把自己系统玩崩了概不负责。</p>
+<ol start="2">
+<li><code>struct cdev</code> 结构体和 <code>struct file_operations</code> 结构体中有哪些内容，有什么作用？</li>
+</ol>
+<p>内核中每个字符设备都对应一个 <code>struct cdev</code> 结构的变量，我这里根本没用到。</p>
+<p><code>struct file_operations</code> 是驱动框架，在应用层的函数（<code>eg: open</code>)被调用时，驱动程序中对应的函数（<code>eg: mydriver_open</code>）就会被执行。</p>
+<ol start="3">
+<li>用于编译内核模块编译的 <code>Makefile</code> 文件中各个部分有什么作用？</li>
+</ol>
+<p>看上面代码的注释吧。</p>
+<ol start="4">
+<li>什么是主设备号和次设备号，有什么作用？</li>
+</ol>
+<p>主设备号用来表示一个特定的驱动程序，次设备号用来表示使用该驱动程序的各设备。具体到这里我们的主设备号为 510 是确定的，但是创建到 <code>/dev</code> 中可以有多个次设备号，多个设备。</p>
+<ol start="5">
+<li>字符设备驱动是如何访问用户空间的数据的？</li>
+</ol>
+<p>使用内核提供的 <code>copy_to_user</code> 和 <code>copy_from_user</code> 这两个函数。</p>
+<h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><ol>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/jchen1218/article/details/121414210">Linux驱动实践：你知道【字符设备驱动程序】的两种写法吗？</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/Wangguang_/article/details/91410809">字符设备驱动实验</a></li>
+</ol>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E5%86%99%E4%BB%A3%E7%A0%81%E5%92%8C-Makefile-%E6%96%87%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">编写代码和 Makefile 文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E8%BD%BD%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8"><span class="toc-number">2.</span> <span class="toc-text">加载字符设备驱动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="toc-number">3.</span> <span class="toc-text">测试驱动程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%B8%E8%BD%BD%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="toc-number">4.</span> <span class="toc-text">卸载驱动程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%92%8C%E6%80%9D%E8%80%83"><span class="toc-number">5.</span> <span class="toc-text">问题和思考</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-number">6.</span> <span class="toc-text">参考链接</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/becdd9d7.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/becdd9d7.html&text=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/becdd9d7.html&title=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/becdd9d7.html&is_video=false&description=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Linux-Kernel字符设备驱动程序实验&body=Check out this article: https://ceyewan.github.io/p/becdd9d7.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/becdd9d7.html&title=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/becdd9d7.html&title=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/becdd9d7.html&title=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/becdd9d7.html&title=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/becdd9d7.html&name=Linux-Kernel字符设备驱动程序实验&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/becdd9d7.html&t=Linux-Kernel字符设备驱动程序实验"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
