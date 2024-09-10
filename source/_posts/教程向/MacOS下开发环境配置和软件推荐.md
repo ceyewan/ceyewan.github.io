@@ -25,20 +25,12 @@ REMOTE=https://gitee.com/mirrors/oh-my-zsh.git sh -c "$(curl -fsSL https://gitee
 
 ```shell
 vim ~/.zshrc # 编辑配置文件
-ZSH_THEME="random" # 找到 ZSH_THEME 修改为 random （随机），或者任何你喜欢的主题 
+ZSH_THEME="random" # 找到 ZSH_THEME 修改为 random （随机），或者任何你喜欢的主题，如 apple 
 ```
 
 然后小小的配置一下：
 
 ```shell
-# 下载 powerlevel10k 主题
-git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k
-# 导入主题
-echo 'source $ZSH_CUSTOM/themes/powerlevel10k/powerlevel10k.zsh-theme' >>! ~/.zshrc
-# 修改 ~/.zshrc 里的 ZSH_THEME 为 "powerlevel10k/powerlevel10k"
-# 然后重新打开终端，跟着提示配置好这个主题（后续需要重新配置，执行 p10k configure 即可）
-# 我感觉配置好繁琐，直男癌没什么审美，只喜欢开箱即用的。所以上面不搞
-# 下面的配置很重要，和使用体验息息相关
 # 语法高亮
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
 # 自动补全
@@ -101,7 +93,7 @@ If:
     PathMatch: [.*\.cpp, .*\.cxx, .*\.cc, .*\.h, .*\.hpp, .*\.hxx]
 CompileFlags:
     Add:
-        - "-std=c++11"
+        - "-std=c++14"
 ---
 # Fragment specific to C source files
 If:
@@ -111,7 +103,7 @@ CompileFlags:
         - "-std=c99"
 ```
 
-C++ 开发我用的是 GitHub Theme + Error Lens + clangd，效果如下：
+C++ 开发我用的是 GitHub Theme + Error Lens + clangd 这三个插件，效果如下：
 
 ![image-20230321221258813](https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20230321221258813.png)
 
@@ -139,7 +131,7 @@ C++ 开发我用的是 GitHub Theme + Error Lens + clangd，效果如下：
 2.   隐私与安全性，当打开一个网上下载的软件被系统拦截了之后，可以在这里允许打开。
 3.   桌面与程序坞，修改程序坞大小，将放大效果设置到最大，买 Mac 不就是为了鼠标滑过时放大效果。最小化窗口使用神奇效果。**连按窗口标题栏以缩放。**打开弹跳打开应用程序，打开台前调度。
 4.   桌面与程序坞，最下面，触发角。比如可以将左上角设置为锁定屏幕，这样临时有事可以将鼠标移动到左上角，直接锁定屏幕，保护隐私。
-5.   通用，共享，互联网共享。我连接的是以太网，可以使用 WIFI 共享（需要开启 WIFI 先）。这样不仅能分享网络，还能创建局域网，局域网可以用来远程连接、投屏等一系列操作。
+5.   通用，共享，互联网共享。我连接的是以太网，可以使用 WIFI 共享（需要开启 WIFI 先）。Mac 能 24 小时开机，用来在寝室开个热点还是可以的。
 
 ## 软件推荐
 
@@ -159,6 +151,8 @@ C++ 开发我用的是 GitHub Theme + Error Lens + clangd，效果如下：
 
 另外还有长截屏也是不支持的，不过对我而言任然是优点大于劣势。
 
+>   目前已经在用 Longshot 了。
+
 ### NeatDownloadManager
 
 多线程下载器，在 Win 上一直用的 IDM，结果没有 Mac 版，找了个替代品，很好用，基本上可以当成 IDM 用，配置一下代理加上 ClashX 基本上可以把代理速度跑满。
@@ -170,6 +164,8 @@ C++ 开发我用的是 GitHub Theme + Error Lens + clangd，效果如下：
 ### Rectangle
 
 分屏软件，自带的分屏真心不好操作，win 键 + 上下左右箭头已经把我养刁了。这个软件我们使用 Ctrl+Option+方向键就好了，还有好多快捷键，好用！
+
+>   目前由 Raycast 代替。
 
 ### 腾讯柠檬清理
 
@@ -187,6 +183,8 @@ C++ 开发我用的是 GitHub Theme + Error Lens + clangd，效果如下：
 
 支持在 m 芯片上跑 iOS 应用，[Decrypt IPA Store](https://decrypt.day/) 可以下载 ipa 文件。不过我现在就下了一个酷狗概念版，免费听歌，界面清爽，移动端都适用。
 
+>   目前用的 apple music，所以它也没用了。
+
 ### VidHub
 
 一款本地播放软件，搭配 Alist 挂载夸克、阿里等云盘，可以创建自己的影视资源库。如果再用上小雅的话，那就更加爽歪歪了，第一次知道阿里云盘不限速有多香。
@@ -194,7 +192,8 @@ C++ 开发我用的是 GitHub Theme + Error Lens + clangd，效果如下：
 其他软件：
 
 - 小红书：现在 MAC 原生支持小红书了，在 MAC 上刷小红书好爽。
-- 坚果云：使用坚果云在 Windows 和 Mac 之间同步文件，Onedrive 也可以吧，但是我妹妹问过我几次，为什么保持好好的文件，突然打不开了。其实就是保存到 Onedrive 上，就这破速度，我是不爱用的。
+- 坚果云：使用坚果云在 Windows 和 Mac 之间同步文件，Onedrive 也可以吧，但总是要我登录登录登录。
 - Pa.per：壁纸软件，一个壁纸看久了总会腻的，这个软件只有一个功能，可以帮你自动换壁纸。
-- ~~UPDF：一款颜值很高的 PDF 阅读器，编辑啥的功能我用不着。~~每次打开都要我登录，我就知道该淘汰它了。没有找到好用的，目前用的系统自带的预览，其实够用了。
-- 搜狗输入法：我一般不想安装第三方输入法的，但是自带的输入法不能按 shift 切换中英文，这比杀了我还难受。无奈只能选择第三方。搜狗是为数不多支持 linux 的输入法了，所以在选择第三方的时候我选他家。  
+- ~~UPDF：一款颜值很高的 PDF 阅读器，编辑啥的功能我用不着。~~每次打开都要我登录，我就知道该淘汰它了。没有找到好用的，~~目前用的系统自带的预览，其实够用了。~~现在使用 skim 和 Adobe acrobat，前者轻量化，看看 PDF，后者用来做一些 PDF 编辑工作。
+- ~~搜狗输入法：我一般不想安装第三方输入法的，但是自带的输入法不能按 shift 切换中英文，这比杀了我还难受。无奈只能选择第三方。搜狗是为数不多支持 linux 的输入法了，所以在选择第三方的时候我选他家。~~  换成了鼠须管。
+- ChatGPT：Mac 客户端程序，常驻后台，比用浏览器方便些。
