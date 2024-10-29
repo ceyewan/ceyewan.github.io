@@ -1,10 +1,11 @@
 ---
-title: PQC: Exploring Kyber in Python
-date: 2024-10-29 18:33:09
+title: 'PQC:Exploring Kyber in Python'
 categories:
-- PQC
+  - PQC
 tags:
-- Kyber
+  - Kyber
+abbrlink: 63fe6d08
+date: 2024-10-29 18:33:09
 ---
 # PQC: Exploring Kyber in Python
 

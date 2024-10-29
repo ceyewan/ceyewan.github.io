@@ -1,5 +1,5 @@
 ---
-title: 'PQC:Introduction'
+title: PQC:Introduction
 categories:
   - PQC
 tags:
