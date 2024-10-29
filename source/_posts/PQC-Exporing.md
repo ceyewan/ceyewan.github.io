@@ -1,5 +1,5 @@
 ---
-title: 'PQC:Exploring Kyber in Python'
+title: PQC:Exploring-Kyber-in-Python
 categories:
   - PQC
 tags:
