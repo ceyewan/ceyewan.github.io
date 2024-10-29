@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="CS50ai-Knowledge总结# 知识表示与逻辑推理## 一、基础概念### 1. 知识型智能体- **定义**：能够通过对知识的内部表示进行操作来实现推理的智能体- **核心要素**：句子(用知识表示语言对世界的断言)### 2. 命题逻辑系统- **命题符号**：使用P、Q、R等字母表示可真可假的陈述- **真值模型**：为命题分配真值的集合，n个命题有2^n个可能模型- **知识库(K">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS50ai-Knowledge">
+<meta property="og:url" content="https://ceyewan.github.io/p/84d7f84a.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="CS50ai-Knowledge总结# 知识表示与逻辑推理## 一、基础概念### 1. 知识型智能体- **定义**：能够通过对知识的内部表示进行操作来实现推理的智能体- **核心要素**：句子(用知识表示语言对世界的断言)### 2. 命题逻辑系统- **命题符号**：使用P、Q、R等字母表示可真可假的陈述- **真值模型**：为命题分配真值的集合，n个命题有2^n个可能模型- **知识库(K">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-10-29T10:32:11.000Z">
+<meta property="article:modified_time" content="2024-10-29T10:36:00.194Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="CS50ai">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>CS50ai-Knowledge</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/859aac7b.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/5d505f64.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/84d7f84a.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/84d7f84a.html&text=CS50ai-Knowledge"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/84d7f84a.html&title=CS50ai-Knowledge"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/84d7f84a.html&is_video=false&description=CS50ai-Knowledge"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CS50ai-Knowledge&body=Check out this article: https://ceyewan.github.io/p/84d7f84a.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/84d7f84a.html&title=CS50ai-Knowledge"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/84d7f84a.html&title=CS50ai-Knowledge"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/84d7f84a.html&title=CS50ai-Knowledge"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/84d7f84a.html&title=CS50ai-Knowledge"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/84d7f84a.html&name=CS50ai-Knowledge&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/84d7f84a.html&t=CS50ai-Knowledge"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CS50ai-Knowledge"><span class="toc-number">1.</span> <span class="toc-text">CS50ai-Knowledge</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.1.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Knowledge"><span class="toc-number">1.2.</span> <span class="toc-text">Knowledge</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Knowledge-Based-Agents"><span class="toc-number">1.2.1.</span> <span class="toc-text">Knowledge-Based Agents</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sentence"><span class="toc-number">1.2.2.</span> <span class="toc-text">Sentence</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Propositional-Logic"><span class="toc-number">1.3.</span> <span class="toc-text">Propositional Logic</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Propositional-Symbols"><span class="toc-number">1.3.1.</span> <span class="toc-text">Propositional Symbols</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Logical-Connectives"><span class="toc-number">1.3.2.</span> <span class="toc-text">Logical Connectives</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Model"><span class="toc-number">1.3.3.</span> <span class="toc-text">Model</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Knowledge-Base"><span class="toc-number">1.3.4.</span> <span class="toc-text">Knowledge Base</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Entailment%EF%BC%88%E2%8A%A8%EF%BC%89"><span class="toc-number">1.3.5.</span> <span class="toc-text">Entailment（⊨）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Inference"><span class="toc-number">1.4.</span> <span class="toc-text">Inference</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Knowledge-Engineering"><span class="toc-number">1.5.</span> <span class="toc-text">Knowledge Engineering</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Inference-Rules"><span class="toc-number">1.6.</span> <span class="toc-text">Inference Rules</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E5%92%8C%E6%90%9C%E7%B4%A2%E9%97%AE%E9%A2%98"><span class="toc-number">1.6.1.</span> <span class="toc-text">知识和搜索问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Resolution"><span class="toc-number">1.7.</span> <span class="toc-text">Resolution</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E5%8F%A5%E5%92%8C%E5%90%88%E5%8F%96%E8%8C%83%E5%BC%8F%EF%BC%88CNF%EF%BC%89"><span class="toc-number">1.7.1.</span> <span class="toc-text">从句和合取范式（CNF）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2%E4%B8%BA%E5%90%88%E5%8F%96%E8%8C%83%E5%BC%8F%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.7.2.</span> <span class="toc-text">转换为合取范式的步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E7%90%86%E7%AE%97%E6%B3%95"><span class="toc-number">1.7.3.</span> <span class="toc-text">推理算法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#First-Order-Logic"><span class="toc-number">1.8.</span> <span class="toc-text">First Order Logic</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E7%94%A8%E9%87%8F%E5%8C%96%EF%BC%88Universal-Quantification%EF%BC%89"><span class="toc-number">1.8.1.</span> <span class="toc-text">通用量化（Universal Quantification）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%9C%A8%E9%87%8F%E5%8C%96%EF%BC%88Existential-Quantification%EF%BC%89"><span class="toc-number">1.8.2.</span> <span class="toc-text">存在量化（Existential Quantification）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%B7%E5%90%88%E9%87%8F%E5%8C%96"><span class="toc-number">1.8.3.</span> <span class="toc-text">混合量化</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        CS50ai-Knowledge
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-10-29T10:32:11.000Z" class="dt-published" itemprop="datePublished">2024-10-29</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/AI/">AI</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/CS50ai/" rel="tag">CS50ai</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h1 id="CS50ai-Knowledge"><a href="#CS50ai-Knowledge" class="headerlink" title="CS50ai-Knowledge"></a>CS50ai-Knowledge</h1><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="section"># 知识表示与逻辑推理</span></span><br><span class="line"></span><br><span class="line"><span class="section">## 一、基础概念</span></span><br><span class="line"></span><br><span class="line"><span class="section">### 1. 知识型智能体</span></span><br><span class="line"><span class="bullet">-</span> <span class="strong">**定义**</span>：能够通过对知识的内部表示进行操作来实现推理的智能体</span><br><span class="line"><span class="bullet">-</span> <span class="strong">**核心要素**</span>：句子(用知识表示语言对世界的断言)</span><br><span class="line"></span><br><span class="line"><span class="section">### 2. 命题逻辑系统</span></span><br><span class="line"><span class="bullet">-</span> <span class="strong">**命题符号**</span>：使用P、Q、R等字母表示可真可假的陈述</span><br><span class="line"><span class="bullet">-</span> <span class="strong">**真值模型**</span>：为命题分配真值的集合，n个命题有2^n个可能模型</span><br><span class="line"><span class="bullet">-</span> <span class="strong">**知识库(KB)**</span>：智能体掌握的命题集合</span><br><span class="line"></span><br><span class="line"><span class="section">### 3. 逻辑连接词</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> 否定(¬): 反转真值</span><br><span class="line"><span class="bullet">2.</span> 合取(∧): 且，全真才真</span><br><span class="line"><span class="bullet">3.</span> 析取(∨): 或，有真则真</span><br><span class="line"><span class="bullet">   -</span> 包含或：允许同真</span><br><span class="line"><span class="bullet">   -</span> 排他或(⊕)：不允许同真</span><br><span class="line"><span class="bullet">4.</span> 蕴含(→): if P then Q</span><br><span class="line"><span class="bullet">   -</span> P为前件，Q为后件</span><br><span class="line"><span class="bullet">   -</span> P假时永真(trivially true)</span><br><span class="line"><span class="bullet">5.</span> 双条件(↔): 当且仅当，等价关系</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="section">## 二、推理系统</span></span><br><span class="line"></span><br><span class="line"><span class="section">### 1. 基本概念</span></span><br><span class="line"><span class="bullet">-</span> <span class="strong">**蕴含关系(⊨)**</span>：若α⊨β，则α真时β必真</span><br><span class="line"><span class="bullet">-</span> <span class="strong">**推理过程**</span>：从已知句子推导出新句子</span><br><span class="line"></span><br><span class="line"><span class="section">### 2. 推理方法</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> 模型检查法</span><br><span class="line"><span class="bullet">   -</span> 枚举所有可能模型</span><br><span class="line"><span class="bullet">   -</span> 验证KB为真时α是否为真</span><br><span class="line">   </span><br><span class="line"><span class="bullet">2.</span> 推理规则法(更高效)</span><br><span class="line"><span class="bullet">   -</span> 假言推理：P→Q且P，则Q</span><br><span class="line"><span class="bullet">   -</span> 合取消去：P∧Q，则P</span><br><span class="line"><span class="bullet">   -</span> 双重否定：¬(¬P)，则P</span><br><span class="line"><span class="bullet">   -</span> 蕴含消去：P→Q，则¬P∨Q</span><br><span class="line"><span class="bullet">   -</span> 德摩根定律：¬(P∧Q)≡¬P∨¬Q</span><br><span class="line"></span><br><span class="line"><span class="section">### 3. 归结原理(Resolution)</span></span><br><span class="line"></span><br><span class="line">核心思想：通过补充文字(P和¬P)生成新知识</span><br><span class="line"></span><br><span class="line">基本规则：</span><br><span class="line"><span class="bullet">1.</span> P∨Q, ¬P ⊨ Q</span><br><span class="line"><span class="bullet">2.</span> P∨Q, ¬P∨R ⊨ Q∨R</span><br><span class="line"></span><br><span class="line">应用步骤：</span><br><span class="line"><span class="bullet">1.</span> 转换为合取范式(CNF)</span><br><span class="line"><span class="bullet">2.</span> 寻找互补文字</span><br><span class="line"><span class="bullet">3.</span> 生成新子句</span><br><span class="line"><span class="bullet">4.</span> 若得到空子句则证明成功</span><br><span class="line"></span><br><span class="line"><span class="section">## 三、一阶逻辑(更强大的表达系统)</span></span><br><span class="line"></span><br><span class="line"><span class="section">### 1. 基本元素</span></span><br><span class="line"><span class="bullet">-</span> <span class="strong">**常量符号**</span>：表示具体对象</span><br><span class="line"><span class="bullet">-</span> <span class="strong">**谓词符号**</span>：表示对象间的关系/属性</span><br><span class="line"></span><br><span class="line"><span class="section">### 2. 量词系统</span></span><br><span class="line"><span class="bullet">1.</span> 全称量词(∀)：对所有x都成立</span><br><span class="line">   例：∀x.Person(x)→Mortal(x)</span><br><span class="line">   </span><br><span class="line"><span class="bullet">2.</span> 存在量词(∃)：存在某个x成立</span><br><span class="line">   例：∃x.House(x)∧BelongsTo(Minerva,x)</span><br><span class="line">   </span><br><span class="line"><span class="bullet">3.</span> 混合使用：</span><br><span class="line">   ∀x.Person(x)→(∃y.House(y)∧BelongsTo(x,y))</span><br><span class="line">   含义：每个人都属于某个房子</span><br></pre></td></tr></table></figure>
+
+<h2 id="Knowledge"><a href="#Knowledge" class="headerlink" title="Knowledge"></a>Knowledge</h2><p>本节探讨如何在人工智能中表现知识并对现有知识进行推理得出结论。</p>
+<h3 id="Knowledge-Based-Agents"><a href="#Knowledge-Based-Agents" class="headerlink" title="Knowledge-Based Agents"></a>Knowledge-Based Agents</h3><h3 id="Sentence"><a href="#Sentence" class="headerlink" title="Sentence"></a>Sentence</h3><p>句子是 AI 存储知识并用它来推断新信息的方式，是一种用知识表示语言对世界的断言。</p>
+<h2 id="Propositional-Logic"><a href="#Propositional-Logic" class="headerlink" title="Propositional Logic"></a>Propositional Logic</h2><p>命题逻辑基于命题，即关于世界的陈述，可以是真或者假。</p>
+<h3 id="Propositional-Symbols"><a href="#Propositional-Symbols" class="headerlink" title="Propositional Symbols"></a>Propositional Symbols</h3><p>命题符号，一般使用 <code>(P、Q、R)</code>。</p>
+<h3 id="Logical-Connectives"><a href="#Logical-Connectives" class="headerlink" title="Logical Connectives"></a>Logical Connectives</h3><p>逻辑连接词，用于连接命题符号的逻辑符号。</p>
+<ul>
+<li><strong>Not (¬)</strong> ：用于反转命题的真值。</li>
+<li>**And (∧)**：连接两个不同的命题，仅当 P 和 Q 都为真时，命题 P∧Q 才为真，表示且。</li>
+<li>**Or (∨)**：连接两个不同的命题，只要其中一个参数为真就为真，表示或。</li>
+</ul>
+<blockquote>
+<p>有两种类型的或，包含或（Inclusive Or）和排他或（Exclusive Or）。排他或也就是异或（XOR，用符号 ⊕ 表示），两者都为真，结果为假。</p>
+</blockquote>
+<ul>
+<li>**Implication(→)**：如果 P 则 Q，P 被称为前件（Antecedent），Q 被称为后件（consequent）。<ul>
+<li>如果 P 为真，Q 为真，则结果为真；Q 为假，则结果为假。</li>
+<li>如果 P 为假，无论 Q 的真值如何，结果都为真（trivially true）。</li>
+</ul>
+</li>
+<li><strong>Biconditional（↔）</strong>：相当于当且仅当，P↔Q &#x3D; P→Q∧Q→P。即当 P 和 Q 同时为真或者同时为假时，结果为真；P 和 Q 不同时，结果为假。</li>
+</ul>
+<h3 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h3><p>模型是为每个命题分配一个真值，即 {P &#x3D; True， Q &#x3D; False}。如果有 n 个命题，那么就会有 $n^2$ 个可能的模型。</p>
+<h3 id="Knowledge-Base"><a href="#Knowledge-Base" class="headerlink" title="Knowledge Base"></a>Knowledge Base</h3><p>知识库是知识型智能体(agent)所掌握的一组句子集合。这是以命题逻辑句子形式提供给人工智能系统的关于世界的知识。这些知识可以用来对世界做出额外的推理。</p>
+<h3 id="Entailment（⊨）"><a href="#Entailment（⊨）" class="headerlink" title="Entailment（⊨）"></a>Entailment（⊨）</h3><p>如果 α ⊨ β （α 蕴含 β），那么在任何 α 为真的世界中，β 也为真。</p>
+<blockquote>
+<p><strong>Implication</strong>：是两个命题之间的逻辑连接词。</p>
+<p><strong>Entailment</strong>：是一种关系，表示如果 α 中信息为真，β 中所有信息都是真的。</p>
+</blockquote>
+<h2 id="Inference"><a href="#Inference" class="headerlink" title="Inference"></a>Inference</h2><p>推理是从旧句子中推导出新句子的过程。首先，考虑模型检查（Model Checking）算法：</p>
+<ol>
+<li>确定 KB ⊨ α 是否成立（即我们能否通过知识库 KB 得出 α 为真的结论）</li>
+<li>枚举所有可能的模型。</li>
+<li>如果在每个 KB 为真的模型中，α 都为真，则结论成立。</li>
+</ol>
+<p>例如：P：今天是星期二；Q：下雨；R：Herry 要去跑步；KB：(P ∧ ¬Q) → R。现在我们想知道 KB ⊨ R，即 R 到底是不是真的。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> logic <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建表示命题的符号</span></span><br><span class="line">P = Symbol(<span class="string">&quot;P&quot;</span>)  <span class="comment"># 今天是星期二</span></span><br><span class="line">Q = Symbol(<span class="string">&quot;Q&quot;</span>)  <span class="comment"># 下雨</span></span><br><span class="line">R = Symbol(<span class="string">&quot;R&quot;</span>)  <span class="comment"># Harry 要去跑步</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 构建知识库 KB: (P ∧ ¬Q) → R</span></span><br><span class="line">knowledge = Implication(And(P, Not(Q)), R)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">check_all</span>(<span class="params">knowledge, query, symbols, model</span>):</span><br><span class="line">    <span class="comment"># 如果 model 已经为每个符号都分配了真值</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> symbols:</span><br><span class="line">        <span class="comment"># 如果知识库在此模型下为真, 那么查询也必须为真</span></span><br><span class="line">        <span class="keyword">if</span> knowledge.evaluate(model):</span><br><span class="line">            <span class="keyword">return</span> query.evaluate(model)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment"># 选择一个剩余的未使用符号</span></span><br><span class="line">        remaining = symbols.copy()</span><br><span class="line">        p = remaining.pop()</span><br><span class="line">        <span class="comment"># 创建一个符号为真的模型</span></span><br><span class="line">        model_true = model.copy()</span><br><span class="line">        model_true[p] = <span class="literal">True</span></span><br><span class="line">        <span class="comment"># 创建一个符号为假的模型</span></span><br><span class="line">        model_false = model.copy()</span><br><span class="line">        model_false[p] = <span class="literal">False</span></span><br><span class="line">        <span class="comment"># 确保在两个模型中都成立</span></span><br><span class="line">        <span class="keyword">return</span> (check_all(knowledge, query, remaining, model_true) <span class="keyword">and</span> </span><br><span class="line">                check_all(knowledge, query, remaining, model_false))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查 KB ⊨ R</span></span><br><span class="line">symbols = [P, Q, R]</span><br><span class="line">query = R</span><br><span class="line">result = check_all(knowledge, query, symbols, &#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;KB ⊨ R 是 <span class="subst">&#123;result&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>check_all 递归为每一个 Symbols 分配真值并将其添加到 Model 中，所有的 Symbols 都分配完真值之后，如果 KB 为真，R 也为真就输出真；R 为假，说明不成立，输出假，即表示不能得到这样的结论。如果 KB 为假，不是我们要考虑的，直接返回 True，不影响最后的结果。</p>
+<h2 id="Knowledge-Engineering"><a href="#Knowledge-Engineering" class="headerlink" title="Knowledge Engineering"></a>Knowledge Engineering</h2><p>知识工程是弄清楚如何在人工智能中表示命题和逻辑的过程。</p>
+<h2 id="Inference-Rules"><a href="#Inference-Rules" class="headerlink" title="Inference Rules"></a>Inference Rules</h2><p>模型检查算法效率较低，而推理规则让我们能够根据现有知识生成新信息。</p>
+<ul>
+<li><p><strong>假言推理（Modus Ponens）</strong>: 如果 $$\alpha \rightarrow \beta$$ 且 $$\alpha$$，则 $$\beta$$。</p>
+</li>
+<li><p><strong>合取消去（And Elimination）</strong>: 如果 $$\alpha \land \beta$$，则 $$\alpha$$。</p>
+</li>
+<li><p><strong>双重否定消去（Double Negation Elimination）</strong>: 如果 $$\neg(\neg \alpha)$$，则 $$\alpha$$。</p>
+</li>
+<li><p><strong>蕴涵消去（Implication Elimination）</strong>: 如果 $$\alpha \rightarrow \beta$$，则 $$\neg \alpha \lor \beta$$。</p>
+</li>
+<li><p><strong>双条件消去（Biconditional Elimination）</strong>: 如果 $$\alpha \leftrightarrow \beta$$，则 $$\alpha \rightarrow \beta \land \beta \rightarrow \alpha$$。</p>
+</li>
+<li><p><strong>德摩根定律（De Morgan’s Law）</strong>: $$\neg (\alpha \land \beta) \equiv \neg \alpha \lor \neg \beta$$；$$\neg (\alpha \lor \beta) \equiv \neg \alpha \land \neg \beta$$</p>
+</li>
+<li><p><strong>分配律（Distributive Property）</strong>: $$\alpha \land (\beta \lor \gamma) \equiv (\alpha \land \beta) \lor (\alpha \land \gamma)$$；$$\alpha \lor (\beta \land \gamma) \equiv (\alpha \lor \beta) \land (\alpha \lor \gamma)$$</p>
+</li>
+</ul>
+<h3 id="知识和搜索问题"><a href="#知识和搜索问题" class="headerlink" title="知识和搜索问题"></a>知识和搜索问题</h3><p>推理被视为具有以下属性的搜索问题：</p>
+<ul>
+<li>初始状态（Initial State）：启动知识库；</li>
+<li>动作（Action）：推理规则；</li>
+<li>转换模型（Transition Model）：推理后的新知识库；</li>
+<li>目标测试（Goal Test）：检查要证明的语句是否在知识库中；</li>
+<li>路径成本函数（Path Cost Function）：证明中的步骤数。</li>
+</ul>
+<h2 id="Resolution"><a href="#Resolution" class="headerlink" title="Resolution"></a>Resolution</h2><p>归结（Resolution）是一个强大的推理规则，它基于补充文字，即一个命题符号和它的否定形式，例如 P 和 ¬P。归结规则允许我们通过推理生成新句子，从而获得新的知识。</p>
+<blockquote>
+<p>如果我们知道 $P \lor Q$ 并且还知道 $\neg P$，那么就能推理出 $Q$。</p>
+</blockquote>
+<p>归结可以进一步推广：</p>
+<blockquote>
+<p>如果我们知道 $P \lor Q$ 并且还知道 $\neg P \lor R$，那么就能推理出 $Q \lor R$。</p>
+</blockquote>
+<h3 id="从句和合取范式（CNF）"><a href="#从句和合取范式（CNF）" class="headerlink" title="从句和合取范式（CNF）"></a>从句和合取范式（CNF）</h3><ul>
+<li><strong>从句（Clause）</strong>：是文字的析取（例如 $$P \lor Q \lor R$$）。</li>
+<li><strong>合取范式（CNF）</strong>：是从句的合取，例如 $$(A \lor B \lor C) \land (D \lor \neg E) \land (F \lor G)$$。</li>
+</ul>
+<h3 id="转换为合取范式的步骤"><a href="#转换为合取范式的步骤" class="headerlink" title="转换为合取范式的步骤"></a>转换为合取范式的步骤</h3><ol>
+<li><strong>消去双条件</strong>：将 $$(\alpha \leftrightarrow \beta)$$ 转换为 $$(\alpha \rightarrow \beta) \land (\beta \rightarrow \alpha)$$。</li>
+<li><strong>消去蕴涵</strong>：将 $$(\alpha \rightarrow \beta)$$ 转换为 $$(\neg \alpha \lor \beta)$$。</li>
+<li><strong>移动否定</strong>：使用德摩根定律，将否定移到文字上。$$\neg (\alpha \land \beta) \equiv \neg \alpha \lor \neg \beta$$</li>
+<li><strong>分配律</strong>：应用分配律以达到合取范式。</li>
+</ol>
+<p><strong>例子</strong>：将 $$(P \lor Q) \rightarrow R$$ 转换为 CNF。</p>
+<ul>
+<li>消去蕴涵：$$\neg (P \lor Q) \lor R$$</li>
+<li>德摩根定律：$$(\neg P \land \neg Q) \lor R$$</li>
+<li>分配律：$$(\neg P \lor R) \land (\neg Q \lor R)$$</li>
+</ul>
+<h3 id="推理算法"><a href="#推理算法" class="headerlink" title="推理算法"></a>推理算法</h3><p>推理算法通过分解生成新子句，直到生成空子句（即矛盾），从而证明知识库的蕴涵关系。</p>
+<p><strong>证明过程</strong>：</p>
+<ol>
+<li>将 $$(KB \land \neg \alpha)$$ 转换为 CNF。</li>
+<li>检查是否可以通过分解生成新子句。</li>
+<li>如果生成空子句，则证明 $$(KB \models \alpha)$$。</li>
+<li>如果无法生成矛盾，则无蕴涵。</li>
+</ol>
+<p><strong>例子</strong>：验证 $$(A \lor B) \land (\neg B \lor C) \land (\neg C)$$ 是否蕴涵 $$A$$。</p>
+<ul>
+<li>假设 $$A$$ 为假，得到 $$(A \lor B) \land (\neg B \lor C) \land (\neg C) \land (\neg A)$$。</li>
+<li>由于 $$\neg C$$，可知 $$B$$ 为假，添加 $$(\neg B)$$。</li>
+<li>由于 $$\neg B$$，可知 $$A$$ 为真，添加 $$(A)$$。</li>
+<li>现在有互补文字 $$(A)$$ 和 $$(\neg A)$$，生成空子句，证明矛盾。</li>
+</ul>
+<p>通过以上步骤，我们可以利用分解和合取范式的转换来进行有效的逻辑推理和证明。</p>
+<h2 id="First-Order-Logic"><a href="#First-Order-Logic" class="headerlink" title="First Order Logic"></a>First Order Logic</h2><p>一阶逻辑使用两种符号：常量符号和谓词符号，可以表达更复杂的思想。</p>
+<blockquote>
+<ul>
+<li><strong>常量符号</strong>：表示对象。例如 Minerva 等。</li>
+<li><strong>谓词符号</strong>：类似于关系或函数，接受一个或多个参数并返回真或假。例如，谓词 Person(Minerva) 表示 Minerva 是一个人。</li>
+</ul>
+</blockquote>
+<h3 id="通用量化（Universal-Quantification）"><a href="#通用量化（Universal-Quantification）" class="headerlink" title="通用量化（Universal Quantification）"></a>通用量化（Universal Quantification）</h3><p>通用量化使用符号 ∀ 来表示“对于所有”。例如，表达式 $$\forall x. \text{BelongsTo}(x, \text{Gryffindor}) \rightarrow \neg \text{BelongsTo}(x, \text{Hufflepuff})$$ 表示对于每一个符号 x，如果 x 属于 Gryffindor，则 x 不属于 Hufflepuff。</p>
+<h3 id="存在量化（Existential-Quantification）"><a href="#存在量化（Existential-Quantification）" class="headerlink" title="存在量化（Existential Quantification）"></a>存在量化（Existential Quantification）</h3><p>存在量化与通用量化相对，表示“至少存在一个”。使用符号 ∃ 表示。例如，表达式 $$\exists x. \text{House}(x) \land \text{BelongsTo}(\text{Minerva}, x)$$ 表示至少存在一个符号 x，它既是一个房子且 Minerva 属于它。这表达了 Minerva 属于某个房子的思想。</p>
+<h3 id="混合量化"><a href="#混合量化" class="headerlink" title="混合量化"></a>混合量化</h3><p>存在量化和通用量化可以在同一个句子中使用。例如，表达式 $$\forall x. \text{Person}(x) \rightarrow (\exists y. \text{House}(y) \land \text{BelongsTo}(x, y))$$ 表示如果 x 是一个人，那么至少存在一个房子 y，使得这个人属于该房子。换句话说，每个人都属于一个房子。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CS50ai-Knowledge"><span class="toc-number">1.</span> <span class="toc-text">CS50ai-Knowledge</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.1.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Knowledge"><span class="toc-number">1.2.</span> <span class="toc-text">Knowledge</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Knowledge-Based-Agents"><span class="toc-number">1.2.1.</span> <span class="toc-text">Knowledge-Based Agents</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sentence"><span class="toc-number">1.2.2.</span> <span class="toc-text">Sentence</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Propositional-Logic"><span class="toc-number">1.3.</span> <span class="toc-text">Propositional Logic</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Propositional-Symbols"><span class="toc-number">1.3.1.</span> <span class="toc-text">Propositional Symbols</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Logical-Connectives"><span class="toc-number">1.3.2.</span> <span class="toc-text">Logical Connectives</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Model"><span class="toc-number">1.3.3.</span> <span class="toc-text">Model</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Knowledge-Base"><span class="toc-number">1.3.4.</span> <span class="toc-text">Knowledge Base</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Entailment%EF%BC%88%E2%8A%A8%EF%BC%89"><span class="toc-number">1.3.5.</span> <span class="toc-text">Entailment（⊨）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Inference"><span class="toc-number">1.4.</span> <span class="toc-text">Inference</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Knowledge-Engineering"><span class="toc-number">1.5.</span> <span class="toc-text">Knowledge Engineering</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Inference-Rules"><span class="toc-number">1.6.</span> <span class="toc-text">Inference Rules</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E5%92%8C%E6%90%9C%E7%B4%A2%E9%97%AE%E9%A2%98"><span class="toc-number">1.6.1.</span> <span class="toc-text">知识和搜索问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Resolution"><span class="toc-number">1.7.</span> <span class="toc-text">Resolution</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E5%8F%A5%E5%92%8C%E5%90%88%E5%8F%96%E8%8C%83%E5%BC%8F%EF%BC%88CNF%EF%BC%89"><span class="toc-number">1.7.1.</span> <span class="toc-text">从句和合取范式（CNF）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2%E4%B8%BA%E5%90%88%E5%8F%96%E8%8C%83%E5%BC%8F%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.7.2.</span> <span class="toc-text">转换为合取范式的步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E7%90%86%E7%AE%97%E6%B3%95"><span class="toc-number">1.7.3.</span> <span class="toc-text">推理算法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#First-Order-Logic"><span class="toc-number">1.8.</span> <span class="toc-text">First Order Logic</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E7%94%A8%E9%87%8F%E5%8C%96%EF%BC%88Universal-Quantification%EF%BC%89"><span class="toc-number">1.8.1.</span> <span class="toc-text">通用量化（Universal Quantification）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%9C%A8%E9%87%8F%E5%8C%96%EF%BC%88Existential-Quantification%EF%BC%89"><span class="toc-number">1.8.2.</span> <span class="toc-text">存在量化（Existential Quantification）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%B7%E5%90%88%E9%87%8F%E5%8C%96"><span class="toc-number">1.8.3.</span> <span class="toc-text">混合量化</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/84d7f84a.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/84d7f84a.html&text=CS50ai-Knowledge"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/84d7f84a.html&title=CS50ai-Knowledge"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/84d7f84a.html&is_video=false&description=CS50ai-Knowledge"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=CS50ai-Knowledge&body=Check out this article: https://ceyewan.github.io/p/84d7f84a.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/84d7f84a.html&title=CS50ai-Knowledge"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/84d7f84a.html&title=CS50ai-Knowledge"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/84d7f84a.html&title=CS50ai-Knowledge"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/84d7f84a.html&title=CS50ai-Knowledge"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/84d7f84a.html&name=CS50ai-Knowledge&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/84d7f84a.html&t=CS50ai-Knowledge"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

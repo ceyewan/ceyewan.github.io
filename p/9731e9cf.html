@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="PQC：The Kyber PKE and KEMKyber 作为一种量子安全的密钥封装机制（Key Encapsulation Mechanism, KEM）的基本信息如下：  量子安全的密钥封装机制（KEM）：Kyber 是一种专门设计用于抵抗量子计算攻击的加密技术。传统的加密方法在量子计算机面前可能会变得不再安全，而 Kyber 通过其设计可以抵御这种威胁。  NIST 标准化：Kyber">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PQC:The-Kyber-PKE-and-KEM">
+<meta property="og:url" content="https://ceyewan.github.io/p/9731e9cf.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="PQC：The Kyber PKE and KEMKyber 作为一种量子安全的密钥封装机制（Key Encapsulation Mechanism, KEM）的基本信息如下：  量子安全的密钥封装机制（KEM）：Kyber 是一种专门设计用于抵抗量子计算攻击的加密技术。传统的加密方法在量子计算机面前可能会变得不再安全，而 Kyber 通过其设计可以抵御这种威胁。  NIST 标准化：Kyber">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-10-29T10:33:53.000Z">
+<meta property="article:modified_time" content="2024-10-29T10:38:04.053Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="Kyber">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>PQC:The-Kyber-PKE-and-KEM</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/859aac7b.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/9731e9cf.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/9731e9cf.html&text=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/9731e9cf.html&title=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/9731e9cf.html&is_video=false&description=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PQC:The-Kyber-PKE-and-KEM&body=Check out this article: https://ceyewan.github.io/p/9731e9cf.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/9731e9cf.html&title=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/9731e9cf.html&title=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/9731e9cf.html&title=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/9731e9cf.html&title=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/9731e9cf.html&name=PQC:The-Kyber-PKE-and-KEM&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/9731e9cf.html&t=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#PQC%EF%BC%9AThe-Kyber-PKE-and-KEM"><span class="toc-number">1.</span> <span class="toc-text">PQC：The Kyber PKE and KEM</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Kyber-PKE-simplified"><span class="toc-number">1.1.</span> <span class="toc-text">Kyber-PKE (simplified)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Rounding"><span class="toc-number">1.1.1.</span> <span class="toc-text">Rounding</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Domain-parameters-and-key-genaration"><span class="toc-number">1.1.2.</span> <span class="toc-text">Domain parameters and key genaration</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Encryption-and-decryption"><span class="toc-number">1.1.3.</span> <span class="toc-text">Encryption and decryption</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Security"><span class="toc-number">1.1.4.</span> <span class="toc-text">Security</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%81%E6%98%8E%EF%BC%9A%E5%8A%A0%E5%AF%86%E6%93%8D%E4%BD%9C%E5%8F%AF%E4%BB%A5%E8%A1%A8%E7%A4%BA%E4%B8%BA%E7%9F%A9%E9%98%B5%E4%B9%98%E7%A7%AF%E5%92%8C%E9%9A%8F%E6%9C%BA%E5%85%83%E7%B4%A0%E7%9A%84%E7%BB%84%E5%90%88%EF%BC%9A-begin-bmatrix-u-v-end-bmatrix"><span class="toc-number">2.</span> <span class="toc-text">证明：加密操作可以表示为矩阵乘积和随机元素的组合：$$\begin{bmatrix}u \v\end{bmatrix}</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Decryption-doesn%E2%80%99t-always-work"><span class="toc-number">2.0.1.</span> <span class="toc-text">Decryption doesn’t always work</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Optimizations"><span class="toc-number">2.1.</span> <span class="toc-text">Optimizations</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="toc-number">2.1.1.</span> <span class="toc-text">参数设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Smaller-public-keys"><span class="toc-number">2.1.2.</span> <span class="toc-text">Smaller public keys</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Ciphertext-compression"><span class="toc-number">2.1.3.</span> <span class="toc-text">Ciphertext compression</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Central-binomial-distribution"><span class="toc-number">2.1.4.</span> <span class="toc-text">Central binomial distribution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Fast-polynomial-multiplication"><span class="toc-number">2.1.5.</span> <span class="toc-text">Fast polynomial multiplication</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kyber-PKE-full"><span class="toc-number">2.2.</span> <span class="toc-text">Kyber-PKE (full)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Domain-parameters-and-key-generation"><span class="toc-number">2.2.1.</span> <span class="toc-text">Domain parameters and key generation</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%9F%E5%8F%82%E6%95%B0%EF%BC%88ML-KEM-768%EF%BC%89"><span class="toc-number">2.2.1.1.</span> <span class="toc-text">域参数（ML-KEM-768）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Kyber-PKE-%E5%AF%86%E9%92%A5%E7%94%9F%E6%88%90%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.2.1.2.</span> <span class="toc-text">Kyber-PKE 密钥生成步骤</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Encryption-and-decryption-1"><span class="toc-number">2.2.2.</span> <span class="toc-text">Encryption and decryption</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Kyber-PKE-%E5%8A%A0%E5%AF%86"><span class="toc-number">2.2.2.1.</span> <span class="toc-text">Kyber-PKE 加密</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Kyber-PKE-%E8%A7%A3%E5%AF%86"><span class="toc-number">2.2.2.2.</span> <span class="toc-text">Kyber-PKE 解密</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Decryption-doesn%E2%80%99t-always-work-1"><span class="toc-number">2.2.3.</span> <span class="toc-text">Decryption doesn’t always work</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Security-1"><span class="toc-number">2.2.4.</span> <span class="toc-text">Security</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kyber-KEM"><span class="toc-number">2.3.</span> <span class="toc-text">Kyber-KEM</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Key-encapsulation-mechanisms"><span class="toc-number">2.3.1.</span> <span class="toc-text">Key encapsulation mechanisms</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kyber-KEM-1"><span class="toc-number">2.3.2.</span> <span class="toc-text">Kyber-KEM</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FO-Transform"><span class="toc-number">2.3.3.</span> <span class="toc-text">FO Transform</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%9F%E5%8F%82%E6%95%B0%EF%BC%88ML-KEM-768%EF%BC%89-1"><span class="toc-number">2.3.4.</span> <span class="toc-text">域参数（ML-KEM-768）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kyber-KEM-%E5%AF%86%E9%92%A5%E7%94%9F%E6%88%90"><span class="toc-number">2.3.5.</span> <span class="toc-text">Kyber-KEM 密钥生成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kyber-KEM-%E5%AF%86%E9%92%A5%E5%B0%81%E8%A3%85"><span class="toc-number">2.3.6.</span> <span class="toc-text">Kyber-KEM 密钥封装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kyber-KEM-%E8%A7%A3%E5%B0%81%E8%A3%85"><span class="toc-number">2.3.7.</span> <span class="toc-text">Kyber-KEM 解封装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Security-2"><span class="toc-number">2.3.8.</span> <span class="toc-text">Security</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Parameter-sets"><span class="toc-number">2.3.9.</span> <span class="toc-text">Parameter sets</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Omitted-details"><span class="toc-number">2.3.10.</span> <span class="toc-text">Omitted details</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        PQC:The-Kyber-PKE-and-KEM
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-10-29T10:33:53.000Z" class="dt-published" itemprop="datePublished">2024-10-29</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/PQC/">PQC</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Kyber/" rel="tag">Kyber</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h1 id="PQC：The-Kyber-PKE-and-KEM"><a href="#PQC：The-Kyber-PKE-and-KEM" class="headerlink" title="PQC：The Kyber PKE and KEM"></a>PQC：The Kyber PKE and KEM</h1><p>Kyber 作为一种量子安全的密钥封装机制（Key Encapsulation Mechanism, KEM）的基本信息如下：</p>
+<ol>
+<li><p><strong>量子安全的密钥封装机制（KEM）</strong>：Kyber 是一种专门设计用于抵抗量子计算攻击的加密技术。传统的加密方法在量子计算机面前可能会变得不再安全，而 Kyber 通过其设计可以抵御这种威胁。</p>
+</li>
+<li><p><strong>NIST 标准化</strong>：Kyber 已经被美国国家标准与技术研究院（NIST）标准化，并在 FIPS 203 中被称为 ML-KEM（基于模块格的 KEM）。这意味着 Kyber 的安全性和有效性已经得到了广泛的认可和验证。</p>
+</li>
+<li><p><strong>Fujisaki-Okamoto 变换</strong>：Kyber-KEM 是通过对一个公钥加密方案（Kyber-PKE）应用 Fujisaki-Okamoto 变换而设计的。Fujisaki-Okamoto 变换是一种将公钥加密方案从仅对选择明文攻击安全（CPA 安全）提升为对选择密文攻击安全（CCA 安全）的通用方法。这使得 Kyber-KEM 在更广泛的攻击模型下保持安全。</p>
+</li>
+</ol>
+<h2 id="Kyber-PKE-simplified"><a href="#Kyber-PKE-simplified" class="headerlink" title="Kyber-PKE (simplified)"></a>Kyber-PKE (simplified)</h2><h3 id="Rounding"><a href="#Rounding" class="headerlink" title="Rounding"></a>Rounding</h3><p>设定 $ q $ 为一个奇素数，$ x $ 为区间 $[0, q - 1]$ 内的一个数。计算 $x’ &#x3D; x \mod q $，其中 $x’ $ 的范围是 $ [-(q-1)&#x2F;2, (q-1)&#x2F;2] $。</p>
+<ul>
+<li>如果 $-q&#x2F;4 &lt; x’ &lt; q&#x2F;4 $，则 $\text{Round}_q(x) &#x3D; 0 $。</li>
+<li>否则，$\text{Round}_q(x) &#x3D; 1 $。</li>
+</ul>
+<blockquote>
+<p>设 $q &#x3D; 3329 $，则如果 $-832 \leq x’ \leq 832 $，那么 $\text{Round}_q(x) &#x3D; 0 $，否则为 1。</p>
+</blockquote>
+<ul>
+<li>舍入操作可以扩展到多项式，通过对多项式的每个系数应用舍入操作。</li>
+<li>示例：对于 $q &#x3D; 3329 $，多项式 $3000 + 1500x + 2010x^2 + 37x^3 $ 的舍入结果为 $x + x^2 $。</li>
+</ul>
+<h3 id="Domain-parameters-and-key-genaration"><a href="#Domain-parameters-and-key-genaration" class="headerlink" title="Domain parameters and key genaration"></a>Domain parameters and key genaration</h3><p>对于 ML-KEM-768 来说，参数设置如下：</p>
+<ul>
+<li>**$ q &#x3D; 3329 $**：一个奇素数。</li>
+<li>**$ n &#x3D; 256 $**：多项式的维度。</li>
+<li>**$ k &#x3D; 3 $**：参数设置。</li>
+<li>**$ \eta_1 &#x3D; 2, \eta_2 &#x3D; 2 $**：用于生成随机多项式的参数。</li>
+</ul>
+<p>密钥生成过程如下：</p>
+<ol>
+<li><p><strong>选择参数</strong>：</p>
+<ul>
+<li>选择矩阵 $ A \in_R R_q^{k \times k} $。</li>
+<li>选择随机多项式 $ s \in_R S_{\eta_1}^k $ 和 $ e \in_R S_{\eta_2}^k $。</li>
+</ul>
+</li>
+<li><p><strong>计算</strong>：</p>
+<ul>
+<li>计算 $ t &#x3D; As + e $。</li>
+</ul>
+</li>
+<li><p><strong>密钥对</strong>：</p>
+<ul>
+<li>Alice 的加密（公钥）是 $ (A, t) $。</li>
+<li>Alice 的解密（私钥）是 $ s $。</li>
+</ul>
+</li>
+</ol>
+<h3 id="Encryption-and-decryption"><a href="#Encryption-and-decryption" class="headerlink" title="Encryption and decryption"></a>Encryption and decryption</h3><p>加密过程（Kyber-PKE(s) encryption）：</p>
+<ol>
+<li><p><strong>获取公钥</strong>：</p>
+<ul>
+<li>Bob 获取 Alice 的加密公钥 $(A, t)$。</li>
+</ul>
+</li>
+<li><p><strong>选择随机多项式</strong>：</p>
+<ul>
+<li>选择 $ r \in_R S_{\eta_1}^k $、$ e_1 \in_R S_{\eta_2}^k $、$ e_2 \in_R S_{\eta_2} $。</li>
+</ul>
+</li>
+<li><p><strong>计算密文</strong>：</p>
+<ul>
+<li>计算 $ u &#x3D; A^T r + e_1 $。</li>
+<li>计算 $ v &#x3D; t^T r + e_2 + \left\lfloor \frac{q}{2} \right\rfloor m $。</li>
+</ul>
+</li>
+<li><p><strong>输出密文</strong>：</p>
+<ul>
+<li>输出密文 $ c &#x3D; (u, v) $。</li>
+</ul>
+</li>
+</ol>
+<p>解密过程（Kyber-PKE(s) decryption）：</p>
+<ol>
+<li><strong>计算明文</strong>：<ul>
+<li>Alice 使用她的解密密钥 $ s $ 计算 $ m &#x3D; \text{Round}_q(v - s^T u) $。</li>
+</ul>
+</li>
+</ol>
+<p>这个过程确保了通过公钥加密和私钥解密来安全地传输信息。</p>
+<h3 id="Security"><a href="#Security" class="headerlink" title="Security"></a>Security</h3><p><strong>声明</strong>：简化的 Kyber-PKE 在选择明文攻击下是不可区分的，前提是 D-MLWE（模块学习误差问题）是不可解的。</p>
+<h1 id="证明：加密操作可以表示为矩阵乘积和随机元素的组合：-begin-bmatrix-u-v-end-bmatrix"><a href="#证明：加密操作可以表示为矩阵乘积和随机元素的组合：-begin-bmatrix-u-v-end-bmatrix" class="headerlink" title="证明：加密操作可以表示为矩阵乘积和随机元素的组合：$$\begin{bmatrix}u \v\end{bmatrix}"></a><strong>证明</strong>：加密操作可以表示为矩阵乘积和随机元素的组合：<br>$$<br>\begin{bmatrix}<br>u \<br>v<br>\end{bmatrix}</h1><p>\begin{bmatrix}<br>A^T \<br>t^T<br>\end{bmatrix}<br>r +<br>\begin{bmatrix}<br>e_1 \<br>e_2<br>\end{bmatrix}<br>+<br>\begin{bmatrix}<br>0 \<br>\left\lfloor \frac{q}{2} \right\rfloor m<br>\end{bmatrix}<br>$$</p>
+<ul>
+<li><p><strong>D-MLWE 假设</strong>：</p>
+<ul>
+<li>$\begin{bmatrix} A^T \ t^T \end{bmatrix}$ 被假设为与随机不可区分。</li>
+<li>$\begin{bmatrix} A^T \ t^T \end{bmatrix} r + \begin{bmatrix} e_1 \ e_2 \end{bmatrix}$ 也被假设为与随机不可区分。</li>
+</ul>
+</li>
+<li><p><strong>对攻击者的影响</strong>：</p>
+<ul>
+<li>从攻击者的角度来看，$ v $ 看起来是随机元素 $(t^T r + e_2)$ 和消息多项式 $\left\lfloor \frac{q}{2} \right\rfloor m$ 的和，因此攻击者无法从中学习到关于 $ m $ 的信息。</li>
+</ul>
+</li>
+</ul>
+<p>这个证明展示了在 D-MLWE 假设下，简化的 Kyber-PKE 能够有效防御选择明文攻击。</p>
+<h3 id="Decryption-doesn’t-always-work"><a href="#Decryption-doesn’t-always-work" class="headerlink" title="Decryption doesn’t always work"></a>Decryption doesn’t always work</h3><ul>
+<li><p>解密计算为：$ v - s^T u &#x3D; (t^T r + e_2 + \left\lfloor \frac{q}{2} \right\rfloor m) - s^T u $</p>
+</li>
+<li><p>经过推导，得到：$ e^T r + e_2 - s^T e_1 + \left\lfloor \frac{q}{2} \right\rfloor m $（将 $ t &#x3D; As + e $ 和 $ u &#x3D; A^T r + e_1 $ 代入）。</p>
+</li>
+<li><p>解密成功的条件是误差多项式 $ E(x) &#x3D; e^T r + e_2 - s^T e_1 $ 的每个系数 $ E_i $ 满足 $-q&#x2F;4 &lt; E_i \mod q &lt; q&#x2F;4$，即 $|E|_\infty &lt; q&#x2F;4$。</p>
+</li>
+<li><p>对于 ML-KEM-768 参数（$ q &#x3D; 3329, n &#x3D; 256, k &#x3D; 3, \eta_1 &#x3D; \eta_2 &#x3D; 2 $），有 $|E_i| \leq 6146 \not&lt; q&#x2F;4$。因此，解密不一定总是成功。</p>
+</li>
+<li><p>尽管如此，可以证明 $|E|_\infty &lt; q&#x2F;4$ 的概率非常接近 1。因此，解密几乎总是会成功。</p>
+</li>
+</ul>
+<h2 id="Optimizations"><a href="#Optimizations" class="headerlink" title="Optimizations"></a>Optimizations</h2><p>这张图片介绍了 Kyber 加密中的密钥和密文的大小：</p>
+<h3 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h3><ul>
+<li><p>使用 ML-KEM-768 参数：$ q &#x3D; 3329, n &#x3D; 256, k &#x3D; 3, \eta_1 &#x3D; 2, \eta_2 &#x3D; 2 $。</p>
+</li>
+<li><p>在 $\mathbb{Z}_q$ 中，一个整数的位长为 $\lceil \log_2 3329 \rceil &#x3D; 12$ 位。</p>
+</li>
+<li><p>加密密钥 $(A, t)$ 的大小为：<br>  $$<br>  (9 \times 256 \times 12) + (3 \times 256 \times 12) \text{ bits} &#x3D; 4608 \text{ bytes}<br>  $$</p>
+</li>
+<li><p>密文 $ c &#x3D; (u, v) $ 的大小为：<br>  $$<br>  (3 \times 256 \times 12) + (256 \times 12) \text{ bits} &#x3D; 1536 \text{ bytes}<br>  $$</p>
+</li>
+</ul>
+<p>这些尺寸说明了在 Kyber 加密中所需的存储空间。</p>
+<h3 id="Smaller-public-keys"><a href="#Smaller-public-keys" class="headerlink" title="Smaller public keys"></a>Smaller public keys</h3><ul>
+<li><p>**生成 $ A $**：从一个随机且公开的 256 位种子 $\rho$ 生成。</p>
+</li>
+<li><p><strong>多项式生成</strong>：通过选择 $\rho \in_R {0,1}^{256}$，然后使用计数器对 $\rho$ 进行哈希来生成多项式的系数。</p>
+</li>
+<li><p>加密密钥现在是 $(\rho, t)$ 而不是 $(A, t)$。</p>
+</li>
+<li><p>任何知道 $\rho$ 的人都可以生成 $ A $。</p>
+</li>
+<li><p>新的加密密钥大小为 $256 + (3 \times 256 \times 12)$ 位，即 1184 字节。</p>
+</li>
+</ul>
+<h3 id="Ciphertext-compression"><a href="#Ciphertext-compression" class="headerlink" title="Ciphertext compression"></a>Ciphertext compression</h3><ul>
+<li><p><strong>压缩</strong>：丢弃密文 $(u, v)$ 中所有多项式系数的“低位”。</p>
+</li>
+<li><p>设 $1 \leq d \leq \lfloor \log_2 q \rfloor$，定义如下：</p>
+<ul>
+<li>对于 $x \in [0, q - 1]$，压缩为：$ \text{Compress}_q(x, d) &#x3D; \left\lfloor \frac{2^d}{q} \cdot x \right\rfloor \mod 2^d $</li>
+<li>对于 $y \in [0, 2^d - 1]$，解压缩为：$ \text{Decompress}_q(y, d) &#x3D; \left\lfloor \frac{q}{2^d} \cdot y \right\rfloor \mod q $</li>
+</ul>
+</li>
+<li><p>对于 $x \in [0, q - 1]$ 和 $x’ &#x3D; \text{Decompress}_q(\text{Compress}_q(x, d), d)$，有：$ |x’ - x|_\infty \leq \left\lceil \frac{q}{2^{d+1}} \right\rceil $</p>
+</li>
+<li><p>压缩和解压缩函数可以自然地扩展到 $R_q$ 中的多项式和 $R_q^k$ 中的多项式向量。</p>
+</li>
+</ul>
+<blockquote>
+<ul>
+<li><p>$ q &#x3D; 3329 $，$ d &#x3D; 10 $，$ x \in [0, q - 1] $。</p>
+</li>
+<li><p>压缩：$\text{Compress}_q(223 + 1438x + 3280x^2 + 798x^3, 10) &#x3D; 69 + 442x + 1009x^2 + 245x^3$。</p>
+</li>
+<li><p>解压缩：$\text{Decompress}(69 + 442x + 1009x^2 + 245x^3) &#x3D; 224 + 1437x + 3280x^2 + 796x^3$。</p>
+</li>
+<li><p>误差多项式为 $-1 + x + 2x^3$。$|(x - x’) \mod q| \leq 2$。</p>
+</li>
+<li><p>$ q &#x3D; 3329 $，$ d &#x3D; 4 $，$ x \in [0, q - 1] $。</p>
+</li>
+<li><p>压缩：$\text{Compress}_q(223 + 1438x + 3280x^2 + 798x^3, 4) &#x3D; 1 + 7x + 4x^3$。</p>
+</li>
+<li><p>解压缩：$\text{Decompress}_q(1 + 7x + 4x^3, 4) &#x3D; 208 + 1456x + 832x^3$。</p>
+</li>
+<li><p>误差多项式为 $15 - 18x - 59x^2 - 34x^3$。$|(x - x’) \mod q| \leq 104$。</p>
+</li>
+</ul>
+</blockquote>
+<p>密文压缩的过程如下：</p>
+<ul>
+<li>将密文组件 $ u $ 和 $ v $ 分别替换为 $ c_1 &#x3D; \text{Compress}_q(u, d_u) $ 和 $ c_2 &#x3D; \text{Compress}_q(v, d_v) $。</li>
+</ul>
+<ol>
+<li><p><strong>参数设置</strong>：</p>
+<ul>
+<li>使用 ML-KEM-768 参数：$ q &#x3D; 3329, n &#x3D; 256, k &#x3D; 3, \eta_1 &#x3D; 2, \eta_2 &#x3D; 2 $。</li>
+<li>压缩参数为 $ d_u &#x3D; 10 $ 和 $ d_v &#x3D; 4 $。</li>
+</ul>
+</li>
+<li><p><strong>结果</strong>：</p>
+<ul>
+<li>压缩后的密文大小为 $ 3 \times 256 \times 10 + 256 \times 4 $ 位，即 1088 字节。</li>
+<li>相比原始的 1536 字节，显著减少了密文的大小。</li>
+</ul>
+</li>
+</ol>
+<p>这种压缩技术有效地减少了存储和传输需求，同时保持解密的准确性。</p>
+<h3 id="Central-binomial-distribution"><a href="#Central-binomial-distribution" class="headerlink" title="Central binomial distribution"></a>Central binomial distribution</h3><p>中心二项分布（Central Binomial Distribution, CBD）在 Kyber 中可以用来生成随机“小”多项式：</p>
+<p><strong>目的</strong>：从集合 $S_\eta$ 中随机选择多项式，通过从 $[-η, η]$ 范围内均匀选择系数来实现。</p>
+<ul>
+<li><p>随机选择 $η$ 对位 $(a_i, b_i)$，其中 $1 \leq i \leq η$。</p>
+</li>
+<li><p>输出 $c &#x3D; \sum_{i&#x3D;1}^{η} (a_i - b_i)$，因此 $c \in [-η, η]$。</p>
+</li>
+<li><p>对于每个 $j \in [-η, η]$，有 $ \Pr(c &#x3D; j) &#x3D; \frac{\binom{2η}{η+j}}{2^{2η}} $</p>
+</li>
+</ul>
+<blockquote>
+<p>当 $η &#x3D; 2$ 时分布为：$-2$ 和 $2$ 的概率是 $1&#x2F;16$，$-1$ 和 $1$ 的概率是 $4&#x2F;16$，$0$ 的概率是 $6&#x2F;16$。</p>
+</blockquote>
+<h3 id="Fast-polynomial-multiplication"><a href="#Fast-polynomial-multiplication" class="headerlink" title="Fast polynomial multiplication"></a>Fast polynomial multiplication</h3><ul>
+<li><p>加密和解密的计算时间主要受限于在环 $ R_q &#x3D; \mathbb{Z}_{3329}[x]&#x2F;(x^{256} + 1) $ 中多项式乘法的时间。</p>
+</li>
+<li><p>使用数论变换（Number-Theoretic Transform, NTT）可以显著加快多项式乘法的速度。</p>
+</li>
+<li><p>NTT 是一种类似快速傅里叶变换（FFT）的算法，专门用于有限域上的多项式运算。</p>
+</li>
+</ul>
+<p>通过使用 NTT，Kyber 能够在不牺牲安全性的情况下提高加密和解密的效率。</p>
+<h2 id="Kyber-PKE-full"><a href="#Kyber-PKE-full" class="headerlink" title="Kyber-PKE (full)"></a>Kyber-PKE (full)</h2><h3 id="Domain-parameters-and-key-generation"><a href="#Domain-parameters-and-key-generation" class="headerlink" title="Domain parameters and key generation"></a>Domain parameters and key generation</h3><h4 id="域参数（ML-KEM-768）"><a href="#域参数（ML-KEM-768）" class="headerlink" title="域参数（ML-KEM-768）"></a>域参数（ML-KEM-768）</h4><ul>
+<li>$ q &#x3D; 3329 $</li>
+<li>$ n &#x3D; 256 $</li>
+<li>$ k &#x3D; 3 $</li>
+<li>$ \eta_1 &#x3D; 2 $ 和 $ \eta_2 &#x3D; 2 $</li>
+<li>$ d_u &#x3D; 10 $ 和 $ d_v &#x3D; 4 $</li>
+</ul>
+<h4 id="Kyber-PKE-密钥生成步骤"><a href="#Kyber-PKE-密钥生成步骤" class="headerlink" title="Kyber-PKE 密钥生成步骤"></a>Kyber-PKE 密钥生成步骤</h4><ol>
+<li>选择 $ \rho \in_R {0, 1}^{256} $，并计算 $ A &#x3D; \text{Expand}(\rho) $，其中 $ A \in R_q^{k \times k} $。</li>
+<li>选择 $ s \in_\text{CBD} S^{k}<em>{\eta_1} $ 和 $ e \in_\text{CBD} S^{k}</em>{\eta_2} $。</li>
+<li>计算 $ t &#x3D; As + e $。</li>
+<li>Alice 的加密（公钥）是 $ (\rho, t) $；她的解密（私钥）是 $ s $。</li>
+</ol>
+<h3 id="Encryption-and-decryption-1"><a href="#Encryption-and-decryption-1" class="headerlink" title="Encryption and decryption"></a>Encryption and decryption</h3><h4 id="Kyber-PKE-加密"><a href="#Kyber-PKE-加密" class="headerlink" title="Kyber-PKE 加密"></a>Kyber-PKE 加密</h4><p>要加密消息 $ m \in {0, 1}^n $，Bob 执行以下步骤：</p>
+<ol>
+<li>获取 Alice 的加密密钥 $ (\rho, t) $ 的真实副本，并计算 $ A &#x3D; \text{Expand}(\rho) $。</li>
+<li>选择 $ r \in_\text{CBD} S^{k}<em>{\eta_1} $，$ e_1 \in_\text{CBD} S^{k}</em>{\eta_2} $。</li>
+<li>计算 $ u &#x3D; A^T r + e_1 $ 和 $ v &#x3D; t^T r + e_2 + \left\lfloor \frac{q}{2} \right\rfloor m $。</li>
+<li>计算 $ c_1 &#x3D; \text{Compress}(u, d_u) $ 和 $ c_2 &#x3D; \text{Compress}(v, d_v) $。</li>
+<li>输出 $ c &#x3D; (c_1, c_2) $。</li>
+</ol>
+<h4 id="Kyber-PKE-解密"><a href="#Kyber-PKE-解密" class="headerlink" title="Kyber-PKE 解密"></a>Kyber-PKE 解密</h4><p>要解密 $ c &#x3D; (c_1, c_2) $，Alice 执行以下步骤：</p>
+<ol>
+<li>计算 $ u’ &#x3D; \text{Decompress}(c_1, d_u) $ 和 $ v’ &#x3D; \text{Decompress}(c_2, d_v) $。</li>
+<li>计算 $ m &#x3D; \text{Round}_q(v’ - s^T u’) $。</li>
+</ol>
+<h3 id="Decryption-doesn’t-always-work-1"><a href="#Decryption-doesn’t-always-work-1" class="headerlink" title="Decryption doesn’t always work"></a>Decryption doesn’t always work</h3><ul>
+<li><p>设 $ u’ &#x3D; u + e_u $ 和 $ v’ &#x3D; v + e_v $。</p>
+</li>
+<li><p>有：$ v’ - s^T u’ &#x3D; (v + e_v) - s^T (u + e_u) &#x3D; v - s^T u + e_v - s^T e_u + \left\lfloor \frac{q}{2} \right\rfloor m$.</p>
+</li>
+<li><p>因此，如果误差多项式的每个系数 $ E_i $ 满足：$ -\frac{q}{4} &lt; E_i \mod q &lt; \frac{q}{4} \quad \text{or} \quad |E|_\infty &lt; \frac{q}{4}$<br>  则 $ \text{Round}_q(v’ - s^T u’) &#x3D; m $。</p>
+</li>
+<li><p>对于 ML-KEM-768 参数，$|E_i| \not&lt; \frac{q}{4}$，因此解密不一定成功。但可以证明，$|E|_\infty &lt; \frac{q}{4}$ 的概率极接近于 1。因此，解密几乎肯定会成功。</p>
+</li>
+</ul>
+<blockquote>
+<p>这里可以看出 $e_u$ 被 $s^T$ 放大了，因此压缩等级更小一点。</p>
+</blockquote>
+<h3 id="Security-1"><a href="#Security-1" class="headerlink" title="Security"></a>Security</h3><ul>
+<li><p><strong>密文压缩</strong>：密文压缩不会影响 Kyber-PKE 的安全性。因此，声明仍然成立。</p>
+</li>
+<li><p><strong>声明</strong>：Kyber-PKE 在假设 D-MLWE 问题是不可解的情况下，对选择明文攻击是不可区分的。</p>
+</li>
+<li><p><strong>注意</strong>：Kyber-PKE 并不打算用于独立使用。</p>
+</li>
+</ul>
+<h2 id="Kyber-KEM"><a href="#Kyber-KEM" class="headerlink" title="Kyber-KEM"></a>Kyber-KEM</h2><h3 id="Key-encapsulation-mechanisms"><a href="#Key-encapsulation-mechanisms" class="headerlink" title="Key encapsulation mechanisms"></a>Key encapsulation mechanisms</h3><p><strong>密钥封装机制（KEM）</strong> 允许两方建立共享的秘密密钥。</p>
+<ol>
+<li><p><strong>密钥生成</strong>：每个用户（例如 Alice）使用此算法生成一个封装密钥 $ ek $（公钥）和一个解封装密钥 $ dk $（私钥）。</p>
+</li>
+<li><p><strong>封装</strong>：Bob 使用 Alice 的封装密钥 $ ek $ 来生成一个秘密密钥 $ K $ 和密文 $ c $，并将 $ c $ 发送给 Alice。</p>
+</li>
+<li><p><strong>解封装</strong>：Alice 使用她的解封装密钥 $ dk $ 从密文 $ c $ 中恢复出 $ K $。</p>
+</li>
+</ol>
+<h3 id="Kyber-KEM-1"><a href="#Kyber-KEM-1" class="headerlink" title="Kyber-KEM"></a>Kyber-KEM</h3><p>Kyber-KEM 是通过对 Kyber-PKE 应用“Fujisaki-Okamoto”（FO）变换而得出的。</p>
+<blockquote>
+<p><strong>FO 变换</strong>：FO 变换是一种通用方法，用于将一个对选择明文攻击安全的公钥加密方案转换为一个对选择密文攻击安全的方案。</p>
+</blockquote>
+<p>该变换使用了三个哈希函数：</p>
+<ul>
+<li>$ G : {0,1}^* \rightarrow {0,1}^{512} $</li>
+<li>$ H : {0,1}^* \rightarrow {0,1}^{256} $</li>
+<li>$ J : {0,1}^* \rightarrow {0,1}^{256} $</li>
+</ul>
+<h3 id="FO-Transform"><a href="#FO-Transform" class="headerlink" title="FO Transform"></a>FO Transform</h3><ol>
+<li><p><strong>封装</strong>：</p>
+<ul>
+<li>使用 Kyber-PKE 对随机选择的 $ m \in {0, 1}^{256} $ 进行加密。</li>
+<li><strong>去随机化</strong>：将消息 $ m $ 和封装密钥 $ ek $ 哈希以生成随机种子 $ R $ 和秘密密钥 $ K $。随机多项式 $ r, e_1 $ 和 $ e_2 $ 由 $ R $ 导出。</li>
+</ul>
+</li>
+<li><p><strong>解封装</strong>：</p>
+<ul>
+<li>预期接收者解密 Kyber-PKE 密文 $ c $ 以恢复 $ m’ $，然后将 $ m’ $ 和 $ ek $ 哈希以获得 $ R’ $ 和 $ K’ $。</li>
+<li>接收者使用 $ R’ $ 重新加密 $ m’ $，并将生成的密文 $ c’ $ 与 $ c $ 进行比较。</li>
+<li>如果 $ c &#x3D; c’ $，接收者接受 $ K’ $；否则，输出一个随机密钥 $ \bar{K} $（与 $ K $ 独立），该密钥通过哈希 $ c $ 和一个秘密值 $ z $ 获得。</li>
+</ul>
+</li>
+<li><p><strong>明文意识</strong>：</p>
+<ul>
+<li>Kyber-KEM 具有明文意识，即解封装只会生成 $ K $（而不是 $ \bar{K} $），当且仅当执行封装的实体已经知道 $ K $。</li>
+</ul>
+</li>
+<li><p><strong>安全性</strong>：</p>
+<ul>
+<li>这种机制提供了对选择密文攻击的抵抗。</li>
+</ul>
+</li>
+</ol>
+<h3 id="域参数（ML-KEM-768）-1"><a href="#域参数（ML-KEM-768）-1" class="headerlink" title="域参数（ML-KEM-768）"></a>域参数（ML-KEM-768）</h3><ul>
+<li>$ q &#x3D; 3329 $</li>
+<li>$ n &#x3D; 256 $</li>
+<li>$ k &#x3D; 3 $</li>
+<li>$ \eta_1 &#x3D; 2 $ 和 $ \eta_2 &#x3D; 2 $</li>
+<li>$ d_u &#x3D; 10 $ 和 $ d_v &#x3D; 4 $</li>
+</ul>
+<h3 id="Kyber-KEM-密钥生成"><a href="#Kyber-KEM-密钥生成" class="headerlink" title="Kyber-KEM 密钥生成"></a>Kyber-KEM 密钥生成</h3><p>Alice 执行以下步骤：</p>
+<ol>
+<li>使用 Kyber-PKE 密钥生成算法选择 Kyber-PKE 加密密钥 $ (\rho, t) $ 和解密密钥 $ s $。</li>
+<li>选择 $ z \in_R {0, 1}^{256} $。</li>
+<li>Alice 的封装密钥是 $ ek &#x3D; (\rho, t) $；她的解封装密钥是 $ dk &#x3D; (s, ek, H(ek), z) $。</li>
+</ol>
+<h3 id="Kyber-KEM-密钥封装"><a href="#Kyber-KEM-密钥封装" class="headerlink" title="Kyber-KEM 密钥封装"></a>Kyber-KEM 密钥封装</h3><ol>
+<li>获取 Alice 的封装密钥 $ek$</li>
+<li>随机选择 $m \in_R {0,1}^{256}$</li>
+<li>计算：$h &#x3D; H(ek)$，$(K, R) &#x3D; G(m, h)$，其中 $K, R \in {0,1}^{256}$</li>
+<li>使用 Kyber-PKE 加密算法用封装密钥 $ek$ 加密 $m$，使用 $R$ 生成需要的随机变量并得到密文 $ c $ 。</li>
+<li>输出 $(K, c)$</li>
+</ol>
+<h3 id="Kyber-KEM-解封装"><a href="#Kyber-KEM-解封装" class="headerlink" title="Kyber-KEM 解封装"></a>Kyber-KEM 解封装</h3><ol>
+<li>使用 Kyber-PKE 解密算法用解密密钥 $s$ 解密 $c$ ，得到明文 $m’$ ；</li>
+<li>计算 $(K’, R’) &#x3D; G(m’, H(ek))$</li>
+<li>计算 $\bar{K} &#x3D; J(z, c)$</li>
+<li>使用 Kyber-PKE 加密算法，使用 $ek$ 和 $R’$ 加密 $m’$，得到新密文 $c’$。</li>
+<li>如果 $c \neq c’$，返回 $\bar{K}$，否则返回 $K’$。</li>
+</ol>
+<h3 id="Security-2"><a href="#Security-2" class="headerlink" title="Security"></a>Security</h3><ol>
+<li><p><strong>经典安全性</strong></p>
+<p> Kyber-KEM 在选择密文攻击(CCA)下是不可区分的，因为：</p>
+<ul>
+<li>D-MLWE 问题是难解的；</li>
+<li>$ G $、$ H $、$J$ 是随机函数。</li>
+</ul>
+</li>
+<li><p><strong>量子安全性</strong></p>
+<p> Kyber-KEM 对量子对手也具有不可区分性。</p>
+</li>
+</ol>
+<h3 id="Parameter-sets"><a href="#Parameter-sets" class="headerlink" title="Parameter sets"></a>Parameter sets</h3><table>
+<thead>
+<tr>
+<th align="center">安全等级</th>
+<th>$q$</th>
+<th>$n$</th>
+<th>$k$</th>
+<th>$\eta_1$</th>
+<th>$\eta_2$</th>
+<th>$d_u$</th>
+<th>$d_v$</th>
+<th>encaps. key size</th>
+<th>ciphertext size</th>
+<th>decapsulation failure rate</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ML-KEM-512</td>
+<td>3329</td>
+<td>256</td>
+<td>2</td>
+<td>3</td>
+<td>2</td>
+<td>10</td>
+<td>4</td>
+<td>800</td>
+<td>768</td>
+<td>$2^{-139}$</td>
+</tr>
+<tr>
+<td align="center">ML-KEM-768</td>
+<td>3329</td>
+<td>256</td>
+<td>3</td>
+<td>2</td>
+<td>2</td>
+<td>10</td>
+<td>4</td>
+<td>1184</td>
+<td>1088</td>
+<td>$2^{-164}$</td>
+</tr>
+<tr>
+<td align="center">ML-KEM-1024</td>
+<td>3329</td>
+<td>256</td>
+<td>4</td>
+<td>2</td>
+<td>2</td>
+<td>11</td>
+<td>5</td>
+<td>1568</td>
+<td>1568</td>
+<td>$2^{-174}$</td>
+</tr>
+</tbody></table>
+<h3 id="Omitted-details"><a href="#Omitted-details" class="headerlink" title="Omitted details"></a>Omitted details</h3><ol>
+<li><p>哈希函数：</p>
+<ul>
+<li><p>$G$: 使用 SHA3-512</p>
+</li>
+<li><p>$H$: 使用 SHA3-256</p>
+</li>
+<li><p>$J$: 使用 SHAKE256</p>
+</li>
+</ul>
+</li>
+<li><p>可扩展输出函数(XOF)：</p>
+<ul>
+<li><p>用于生成矩阵 $A$</p>
+</li>
+<li><p>使用 SHAKE128 算法</p>
+</li>
+<li><p>XOF 的特点是可以产生任意长度的输出</p>
+</li>
+</ul>
+</li>
+<li><p>伪随机函数(PRF)：</p>
+<ul>
+<li><p>用于生成多个参数：$s$、$e$、$r$、$e_1$、$e_2$</p>
+</li>
+<li><p>使用的是 SHAKE256 算法</p>
+</li>
+</ul>
+</li>
+<li><p>数论变换(NTT)：</p>
+<ul>
+<li>用于在环 $R_q &#x3D; \mathbb{Z}_{3329}[x]&#x2F;(x^{256} + 1)$ 中进行快速多项式乘法</li>
+</ul>
+</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#PQC%EF%BC%9AThe-Kyber-PKE-and-KEM"><span class="toc-number">1.</span> <span class="toc-text">PQC：The Kyber PKE and KEM</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Kyber-PKE-simplified"><span class="toc-number">1.1.</span> <span class="toc-text">Kyber-PKE (simplified)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Rounding"><span class="toc-number">1.1.1.</span> <span class="toc-text">Rounding</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Domain-parameters-and-key-genaration"><span class="toc-number">1.1.2.</span> <span class="toc-text">Domain parameters and key genaration</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Encryption-and-decryption"><span class="toc-number">1.1.3.</span> <span class="toc-text">Encryption and decryption</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Security"><span class="toc-number">1.1.4.</span> <span class="toc-text">Security</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%81%E6%98%8E%EF%BC%9A%E5%8A%A0%E5%AF%86%E6%93%8D%E4%BD%9C%E5%8F%AF%E4%BB%A5%E8%A1%A8%E7%A4%BA%E4%B8%BA%E7%9F%A9%E9%98%B5%E4%B9%98%E7%A7%AF%E5%92%8C%E9%9A%8F%E6%9C%BA%E5%85%83%E7%B4%A0%E7%9A%84%E7%BB%84%E5%90%88%EF%BC%9A-begin-bmatrix-u-v-end-bmatrix"><span class="toc-number">2.</span> <span class="toc-text">证明：加密操作可以表示为矩阵乘积和随机元素的组合：$$\begin{bmatrix}u \v\end{bmatrix}</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Decryption-doesn%E2%80%99t-always-work"><span class="toc-number">2.0.1.</span> <span class="toc-text">Decryption doesn’t always work</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Optimizations"><span class="toc-number">2.1.</span> <span class="toc-text">Optimizations</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="toc-number">2.1.1.</span> <span class="toc-text">参数设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Smaller-public-keys"><span class="toc-number">2.1.2.</span> <span class="toc-text">Smaller public keys</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Ciphertext-compression"><span class="toc-number">2.1.3.</span> <span class="toc-text">Ciphertext compression</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Central-binomial-distribution"><span class="toc-number">2.1.4.</span> <span class="toc-text">Central binomial distribution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Fast-polynomial-multiplication"><span class="toc-number">2.1.5.</span> <span class="toc-text">Fast polynomial multiplication</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kyber-PKE-full"><span class="toc-number">2.2.</span> <span class="toc-text">Kyber-PKE (full)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Domain-parameters-and-key-generation"><span class="toc-number">2.2.1.</span> <span class="toc-text">Domain parameters and key generation</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%9F%E5%8F%82%E6%95%B0%EF%BC%88ML-KEM-768%EF%BC%89"><span class="toc-number">2.2.1.1.</span> <span class="toc-text">域参数（ML-KEM-768）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Kyber-PKE-%E5%AF%86%E9%92%A5%E7%94%9F%E6%88%90%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.2.1.2.</span> <span class="toc-text">Kyber-PKE 密钥生成步骤</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Encryption-and-decryption-1"><span class="toc-number">2.2.2.</span> <span class="toc-text">Encryption and decryption</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Kyber-PKE-%E5%8A%A0%E5%AF%86"><span class="toc-number">2.2.2.1.</span> <span class="toc-text">Kyber-PKE 加密</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Kyber-PKE-%E8%A7%A3%E5%AF%86"><span class="toc-number">2.2.2.2.</span> <span class="toc-text">Kyber-PKE 解密</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Decryption-doesn%E2%80%99t-always-work-1"><span class="toc-number">2.2.3.</span> <span class="toc-text">Decryption doesn’t always work</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Security-1"><span class="toc-number">2.2.4.</span> <span class="toc-text">Security</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kyber-KEM"><span class="toc-number">2.3.</span> <span class="toc-text">Kyber-KEM</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Key-encapsulation-mechanisms"><span class="toc-number">2.3.1.</span> <span class="toc-text">Key encapsulation mechanisms</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kyber-KEM-1"><span class="toc-number">2.3.2.</span> <span class="toc-text">Kyber-KEM</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FO-Transform"><span class="toc-number">2.3.3.</span> <span class="toc-text">FO Transform</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%9F%E5%8F%82%E6%95%B0%EF%BC%88ML-KEM-768%EF%BC%89-1"><span class="toc-number">2.3.4.</span> <span class="toc-text">域参数（ML-KEM-768）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kyber-KEM-%E5%AF%86%E9%92%A5%E7%94%9F%E6%88%90"><span class="toc-number">2.3.5.</span> <span class="toc-text">Kyber-KEM 密钥生成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kyber-KEM-%E5%AF%86%E9%92%A5%E5%B0%81%E8%A3%85"><span class="toc-number">2.3.6.</span> <span class="toc-text">Kyber-KEM 密钥封装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kyber-KEM-%E8%A7%A3%E5%B0%81%E8%A3%85"><span class="toc-number">2.3.7.</span> <span class="toc-text">Kyber-KEM 解封装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Security-2"><span class="toc-number">2.3.8.</span> <span class="toc-text">Security</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Parameter-sets"><span class="toc-number">2.3.9.</span> <span class="toc-text">Parameter sets</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Omitted-details"><span class="toc-number">2.3.10.</span> <span class="toc-text">Omitted details</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/9731e9cf.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/9731e9cf.html&text=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/9731e9cf.html&title=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/9731e9cf.html&is_video=false&description=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PQC:The-Kyber-PKE-and-KEM&body=Check out this article: https://ceyewan.github.io/p/9731e9cf.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/9731e9cf.html&title=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/9731e9cf.html&title=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/9731e9cf.html&title=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/9731e9cf.html&title=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/9731e9cf.html&name=PQC:The-Kyber-PKE-and-KEM&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/9731e9cf.html&t=PQC:The-Kyber-PKE-and-KEM"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

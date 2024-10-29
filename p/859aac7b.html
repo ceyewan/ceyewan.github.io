@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="PQC：IntroductionIntroduction在 2024 年，美国国家标准与技术研究所（NIST）发布了一套量子安全密钥封装机制（KEM）和签名方案的标准。这些方案旨在取代 RSA 和 ECC，因为它们不可抵抗量子攻击。预计 Kyber（KEM）和 Dilithium（DSA）将在未来几年得到广泛应用。 量子计算机 概念：量子计算机利用量子力学现象（如叠加、干涉和纠缠）来进行数据操作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PQC:Introduction">
+<meta property="og:url" content="https://ceyewan.github.io/p/859aac7b.html">
+<meta property="og:site_name" content="Ceyewan&#39;s Blog">
+<meta property="og:description" content="PQC：IntroductionIntroduction在 2024 年，美国国家标准与技术研究所（NIST）发布了一套量子安全密钥封装机制（KEM）和签名方案的标准。这些方案旨在取代 RSA 和 ECC，因为它们不可抵抗量子攻击。预计 Kyber（KEM）和 Dilithium（DSA）将在未来几年得到广泛应用。 量子计算机 概念：量子计算机利用量子力学现象（如叠加、干涉和纠缠）来进行数据操作。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-10-29T10:33:32.000Z">
+<meta property="article:modified_time" content="2024-10-29T10:37:11.811Z">
+<meta property="article:author" content="ceyewan">
+<meta property="article:tag" content="PQC">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/icons.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/icon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-apple-touch.png">
+        
+      
+    
+    <!-- title -->
+    <title>PQC:Introduction</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tag</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/p/9731e9cf.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/p/84d7f84a.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/859aac7b.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/859aac7b.html&text=PQC:Introduction"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/859aac7b.html&title=PQC:Introduction"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/859aac7b.html&is_video=false&description=PQC:Introduction"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PQC:Introduction&body=Check out this article: https://ceyewan.github.io/p/859aac7b.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/859aac7b.html&title=PQC:Introduction"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/859aac7b.html&title=PQC:Introduction"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/859aac7b.html&title=PQC:Introduction"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/859aac7b.html&title=PQC:Introduction"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/859aac7b.html&name=PQC:Introduction&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/859aac7b.html&t=PQC:Introduction"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#PQC%EF%BC%9AIntroduction"><span class="toc-number">1.</span> <span class="toc-text">PQC：Introduction</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.1.</span> <span class="toc-text">Introduction</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8F%E5%AD%90%E8%AE%A1%E7%AE%97%E6%9C%BA"><span class="toc-number">1.1.1.</span> <span class="toc-text">量子计算机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Shor-%E7%AE%97%E6%B3%95"><span class="toc-number">1.1.2.</span> <span class="toc-text">Shor 算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Grover-%E7%AE%97%E6%B3%95"><span class="toc-number">1.1.3.</span> <span class="toc-text">Grover 算法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Mathematical-prerequisites"><span class="toc-number">1.2.</span> <span class="toc-text">Mathematical prerequisites</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Modular-arithmetic"><span class="toc-number">1.2.1.</span> <span class="toc-text">Modular arithmetic</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Polynomial-rings"><span class="toc-number">1.2.2.</span> <span class="toc-text">Polynomial rings</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Module-R-q-k"><span class="toc-number">1.2.3.</span> <span class="toc-text">Module $ R_q^k $</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Size"><span class="toc-number">1.2.4.</span> <span class="toc-text">Size</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Symmetric-mod"><span class="toc-number">1.2.5.</span> <span class="toc-text">Symmetric mod</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Size-of-Polynomial"><span class="toc-number">1.2.6.</span> <span class="toc-text">Size of Polynomial</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Small-Polynominal"><span class="toc-number">1.2.7.</span> <span class="toc-text">Small Polynominal</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lattice-problems"><span class="toc-number">1.3.</span> <span class="toc-text">Lattice problems</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#MLWE%EF%BC%88Module-Learning-With-Errors%EF%BC%89"><span class="toc-number">1.3.1.</span> <span class="toc-text">MLWE（Module Learning With Errors）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#D-MLWE%EF%BC%88Decisional-Module-Learning-With-Errors%EF%BC%89"><span class="toc-number">1.3.2.</span> <span class="toc-text">D-MLWE（Decisional Module Learning With Errors）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MSIS%EF%BC%88Module-Short-Integer-Solution%EF%BC%89"><span class="toc-number">1.3.3.</span> <span class="toc-text">MSIS（Module Short Integer Solution）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Why-Lattices"><span class="toc-number">1.3.4.</span> <span class="toc-text">Why Lattices</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        PQC:Introduction
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">ceyewan</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2024-10-29T10:33:32.000Z" class="dt-published" itemprop="datePublished">2024-10-29</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/PQC/">PQC</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/PQC/" rel="tag">PQC</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h1 id="PQC：Introduction"><a href="#PQC：Introduction" class="headerlink" title="PQC：Introduction"></a>PQC：Introduction</h1><h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>在 2024 年，美国国家标准与技术研究所（NIST）发布了一套量子安全密钥封装机制（KEM）和签名方案的标准。这些方案旨在取代 RSA 和 ECC，因为它们不可抵抗量子攻击。预计 Kyber（KEM）和 Dilithium（DSA）将在未来几年得到广泛应用。</p>
+<h3 id="量子计算机"><a href="#量子计算机" class="headerlink" title="量子计算机"></a>量子计算机</h3><ul>
+<li><strong>概念</strong>：量子计算机利用量子力学现象（如叠加、干涉和纠缠）来进行数据操作。</li>
+<li><strong>量子比特（qubit）</strong>：量子比特可以同时处于两种状态，每种状态具有一定的概率。</li>
+<li><strong>n-量子比特寄存器</strong>：可以处于 $2^n$ 种状态，每种状态具有一定的概率。</li>
+</ul>
+<p>当函数 $f: {0, 1}^n \rightarrow {0, 1}^n$ 应用到 n-量子比特寄存器时，它会在所有 $2^n$ 状态上同时进行评估。然而，当 n-量子比特寄存器被测量时，它会根据其底层概率分布回归为 $2^n$ 中的一个状态。因此，量子计算机并不是“高度并行的机器”。</p>
+<h3 id="Shor-算法"><a href="#Shor-算法" class="headerlink" title="Shor 算法"></a>Shor 算法</h3><p>在实际应用中使用的公钥系统包括：</p>
+<ul>
+<li><strong>RSA</strong>：安全性基于整数分解的难度。</li>
+<li><strong>DL（离散对数）</strong>：安全性基于离散对数问题的难度。</li>
+<li><strong>ECC（椭圆曲线密码学）</strong>：安全性基于 ECDLP（椭圆曲线离散对数问题）的难度。</li>
+</ul>
+<p><strong>Shor 算法</strong>：在 1994 年，Peter Shor 发现了一种非常高效的（多项式时间）量子算法来解决这些问题。因此，所有的 RSA、DL 和 ECC 实现都可以被量子计算机完全破解。</p>
+<h3 id="Grover-算法"><a href="#Grover-算法" class="headerlink" title="Grover 算法"></a>Grover 算法</h3><p>设 $F:{0,1}^n→{0,1}$ 是一个函数，满足以下条件：</p>
+<ol>
+<li>F 是可以高效计算的；</li>
+<li>$F(x)&#x3D;1$ 对于恰好一个输入 $x∈{0,1}^n$ 成立。</li>
+</ol>
+<p>Lov Grover 在 1996 年发现了一种量子算法，可以在 $\sqrt{2^n}$ 次 F 的评估中找到 x。</p>
+<p>考虑使用 $ \ell $-位密钥的 AES。假设我们有 $ t $ 对已知的明文-密文对 $ (m_i, c_i) $，其中 $ t $ 的期望值接近于 0。   定义 $ F : {0, 1}^\ell \rightarrow {0, 1} $ 为：<br>$$<br>F(k) &#x3D;   \begin{cases}   1 &amp; \text{如果 } AES_k(m_i) &#x3D; c_i \text{ 对于所有 } 1 \leq i \leq t \   0 &amp; \text{否则}   \end{cases}<br>$$</p>
+<p>然后，Grover 的算法可以在 $ 2^{\ell&#x2F;2} $ 次量子操作中找到秘密密钥。因此，为了实现 128 位的安全性水平，应该使用 256 位的 AES 密钥以抵御量子攻击。</p>
+<blockquote>
+<p><strong>Harvest Now Decrypt Later（HNDL）attacks</strong>：这种攻击策略指的是在当前阶段收集数据，即使这些数据现在是加密的，未来可能会有技术手段将其解密。</p>
+</blockquote>
+<h2 id="Mathematical-prerequisites"><a href="#Mathematical-prerequisites" class="headerlink" title="Mathematical prerequisites"></a>Mathematical prerequisites</h2><h3 id="Modular-arithmetic"><a href="#Modular-arithmetic" class="headerlink" title="Modular arithmetic"></a>Modular arithmetic</h3><ul>
+<li><strong>模数</strong>：$ q \geq 2 $，一般选择素数。</li>
+<li>$ a \equiv b \ (\text{mod } q) $ 表示 $ a - b $ 是 $ q $ 的整数倍。</li>
+<li>$ r &#x3D; a \ \text{mod} \ q $ 表示 $ r $ 是将整数 $ a $ 除以 $ q $ 后的余数（所以 $ 0 \leq r &lt; q $）。</li>
+<li><strong>模 $ q $ 的整数</strong>：$ \mathbb{Z}_q &#x3D; {0, 1, 2, \ldots, q - 1} $，在这里，加法、减法和乘法都是模 $ q $ 进行的。</li>
+</ul>
+<h3 id="Polynomial-rings"><a href="#Polynomial-rings" class="headerlink" title="Polynomial rings"></a>Polynomial rings</h3><ul>
+<li>设 $ q $ 为一个素数模数。</li>
+<li>$ \mathbb{Z}_q[x] $ 是所有以 $ x $ 为变量且系数在 $ \mathbb{Z}_q $ 中的多项式的集合。</li>
+<li>在 $ \mathbb{Z}_q[x] $ 中进行加法、减法、乘法和除法时，所有系数的算术运算都在 $ \mathbb{Z}_q $ 中进行。</li>
+<li>多项式环 $ R_q &#x3D; \mathbb{Z}_q[x]&#x2F;(x^n + 1) $ 由所有在 $ \mathbb{Z}_q[x] $ 中的多项式组成，其次数小于 $ n $，并且多项式的乘法是在约简多项式 $ x^n + 1 $ 下进行的。</li>
+</ul>
+<p>多项式相乘的步骤：</p>
+<ol>
+<li>在 $ \mathbb{Z}_q[x] $ 中相乘多项式 $ f(x) $ 和 $ g(x) $，得到一个多项式 $ h(x) $，其次数最多为 $ 2n - 2 $。</li>
+<li>将 $ h(x) $ 除以 $ x^n + 1 $，得到一个余数多项式 $ r(x) $，其次数最多为 $ n - 1 $。</li>
+<li>则 $ f(x) \times g(x) &#x3D; r(x) $ 在 $ R_q $ 中。</li>
+</ol>
+<blockquote>
+<p>$ R_q $ 的大小为 $ q^n $。</p>
+</blockquote>
+<h3 id="Module-R-q-k"><a href="#Module-R-q-k" class="headerlink" title="Module $ R_q^k $"></a>Module $ R_q^k $</h3><ul>
+<li>设 $ k $ 为正整数。</li>
+<li>模 $ R_q^k $ 的元素是长度为 $ k $ 的多项式向量，且这些多项式在 $ R_q $ 中。</li>
+<li>在 $ R_q^k $ 中，元素的加法和减法是逐分量进行的（因此结果也是 $ R_q^k $ 中的元素）。</li>
+<li>两个向量的内积（乘法）在 $ R_q^k $ 中的结果是一个多项式，且该多项式在 $ R_q $ 中。</li>
+<li>所有的向量将在 $ R_q^k $ 中以列向量的形式书写。</li>
+</ul>
+<h3 id="Size"><a href="#Size" class="headerlink" title="Size"></a>Size</h3><ul>
+<li>我们引入了“大小”的概念，用于：<ul>
+<li>$ \mathbb{Z}_q $ 中的整数</li>
+<li>$ R_q &#x3D; \mathbb{Z}_q[x]&#x2F;(x^n + 1) $ 中的多项式</li>
+<li>$ R_q^k $ 中的多项式向量</li>
+</ul>
+</li>
+<li>这个大小被称为“无穷范数”，用符号 $ | \cdot |_\infty $ 表示。</li>
+</ul>
+<p>为此，我们需要引入“对称模”的概念。</p>
+<h3 id="Symmetric-mod"><a href="#Symmetric-mod" class="headerlink" title="Symmetric mod"></a>Symmetric mod</h3><p>设 $ q $ 为奇数，$ r \in \mathbb{Z}_q $：<br>$$<br>r \mod q &#x3D;<br>\begin{cases}<br>r, &amp; \text{if } r \leq \frac{q - 1}{2} \<br>r - q, &amp; \text{if } r &gt; \frac{q - 1}{2}<br>\end{cases}<br>$$<br>因此，$ -\frac{q - 1}{2} \leq r \mod q \leq \frac{q - 1}{2} $。</p>
+<p>设 $ q $ 为偶数，$ r \in \mathbb{Z}_q $：<br>$$<br>r \mod q &#x3D;<br>\begin{cases}<br>r, &amp; \text{if } r \leq \frac{q}{2} \<br>r - q, &amp; \text{if } r &gt; \frac{q}{2}<br>\end{cases}<br>$$<br>因此，$ -\frac{q}{2} &lt; r \mod q \leq \frac{q}{2} $。</p>
+<blockquote>
+<p>$ \mod q $ 也可以写作 $ \mod^+ q $。</p>
+</blockquote>
+<h3 id="Size-of-Polynomial"><a href="#Size-of-Polynomial" class="headerlink" title="Size of Polynomial"></a>Size of Polynomial</h3><ul>
+<li><p><strong>模 $ q $ 的整数</strong>：设 $ r \in \mathbb{Z}_q $。则 $ | r |_\infty &#x3D; | r \mod q | $。</p>
+<ul>
+<li><strong>例子</strong>：设 $ q &#x3D; 19 $。则 $ | 7 |_\infty &#x3D; 7 $ 和 $ | 18 |_\infty &#x3D; 1 $。</li>
+<li>注意：如果 $ q $ 为奇数，则 $ 0 \leq | r |_\infty \leq \frac{(q - 1)}{2} $；如果 $ q $ 为偶数，则 $ 0 \leq | r |_\infty \leq \frac{q}{2} $。</li>
+</ul>
+</li>
+<li><p><strong>环元素</strong>：设 $ f(x) &#x3D; f_0 + f_1 x + \cdots + f_{n-1} x^{n-1} \in R_q $。则 $ | f |_\infty &#x3D; \max | f_i |_\infty $。</p>
+<ul>
+<li><strong>例子</strong>：设 $ f(x) &#x3D; 1 + 12x + 3x^3 + 18x^5 \in R_{19} $。则 $ | f |_\infty &#x3D; 7 $，因为 $ f $ 的模 $ q $ 表示为 $ 1 - 7x + 3x^3 - x^5 $。</li>
+</ul>
+</li>
+<li><p><strong>模元素</strong>：设 $ a &#x3D; [a_1, a_2, \ldots, a_k]^T \in R_q^k $。则 $ | a |_\infty &#x3D; \max | a_i |_\infty $。</p>
+</li>
+</ul>
+<h3 id="Small-Polynominal"><a href="#Small-Polynominal" class="headerlink" title="Small Polynominal"></a>Small Polynominal</h3><ul>
+<li>如果 $ | f |_\infty $ 是“小”的，那么一个多项式 $ f \in R_q $ 是小的。</li>
+<li>设 $ \eta $ 为一个与 $ q&#x2F;2 $ 相比小的正整数。</li>
+<li>定义 $ S_\eta &#x3D; { f \in R_q \mid | f |_\infty \leq \eta } $ 为在 $ R_q $ 中所有系数大小最多为 $ \eta $ 的多项式的集合。</li>
+<li>$ S_\eta $ 是“小”多项式的集合。</li>
+</ul>
+<blockquote>
+<p><strong>例子</strong>：设 $ q &#x3D; 31 $。那么 $ 1 + 30x + 29x^2 + x^4 + 2x^5 \in S_2 $。</p>
+</blockquote>
+<p><strong>声明</strong>：如果 $ f \in S_{\eta_1} $ 且 $ g \in S_{\eta_2} $，则 $ fg \in S_{n\eta_1\eta_2} $，也是一个相对小的多项式。</p>
+<p>证明：</p>
+<p>设 $ f(x) &#x3D; f_0 + f_1 x + \cdots + f_{n-1} x^{n-1} \in S_{\eta_1} $ 和 $ g(x) &#x3D; g_0 + g_1 x + \cdots + g_{n-1} x^{n-1} \in S_{\eta_2} $，令 $ h(x) &#x3D; f(x)g(x) &#x3D; h_0 + h_1 x + \cdots + h_{n-1} x^{n-1} $。容易知道 $ | h_i |<em>\infty \leq n \eta_1 \eta_2 $，因此，$ h \in S</em>{n \eta_1 \eta_2} $。</p>
+<p>同样地，如果 $ a \in S^{k}<em>{\eta_1} $ 且 $ b \in S^{k}</em>{\eta_2} $，则 $ ab^T \in S_{k n \eta_1 \eta_2} $。</p>
+<h2 id="Lattice-problems"><a href="#Lattice-problems" class="headerlink" title="Lattice problems"></a>Lattice problems</h2><ul>
+<li><strong>Kyber 的安全性</strong>：基于决策模块学习带错误 (D-MLWE) 问题的困难性，而该问题又与 MLWE 问题的困难性相关。</li>
+<li><strong>Dilithium 的安全性</strong>：基于 D-MLWE 和模块短整数解 (MSIS) 问题的困难性。</li>
+</ul>
+<h3 id="MLWE（Module-Learning-With-Errors）"><a href="#MLWE（Module-Learning-With-Errors）" class="headerlink" title="MLWE（Module Learning With Errors）"></a>MLWE（Module Learning With Errors）</h3><p><strong>MLWE</strong> 是 LWE（Learning With Errors）问题的一个推广。LWE 问题是密码学中的一个基础问题，其安全性基于计算困难的假设。LWE 问题的基本形式是给定一个秘密向量和一个带有噪声的线性方程组，求解秘密向量。</p>
+<p>MLWE 扩展了 LWE 的概念，引入了模块结构（即引入了模运算）。具体来说，MLWE 问题在一个模块上定义，其中模块是一个环上的自由模。这样做的好处是可以在保持安全性的同时提高效率和灵活性。</p>
+<ul>
+<li><p><strong>参数</strong>：</p>
+<ul>
+<li>素数 $ q $</li>
+<li>整数 $ n, k, \ell $ 使得 $ k \geq \ell $</li>
+<li>整数 $ \eta_1, \eta_2 $ 使得 $ \eta_1, \eta_2 \ll \frac{q}{2} $</li>
+</ul>
+</li>
+<li><p><strong>模块带错误学习 (MLWE) 实例</strong>：</p>
+<ul>
+<li>$ A \in R_q^{k \times \ell} $（其中 $ R_q &#x3D; \mathbb{Z}_q[x]&#x2F;(x^n + 1) $）</li>
+<li>$ t &#x3D; As + e $，其中 $ s \in_R S_{\eta_1}^{\ell} $ 和 $ e \in_R S_{\eta_2}^{k} $（因此 $ t \in R_q^k $）</li>
+</ul>
+</li>
+<li><p><strong>要求</strong>：求解 $ s $</p>
+</li>
+</ul>
+<h3 id="D-MLWE（Decisional-Module-Learning-With-Errors）"><a href="#D-MLWE（Decisional-Module-Learning-With-Errors）" class="headerlink" title="D-MLWE（Decisional Module Learning With Errors）"></a>D-MLWE（Decisional Module Learning With Errors）</h3><p><strong>D-MLWE</strong> 是 MLWE 问题的一个变体，侧重于决策问题而非搜索问题。D-MLWE 的目标是区分两种情况：一种是给定的向量是根据 MLWE 问题生成的（即带有噪声的线性方程组），另一种是给定的向量是随机生成的。</p>
+<p>换句话说，D-MLWE 问题是关于判断特定样本是否符合某种结构（即是否是带噪声的线性组合）的问题。这种决策问题在密码学中非常重要，因为许多加密协议的安全性依赖于无法有效区分这两种情况。</p>
+<p>D-MLWE（Decisional-Module Learning With Errors）问题是一个基于格的密码学问题，具体描述如下：</p>
+<ul>
+<li><p><strong>参数：</strong></p>
+<ul>
+<li><p>素数 $ q $：用于定义模数。</p>
+</li>
+<li><p>整数 $ n, k, \ell $：满足 $ k \geq \ell $。</p>
+</li>
+<li><p>整数 $ \eta_1, \eta_2 \ll q&#x2F;2 $：用于定义噪声的界限。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>决策-模块带错误学习(D-MLWE)实例：</strong></p>
+<ul>
+<li><p>矩阵 $ A $：属于 $ R_q^{k \times \ell} $，其中 $ R_q &#x3D; \mathbb{Z}_q[x]&#x2F;(x^n + 1) $。</p>
+</li>
+<li><p>向量 $ z $：属于 $ R_q^k $，有两种可能的生成方式：</p>
+<ul>
+<li>$ z &#x3D; t $ 以概率 $ \frac{1}{2} $ 生成，其中 $ t &#x3D; As + e $，$ s \in R_{S_{\eta_1}^\ell} $，$ e \in R_{S_{\eta_2}^k} $。</li>
+<li>$ z $ 是随机生成的，属于 $ R_q^k $，以概率 $ \frac{1}{2} $。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>要求</strong>：判断给定的 $ (A, z) $ 是否是一个 MLWE 实例，即判断 $ z $ 是否等于 $ t $。</p>
+</li>
+</ul>
+<h3 id="MSIS（Module-Short-Integer-Solution）"><a href="#MSIS（Module-Short-Integer-Solution）" class="headerlink" title="MSIS（Module Short Integer Solution）"></a>MSIS（Module Short Integer Solution）</h3><p><strong>MSIS</strong> 是 SIS（Short Integer Solution）问题的模块化版本。SIS 问题要求找到一个短向量，使其在给定的整数矩阵下映射为零。这个问题在密码学中用于构造基于格的密码系统。</p>
+<p>MSIS 将 SIS 问题扩展到模块上，类似于 MLWE 对 LWE 的扩展。MSIS 问题的目标是找到一个短的模块向量，使其在给定的模块矩阵下映射为零。MSIS 的安全性也基于格问题的计算困难性。</p>
+<h3 id="Why-Lattices"><a href="#Why-Lattices" class="headerlink" title="Why Lattices"></a>Why Lattices</h3><p>在现代密码学中，格（lattices）在评估 MLWE、D-MLWE 和 MSIS 问题的难度时扮演了两个重要角色。</p>
+<ol>
+<li><p><strong>理论上的难度保证</strong>：</p>
+<p> 在 2012 年，Langlois 和 Stehlé 证明了 MLWE、D-MLWE 和 MSIS 的平均情况难度至少与某些结构化格中的自然格问题的最坏情况量子难度一样难。这一结果提供了理论上的安全性保证，表明在平均情况下解决这些问题至少和解决某些特定的最坏情况格问题一样困难。</p>
+<ul>
+<li><strong>高度渐近性</strong>：这种保证是高度渐近性的，意味着它更多地适用于非常大的参数集。在实际应用中，参数集可能并不总是足够大以使这些渐近结果直接适用。因此，这种理论保证在实际中能提供的安全性保证可能有限。</li>
+</ul>
+</li>
+<li><p><strong>作为格问题的重述</strong>：</p>
+<p> MLWE、D-MLWE 和 MSIS 问题可以被重述为格问题。这些格问题是密码学领域中被广泛研究的对象，研究人员通过分析这些问题的最优攻击策略来评估其难度。</p>
+<ul>
+<li><strong>具体参数的选择</strong>：通过研究这些格问题，可以找到已知最快的攻击方法，从而帮助确定具体的参数选择。例如，Kyber 和 Dilithium（两种基于格的加密方案和签名方案）的参数选择就是基于这种分析。这种方法确保在给定的参数下，这些问题足够难以抵御已知的攻击。</li>
+</ul>
+</li>
+</ol>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/categories/">Category</a></li>
+        
+          <li><a href="/tags/">Tag</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#PQC%EF%BC%9AIntroduction"><span class="toc-number">1.</span> <span class="toc-text">PQC：Introduction</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.1.</span> <span class="toc-text">Introduction</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8F%E5%AD%90%E8%AE%A1%E7%AE%97%E6%9C%BA"><span class="toc-number">1.1.1.</span> <span class="toc-text">量子计算机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Shor-%E7%AE%97%E6%B3%95"><span class="toc-number">1.1.2.</span> <span class="toc-text">Shor 算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Grover-%E7%AE%97%E6%B3%95"><span class="toc-number">1.1.3.</span> <span class="toc-text">Grover 算法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Mathematical-prerequisites"><span class="toc-number">1.2.</span> <span class="toc-text">Mathematical prerequisites</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Modular-arithmetic"><span class="toc-number">1.2.1.</span> <span class="toc-text">Modular arithmetic</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Polynomial-rings"><span class="toc-number">1.2.2.</span> <span class="toc-text">Polynomial rings</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Module-R-q-k"><span class="toc-number">1.2.3.</span> <span class="toc-text">Module $ R_q^k $</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Size"><span class="toc-number">1.2.4.</span> <span class="toc-text">Size</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Symmetric-mod"><span class="toc-number">1.2.5.</span> <span class="toc-text">Symmetric mod</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Size-of-Polynomial"><span class="toc-number">1.2.6.</span> <span class="toc-text">Size of Polynomial</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Small-Polynominal"><span class="toc-number">1.2.7.</span> <span class="toc-text">Small Polynominal</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lattice-problems"><span class="toc-number">1.3.</span> <span class="toc-text">Lattice problems</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#MLWE%EF%BC%88Module-Learning-With-Errors%EF%BC%89"><span class="toc-number">1.3.1.</span> <span class="toc-text">MLWE（Module Learning With Errors）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#D-MLWE%EF%BC%88Decisional-Module-Learning-With-Errors%EF%BC%89"><span class="toc-number">1.3.2.</span> <span class="toc-text">D-MLWE（Decisional Module Learning With Errors）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MSIS%EF%BC%88Module-Short-Integer-Solution%EF%BC%89"><span class="toc-number">1.3.3.</span> <span class="toc-text">MSIS（Module Short Integer Solution）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Why-Lattices"><span class="toc-number">1.3.4.</span> <span class="toc-text">Why Lattices</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://ceyewan.github.io/p/859aac7b.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://ceyewan.github.io/p/859aac7b.html&text=PQC:Introduction"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://ceyewan.github.io/p/859aac7b.html&title=PQC:Introduction"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://ceyewan.github.io/p/859aac7b.html&is_video=false&description=PQC:Introduction"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PQC:Introduction&body=Check out this article: https://ceyewan.github.io/p/859aac7b.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://ceyewan.github.io/p/859aac7b.html&title=PQC:Introduction"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://ceyewan.github.io/p/859aac7b.html&title=PQC:Introduction"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://ceyewan.github.io/p/859aac7b.html&title=PQC:Introduction"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://ceyewan.github.io/p/859aac7b.html&title=PQC:Introduction"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://ceyewan.github.io/p/859aac7b.html&name=PQC:Introduction&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://ceyewan.github.io/p/859aac7b.html&t=PQC:Introduction"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+      
+        
+          2016-2024
+  </div>
+  <div class="footer-left">
+    ceyewan
+  </div>
+</footer>
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
