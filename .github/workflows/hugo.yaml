@@ -71,6 +71,7 @@ jobs:
           if [[ -n "$(git status --porcelain)" ]]; then
             git add content/posts
             git commit -m "自动生成/更新博客摘要"
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
             git push
           else
             echo "没有需要提交的更改"
