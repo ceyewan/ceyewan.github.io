@@ -170,6 +170,151 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">K8s 实战教程
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Kubernetes（简称 K8s）已成为云原生时代的标准，是构建、部署和管理可扩展应用的事实上的操作系统。掌握它对于现代软件工程师和运维专家而言至关重要。
+本教程将采用一种循序渐进的实战方法。我们将从最基础的 Container（容器） 概念出发，通过逐步迭代和完善配置文件，引导你掌握 Pod、Deployment、Service、Ingress 等核心资源。最终，你将学会如何使用 Helm 将所有组件打包，实现一套完整服务的自动化部署。
+准备工作 在开始之前，请确保你的开发环境满足以下要求。本教程主要参考自这篇优秀的 教程，并结合了个人实践。
+容器运行时与 Kubernetes 集群：你需要一个容器运行时（如 Docker）和一个本地 Kubernetes 集群。 推荐方案 (macOS)：使用 OrbStack。它集成了 Docker 和 Kubernetes，一键启动即可获得完整的开发环境，无需额外安装 Minikube 或 Docker Desktop。 Kubernetes 命令行工具：安装 kubectl，它是与 Kubernetes 集群交互的核心工具。 容器镜像仓库：注册一个容器镜像仓库账号，如 Docker Hub、阿里云 ACR 或其他公有/私有仓库，并使用 docker login 命令登录。我们后续构建的镜像将推送到这里。 Container 我们的云原生之旅始于最核心的构建块：容器 (Container)。容器将应用程序及其所有依赖项打包在一起，确保其在任何环境中都能以一致的方式运行。主要氛围三个部分：
+编写一个简单的 Go Web 应用。 使用多阶段构建 (Multi-stage Build) 的 Dockerfile 将其打包成一个轻量、安全的镜像。 编写一个脚本来自动化构建和推送镜像的流程。 选择 Go 语言是因为它在云原生领域广受欢迎，其主要优势在于：
+静态编译：生成无外部依赖的单个二进制文件，非常适合容器化。 跨平台：轻松编译适用于不同操作系统和架构（如 linux/amd64）的程序。 高性能：天生支持并发，内存占用低，非常适合构建高效的微服务。 为了构建一个最优的容器镜像，我们将采用多阶段构建（Multi-stage Build） 策略。这是一种最佳实践，能有效减小镜像体积并提高安全性。
+构建阶段 (Builder Stage)：使用一个包含完整 Go 工具链的基础镜像来编译我们的源代码，生成一个静态链接的可执行文件。 最终阶段 (Final Stage)：使用一个极简的基础镜像（如 distroless），它仅包含运行程序所必需的库。我们只将上一步生成的可执行文件拷贝进来，完全抛弃了 Go 编译环境和源代码。 通过这种方式，最终镜像的体积可以从数百 MB 锐减到约 10MB，极大地提升了分发效率和安全性。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-06-28 22:03:32 +0800 CST'>2025-06-28</span>&nbsp;·&nbsp;10 分钟&nbsp;·&nbsp;ceyewan</footer>
+  <a class="entry-link" aria-label="post link to K8s 实战教程" href="http://localhost:1313/posts/cloud-native/295cf1c4/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">虚拟化与容器化概述
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1 虚拟化技术 KVM（Kernel-based Virtual Machine）是 Linux 内核中的原生虚拟化解决方案，借助硬件辅助虚拟化技术，在一台物理服务器上运行多个独立的虚拟机（VM），每台虚拟机可运行不同的操作系统（如 Windows、Ubuntu 等）。KVM 依赖 硬件虚拟化支持、Hypervisor 架构和 QEMU 用户态模拟器，广泛应用于云计算平台（如 OpenStack、Proxmox）及生产环境中的虚拟化部署。
+1.1 硬件辅助虚拟化 现代 x86 架构 CPU（如 Intel VT-x、AMD-V）内置了虚拟化指令集扩展，允许虚拟机的指令在物理 CPU 上原生执行，从而提升性能并降低虚拟化的实现复杂度。
+CPU 虚拟化模式：CPU 支持两种运行模式：
+Root Mode（VMX Root）：宿主机（Hypervisor）运行的模式； Non-Root Mode（VMX Non-Root）：虚拟机运行的模式。 当虚拟机需要执行特权操作（如访问 I/O 设备、CR3 切换等），会触发 VM-exit，退出 Non-Root Mode，由 KVM 接管处理。
+[!NOTE] 硬件虚拟化极大减少了二进制翻译等传统软件模拟技术的开销，使得虚拟机运行更接近原生性能。
+1.2 Hypervisor 架构（KVM） Hypervisor 是一种软件、固件或硬件层，用来在物理硬件和虚拟机（VM）之间提供隔离与资源调度。它的主要作用是模拟一个完整的计算机系统（CPU、内存、磁盘、网络等）；管理多个虚拟机对底层物理资源的访问；保证虚拟机之间的安全隔离和资源公平使用。
+类型 说明 示例 Type-1 裸金属型，直接运行在硬件上，性能高、安全性强 KVM、Xen、ESXi Type-2 宿主型，运行在操作系统之上，适合桌面环境 VirtualBox、VMware Workstation KVM 就是一个 Type-1 类型的 Hypervisor：
+虽然 KVM 运行在 Linux 内核中，但加载 kvm.ko 模块后，Linux 内核本身就充当了 Hypervisor 的角色，因此被归类为 Type-1。 每个虚拟机以一个普通的 Linux 进程存在，便于调度、监控、资源隔离。 1.3 QEMU：用户态虚拟设备模拟器 KVM 本身只提供 CPU 和内存的虚拟化能力，而不包含虚拟设备（磁盘、网卡、显卡等）模拟能力。QEMU（Quick Emulator）是与 KVM 配套使用的用户空间模拟器，补全虚拟设备层。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-06-28 22:01:55 +0800 CST'>2025-06-28</span>&nbsp;·&nbsp;8 分钟&nbsp;·&nbsp;ceyewan</footer>
+  <a class="entry-link" aria-label="post link to 虚拟化与容器化概述" href="http://localhost:1313/posts/cloud-native/4b9fc30e/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Go 高性能日志库 Zap
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Zap 是 Uber 开源的一款结构化、分级、极致性能优化的 Go 日志库。它专为性能敏感的场景设计，支持强类型字段、高效序列化，并兼顾开发体验。
+Zap 提供了两种日志 API：
+Logger：强类型结构化 API，性能最优； SugaredLogger：支持 fmt.Sprintf 风格，使用更便捷，性能略低； 1 为什么 Zap 如此高性能？ 1.1 避免反射开销 传统库如 Logrus：大量使用 interface{} 与反射； Zap：使用强类型字段（如 zap.String、zap.Int），绕过反射，性能更优。 1.2 减少内存分配 使用 sync.Pool 重用对象，缓解 GC 压力； 临时缓冲区、日志字段结构都支持复用； 零分配字符串编码，避免频繁拼接。 1.3 精简调用链 其他库：多层接口封装（Logger → Encoder → Formatter）； Zap：扁平化设计，Logger → Encoder，直达底层。 1.4 非阻塞写入 &amp; 异步优化 日志调用方不直接执行 I/O； 通过 channel 实现生产者 - 消费者模型，避免阻塞； 默认同步写入，结合 WriteSyncer 可实现批量输出。 1.5 编码器优化 高性能 JSON / Console 编码器； 直接写入 []byte，绕过字符串中间态； 支持颜色、高亮、字段定制等扩展性良好的格式化能力。 1.6 高性能 API 设计 明确区分性能优先（Logger）与开发便捷（SugaredLogger）两条路径； 鼓励在核心路径中使用 Logger，在外围使用 SugaredLogger。 2 结构化日志 传统日志多为文本拼接，机器难以解析。而结构化日志以 键值对 方式记录，天然适配 JSON、可直接被日志平台（如 ELK、Loki）解析。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-06-28 21:53:07 +0800 CST'>2025-06-28</span>&nbsp;·&nbsp;2 分钟&nbsp;·&nbsp;ceyewan</footer>
+  <a class="entry-link" aria-label="post link to Go 高性能日志库 Zap" href="http://localhost:1313/posts/golang-learning/22e8abab/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Go 库函数和内置方法
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1 List container/list 包提供了一个双向链表的实现。双向链表是一种常见的数据结构，支持高效的插入、删除和遍历操作。
+l:= list.New()：创建一个新的双向链表。 l.PushFront(value)：在链表头部插入一个元素。 l.PushBack(value)：在链表尾部插入一个元素。 l.InsertBefore(value, mark)：在 mark 元素之前插入一个元素。 l.InsertAfter(value, mark)：在 mark 元素之后插入一个元素。 l.Remove(elem)：删除链表中的指定元素。 l.MoveToFront(elem)：将元素移动到链表头部。 l.MoveToBack(elem)：将元素移动到链表尾部。 l.MoveBefore(elem, mark)：将元素移动到 mark 元素之前。 l.MoveAfter(elem, mark)：将元素移动到 mark 元素之后。 l.Front()：获取链表头部的元素。 l.Back()：获取链表尾部的元素。 l.Len()：返回链表中元素的数量。 import &#34;container/heap&#34; for e := l.Front(); e != nil; e = e.Next() { fmt.Println(e.Value) } 上面的 e 的类型是 *list.Element，即指向 list.Element 结构体的指针。其中包括 next 和 prev 两个指针，list 指向该元素所属的链表，最后是 Value，表示该元素存储的值，类型是 interface{} 可以存储任何类型的值。
+因此，假设我们向链表中写入的是一个结构体，那么需要进行一次类型断言，然后再来获取结构体里面的值，如 e.Value.(*CacheItem).key 和 e.Value.(*CacheItem).value。
+2 Heap container/heap 包提供了一个堆的实现。堆是一种特殊的树形数据结构，通常用于实现优先队列。堆分为最小堆和最大堆，container/heap 包默认实现的是最小堆。
+h:= &amp;Heap{}：创建一个堆对象。 heap.Init(h)：初始化堆，使其满足堆的性质。 heap.Push(h, value)：向堆中插入一个元素，并保持堆的性质。 heap.Pop(h)：从堆中删除并返回最小（或最大）的元素，并保持堆的性质。 h[0]：获取堆顶元素（最小或最大元素），但不删除它。 len(h)：返回堆中元素的数量。 type hp []*ListNode func (h hp) Len() int { return len(h) } func (h hp) Less(i, j int) bool { return h[i].Val &lt; h[j].Val } // 最小堆 func (h hp) Swap(i, j int) { h[i], h[j] = h[j], h[i] } func (h *hp) Push(v any) { *h = append(*h, v.(*ListNode)) } func (h *hp) Pop() any { a := *h; v := a[len(a)-1]; *h = a[:len(a)-1]; return v } 要使用 container/heap 包，需要实现 heap.Interface 接口，该接口包含 sort.Interface 接口和 Push、Pop 方法，而 sort.Interface 接口又要求实现 Len、Less、Swap 这三种方法。因此，最后就是要实现上面这五种方法，不过还好，都挺容易的。注意，Push 和 Pop 都是操作的最后一个元素。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-06-28 21:53:07 +0800 CST'>2025-06-28</span>&nbsp;·&nbsp;3 分钟&nbsp;·&nbsp;ceyewan</footer>
+  <a class="entry-link" aria-label="post link to Go 库函数和内置方法" href="http://localhost:1313/posts/golang-learning/21b8541d/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Go 热重载工具 Air
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>air 是一款专为 Go 项目设计的热重载工具，它能够在开发者保存代码文件时自动触发重新编译并重启程序。相比直接使用 go run 命令，air 提供了更多实用功能：
+支持自定义构建和运行命令 避免路径错误和日志丢失问题 配置灵活且使用简单 显著提升本地开发效率 1 安装 安装 air 非常简单，只需执行以下命令：
+go install github.com/air-verse/air@latest go get 主要作用是将某个模块加入 go.mod，并下载源码到本地缓存（GOPATH/pkg/mod）； go install 主要用于安装 CLI 工具或构建你自己的可执行程序。 2 使用 2.1 基础使用 最简单的使用方式是直接在项目目录下运行：
+air 这会使用默认配置启动热重载功能。但更推荐的方式是通过配置文件进行详细配置。
+2.2 配置文件 执行以下命令生成默认配置文件：
+air init 这会生成一个 .air.toml 文件，内容类似：
+# .air.toml [build] cmd = &#34;go build -o ./tmp/main ./main.go&#34; # 指定构建命令，产出你要执行的 ./main bin = &#34;./tmp/main&#34; # air 会运行这个二进制文件 full_bin = true # 使用完整路径（不加的话在某些环境变量下会找不到） [run] cmd = &#34;&#34; # 不加的话 air 会自动运行上面 build 出来的 bin [log] time = true 2.3 配置详解 构建配置： cmd：指定构建命令 bin：指定构建输出的可执行文件路径 full_bin：是否使用完整路径（避免环境变量问题） 运行配置： cmd：可指定运行命令（留空则自动运行构建出的二进制文件） 日志配置： time：是否显示时间戳 3 高级用法 3.1 自定义构建命令 air --build.cmd &#34;go build -o bin/api cmd/run.go&#34; --build.bin &#34;./bin/api&#34; 3.2 排除特定目录 air --build.exclude_dir &#34;templates,build&#34; 3.3 传递运行参数 # Will run ./tmp/main server --port 8080 air server --port 8080 4 注意事项 不要使用 go run： air 的底层机制是编译后执行 go run 会在临时目录构建，可能导致路径问题 临时文件位置： air 默认将编译好的程序放在 tmp 文件夹 确保你的项目有适当的 .gitignore 配置 与热部署的区别： 热重载：开发环境使用，修改代码后自动编译 &#43; 运行 热部署：生产环境使用，实现不中断服务的版本更新 [!NOTE] 热重载&amp;热部署 热重载：改代码后自动编译 &#43; 运行，常用于开发环境（如 air）； 热部署：上线新版本时不中断服务，常用于生产环境，涉及滚动发布、负载均衡等； 守护进程：程序崩溃或退出后自动重启，保持服务持续运行，如 systemd 和 docker；
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-06-28 21:53:07 +0800 CST'>2025-06-28</span>&nbsp;·&nbsp;1 分钟&nbsp;·&nbsp;ceyewan</footer>
+  <a class="entry-link" aria-label="post link to Go 热重载工具 Air" href="http://localhost:1313/posts/golang-learning/a793fe12/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Go 性能分析工具 Pprof
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>pprof 是 Go 官方内置的性能分析工具，用于采集并分析 Go 程序的运行时性能数据，帮助开发者发现 CPU 瓶颈、内存泄漏、阻塞等待等问题。具体来说，支持 CPU、Memory、Block、Goroutine、Heap Profiling 等。
+首先，应用程序通过 import _ &#34;net/http/pprof&#34; 匿名导入 pprof 包，用于在程序中进行插桩，然后通过下面的代码在对应端口启动 pprof 服务：
+go func() { http.ListenAndServe(&#34;localhost:6060&#34;, nil) }() 接下来，就可以通过浏览器访问 http://127.0.0.1:6060/debug/pprof/，可以看到如下界面：
+类型 描述 allocs 内存分配情况的采样信息 blocks 阻塞操作情况的采样信息 cmdline 显示程序启动命令及参数 goroutine 当前所有协程的堆栈信息 heap 堆上内存使用情况的采样信息 mutex 锁争用情况的采样信息 profile CPU 占用情况的采样信息 threadcreate 系统线程创建情况的采样信息 trace 程序运行跟踪信息 由于直接看网页不够直观，可以借助 go tool pprof 工具来排查。
+1 CPU 调优 通过 go tool pprof &#34;http://localhost:6060/debug/pprof/profile?seconds=30&#34; 获取近 30 秒的执行记录，然后会进入到一个命令行交互界面，我们可以通过 top 命令查看 CPU 资源使用量的排序，通过 list xxx 查看相关代码段的实现，通过 web 命令生成一个可视化的界面。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-06-28 21:53:07 +0800 CST'>2025-06-28</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;ceyewan</footer>
+  <a class="entry-link" aria-label="post link to Go 性能分析工具 Pprof" href="http://localhost:1313/posts/golang-learning/6b074835/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Go 远程过程调用标准库与 GRPC
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1 RPC 核心概念与通信基础 RPC（Remote Procedure Call）远程过程调用 是一种使程序可以调用另一台机器上函数的通信协议，开发者可以像调用本地函数一样透明地调用远程服务。这种抽象极大简化了分布式系统中服务之间的交互逻辑，是微服务架构中最基础的通信手段。
+[!NOTE] RPC（Remote Procedure Call）：远程过程调用是一种封装通信细节的机制，允许开发者调用远程服务如同本地函数。常见实现包括 gRPC、Thrift、Dubbo 等。它屏蔽了底层网络传输、数据序列化等复杂性，是构建现代微服务系统的基础。
+IPC（Inter-Process Communication）：进程间通信用于同一主机内多个进程的数据交换与协同，方式包括管道、消息队列、共享内存、信号、Socket 等。IPC 更多用于单机多进程协作，RPC 更适合跨网络服务交互。
+在软件系统从单体架构向微服务架构演化的过程中，不同服务部署在不同主机或容器中，模块之间无法通过函数调用直接通信。此时，就需要一种通信机制，既能跨进程、跨主机调用远程服务，又不需要开发者处理底层细节——这就是 RPC 诞生的背景。
+1.1 RPC 核心组成与工作流程 客户端存根（Client Stub）：负责将客户端的函数调用请求序列化成网络消息，并发送给服务端。 服务端骨架（Server Stub）：负责接收客户端的请求，反序列化消息，调用相应的服务函数，并将结果序列化后返回给客户端。 序列化协议：定义了数据如何序列化和反序列化，常见的序列化协议有 JSON、Protobuf 等。 传输协议：定义了网络消息如何传输，常见的传输协议有 TCP、HTTP、gRPC（基于 HTTP/2）等。 2 最简 RPC 示例：HelloWorld 2.1 标准库实现 Go 语言标准库中提供了一个内置的 RPC 包 net/rpc，用于实现远程过程调用。它基于自定义的二进制协议，支持通过原始 TCP 或 HTTP 通信。不过，net/rpc 不支持 HTTP/2，因此无法享受到如多路复用、流量控制等高级特性，性能上也相对有限，适合学习和内部系统使用。
+首先，我们定义一个 HelloService 类型，并在其中实现一个符合 RPC 规范的方法 SayHello：
+type HelloService struct {} func (p *HelloService) SayHello(request string, reply *string) error { *reply = &#34;Hello World:&#34; &#43; request return nil } Go 的 RPC 方法必须满足以下规范：方法必须是导出方法（首字母大写）。方法只能有两个可序列化的参数；第一个参数是请求参数，类型必须是导出或内建类型；第二个参数是响应参数的指针类型；并且必须返回一个 error 类型。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-06-28 21:53:07 +0800 CST'>2025-06-28</span>&nbsp;·&nbsp;9 分钟&nbsp;·&nbsp;ceyewan</footer>
+  <a class="entry-link" aria-label="post link to Go 远程过程调用标准库与 GRPC" href="http://localhost:1313/posts/golang-learning/ccbc66d4/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Go 中的优雅关闭 Graceful Shutdown
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>对于现代的 HTTP 服务器和容器化应用，优雅关闭不仅仅是一个好习惯，更是确保服务不中断的关键措施。一个优雅的关闭过程通常需要满足以下三个核心条件：
+停止接受新请求或消息：在关闭应用时，首先要确保系统不再接收新的 HTTP 请求或消息。此时，仍然保持与数据库、缓存等外部系统的连接，避免中断外部服务的通信。 等待正在处理的请求完成：关闭过程中，应该等待所有正在处理的请求完成，防止已有的请求因为服务突然关闭而未被正确响应。对于请求超时的情况，提供优雅的错误响应或通知用户，确保用户获得清晰的服务状态。 释放关键资源并执行清理：在关闭过程中，及时释放关键资源至关重要。这包括数据库连接、文件锁、网络监听器等。所有资源都应当在退出前清理，确保不会留下任何潜在的资源泄漏或死锁问题。 [!NOTE] 优雅退出 优雅退出指程序或系统在终止时主动释放资源、保存状态并妥善处理未完成任务，确保数据完整性和服务连续性，避免强制中断导致的错误或损坏。常见于后台服务、多线程应用或分布式系统，通过捕获退出信号、清理临时文件、关闭数据库连接等步骤实现平稳关闭，提升可靠性与用户体验。
+1 捕获信号 优雅关闭的第一步是捕获终止信号，这些信号通知应用程序该退出并开始关闭过程。信号是一种软件中断，通知进程发生了特定事件。操作系统会中断进程的正常流程并传递信号。
+Signal handler：应用程序可以为特定信号注册处理函数，接收到信号时自动执行。 Default action：如果未注册处理函数，进程会按信号的默认行为处理，如终止或忽略。 Unblockable signals：某些信号（如 SIGKILL）无法被捕获或忽略，它们直接终止进程。 在 Go 应用启动时，Go 运行时自动处理常见的终止信号，如 SIGINT、SIGTERM 和 SIGHUP。其中，最常用于优雅关闭的信号是：
+SIGTERM：请求优雅退出，Kubernetes 通常是发送该信号终止该程序； SIGINT：中断，用户通过 Ctrl&#43;C 中断进程时触发； SIGHUP：挂断，用于通知应用程序重新加载配置。 [!NOTE] Go 如何终止程序 当 Go 应用程序收到 SIGTERM 时，Go 运行时会通过内置的信号处理器捕获它，首先检查是否注册了自定义处理器。如果没有，运行时会暂时禁用自定义处理器，并再次向应用程序发送相同的信号 (SIGTERM)。此时，操作系统会使用默认行为终止进程。
+在 Go 中，你可以通过 os/signal 包注册自定义信号处理器来覆盖默认的信号处理行为。以下是一个处理 SIGINT 和 SIGTERM 信号的示例：
+func main() { signalChan := make(chan os.Signal, 1) signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM) // 其他初始化工作 &lt;-signalChan fmt.Println(&#34;收到终止信号，正在关闭…&#34;) } signal.Notify 告诉 Go 运行时将指定的信号发送到自定义的信号通道，而不是使用默认的终止行为。这样，你可以手动处理信号并避免程序自动终止。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-06-28 21:53:07 +0800 CST'>2025-06-28</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;ceyewan</footer>
+  <a class="entry-link" aria-label="post link to Go 中的优雅关闭 Graceful Shutdown" href="http://localhost:1313/posts/golang-learning/abf1fab9/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Model Context Protocol Crash Course
     </h2>
   </header>
@@ -179,7 +324,7 @@ MCP（Model Context Protocol，模型上下文协议）正是为了解决这一�
 1.1 LLM 的局限与需求 LLM 的知识固化在训练数据中，无法主动获取实时信息。 传统 prompt 工程、RAG 检索、手动集成工具等方式各有不足，难以满足复杂、动态需求。 需要一个标准化、可扩展、易集成的协议，让模型能像调用 USB 设备一样调用外部能力。 2 LLMs 的上下文管理 2.1 传统方法 截断/滑动窗口：保留最近对话，丢弃旧信息，易丢失重要上下文。 摘要法：对长内容做摘要，易丢失细节且需要额外计算。 模板化 prompt：预留插槽（slots）手动填充信息，开发负担大。 2.2 RAG（检索增强生成） 外部系统负责检索，模型被动接收，无法主动发起信息获取。 主要解决知识查找，但不支持 &#34; 调用工具 &#34; 类操作。 2.3 Prompt 链与 Agent 利用模型输出特殊指令（如 SEARCH: xxx）由外部系统解析执行。 实现了初步的 &#34; 推理 &#43; 行动 “（ReAct），但缺乏标准，集成脆弱，难以复用。 2.4 函数调用 Function Calling 结构化定义可调用函数，模型输出 JSON 指令，由外部执行并反馈结果。 结构化程度提升，但仍需为每对模型与工具定制 glue code，维护困难。 2.5 M×N 集成难题 N 个工具 × M 个 AI 应用，需开发 N×M 套集成代码，极其低效。 工具与模型间缺乏统一标准，导致 &#34; 集成地狱 “，迫切需要一套标准协议。 3 MCP：模型上下文协议 3.1 MCP 是什么？ 定义：MCP 是一种开放的、标准化的协议，规范了 AI 应用与外部工具/资源的交互方式。 作用：像 USB-C 一样，MCP 让任何 AI 应用与任何 MCP 能力（工具/资源/提示词）都能即插即用、互操作。 意义： 开发者只需实现一次 MCP 客户端/服务器，即可集成所有能力，极大降低开发和维护成本。 工具/资源提供方只需实现一次 MCP 服务端，即可服务所有支持 MCP 的 AI 应用。 用户获得更强大、更灵活、更实时的 AI 助手体验。 ...</p>
   </div>
   <footer class="entry-footer"><span title='2025-06-25 22:12:45 +0800 CST'>2025-06-25</span>&nbsp;·&nbsp;2 分钟&nbsp;·&nbsp;ceyewan</footer>
-  <a class="entry-link" aria-label="post link to Model Context Protocol Crash Course" href="http://localhost:1313/posts/my-first-blog/"></a>
+  <a class="entry-link" aria-label="post link to Model Context Protocol Crash Course" href="http://localhost:1313/posts/model-context-protocol-crash-course/"></a>
 </article>
     </main>
     

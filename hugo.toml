@@ -118,14 +118,6 @@ comments = true
   url = "https://github.com/tianshaohan"
 
   [[params.socialIcons]]
-  name = "bilibili"
-  url = "https://space.bilibili.com/395280439"
-
-  [[params.socialIcons]]
-  name = "QQ"
-  url = "img/qq.jpg"
-
-  [[params.socialIcons]]
   name = "email"
   url = "mailto:shaohan.tian@foxmail.com"
 

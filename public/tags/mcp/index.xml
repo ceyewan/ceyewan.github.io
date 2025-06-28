@@ -10,9 +10,9 @@
     <atom:link href="http://localhost:1313/tags/mcp/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Model Context Protocol Crash Course</title>
-      <link>http://localhost:1313/posts/my-first-blog/</link>
+      <link>http://localhost:1313/posts/model-context-protocol-crash-course/</link>
       <pubDate>Wed, 25 Jun 2025 22:12:45 +0800</pubDate>
-      <guid>http://localhost:1313/posts/my-first-blog/</guid>
+      <guid>http://localhost:1313/posts/model-context-protocol-crash-course/</guid>
       <description>&lt;h2 id=&#34;1-引言&#34;&gt;1 引言&lt;/h2&gt;
 &lt;p&gt;在 AI 领域，尤其是大语言模型（LLM）应用中，&lt;strong&gt;如何让模型灵活获取外部实时信息、调用工具、集成多源数据&lt;/strong&gt;，一直是开发者面临的核心难题。&lt;br&gt;
 MCP（Model Context Protocol，模型上下文协议）正是为了解决这一痛点而诞生的，它就像 AI 世界的 &amp;ldquo;USB-C&amp;rdquo;，统一了 AI 与外部能力（工具、资源等）之间的连接标准。&lt;/p&gt;
