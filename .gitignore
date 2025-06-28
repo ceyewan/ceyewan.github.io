@@ -30,3 +30,6 @@ public/*
 
 # Obsidian vault files
 Obsidian Vault/*
+
+# 虚拟环境
+scripts/.venv/*

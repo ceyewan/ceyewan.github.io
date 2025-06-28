@@ -1,12 +1,13 @@
 ---
+categories:
+- Golang
 date: '2025-06-28T21:53:07+08:00'
 draft: false
-title: 'Go 远程过程调用标准库与 GRPC'
-slug: 'ccbc66d4'
+slug: ccbc66d4
+summary: RPC与gRPC核心概念解析及实战示例
 tags:
-  - "gRPC"
-categories:
-  - "Golang"
+- gRPC
+title: Go 远程过程调用标准库与 GRPC
 ---
 
 ## 1 RPC 核心概念与通信基础

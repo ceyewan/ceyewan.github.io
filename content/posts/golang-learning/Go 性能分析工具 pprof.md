@@ -1,12 +1,13 @@
 ---
+categories:
+- Golang
 date: '2025-06-28T21:53:07+08:00'
 draft: false
-title: 'Go 性能分析工具 Pprof'
-slug: '6b074835'
+slug: 6b074835
+summary: Go性能调优利器pprof使用指南
 tags:
-  - "pprof"
-categories:
-  - "Golang"
+- pprof
+title: Go 性能分析工具 Pprof
 ---
 
 pprof 是 Go 官方内置的性能分析工具，用于采集并分析 Go 程序的运行时性能数据，帮助开发者发现 CPU 瓶颈、内存泄漏、阻塞等待等问题。具体来说，支持 CPU、Memory、Block、Goroutine、Heap Profiling 等。

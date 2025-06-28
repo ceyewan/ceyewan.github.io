@@ -1,12 +1,13 @@
 ---
+categories:
+- AI Agent
 date: '2025-06-25T22:12:45+08:00'
 draft: false
-title: 'Model Context Protocol Crash Course'
-categories:
-  - "AI Agent"
+summary: MCP 协议：AI 工具调用的“USB-C”，实现模型与外部能力标准化互操作。
 tags:
-  - "MCP"
-  - "Agent"
+- MCP
+- Agent
+title: Model Context Protocol Crash Course
 ---
 
 ## 1 引言

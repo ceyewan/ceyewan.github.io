@@ -1,12 +1,13 @@
 ---
+categories:
+- Golang
 date: '2025-06-28T21:53:07+08:00'
 draft: false
-title: 'Go 热重载工具 Air'
-slug: 'a793fe12'
+slug: a793fe12
+summary: Go项目热重载工具air提升开发效率
 tags:
-  - "air"
-categories:
-  - "Golang"
+- air
+title: Go 热重载工具 Air
 ---
 
 air 是一款专为 Go 项目设计的**热重载工具**，它能够在开发者保存代码文件时自动触发重新编译并重启程序。相比直接使用 `go run` 命令，air 提供了更多实用功能：

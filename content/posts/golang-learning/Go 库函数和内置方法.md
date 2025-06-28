@@ -1,12 +1,13 @@
 ---
+categories:
+- Golang
 date: '2025-06-28T21:53:07+08:00'
 draft: false
-title: 'Go 库函数和内置方法'
-slug: '21b8541d'
+slug: 21b8541d
+summary: Go标准库常用包详解：List、Heap、Unicode、Strings及更多实用方法
 tags:
-  - ""
-categories:
-  - "Golang"
+- ''
+title: Go 库函数和内置方法
 ---
 
 ## 1 List

@@ -42,21 +42,49 @@ jobs:
           wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb \
           && sudo dpkg -i ${{ runner.temp }}/hugo.deb
       # 如主题依赖 Dart Sass，可保留此步骤，否则可删除
-      - name: 安装 Dart Sass
-        run: sudo snap install dart-sass
+      # - name: 安装 Dart Sass
+      #   run: sudo snap install dart-sass
       # 检出代码（含子模块）
       - name: 检出代码
         uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
+
+      # 生成摘要（Hugo 构建前，使用 uv 安装依赖）
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 安装 uv
+        run: |
+          pip install uv || python -m pip install uv
+      - name: 安装依赖（uv）
+        run: |
+          cd scripts && uv pip install -r requirements.txt || uv pip install .
+      - name: 生成摘要
+        env:
+          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+        run: |
+          python3 scripts/generate_summaries.py
+      - name: 检查更改并提交
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add content/posts
+            git commit -m "自动生成/更新博客摘要"
+            git push
+          else
+            echo "没有需要提交的更改"
+
       # 配置 GitHub Pages 环境
       - name: 配置 Pages
         id: pages
         uses: actions/configure-pages@v5
       # 如有 Node.js 依赖（如前端构建），可保留此步骤，否则可删除
-      - name: 安装 Node.js 依赖
-        run: "[[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true"
+      # - name: 安装 Node.js 依赖
+      #   run: "[[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true"
       # 恢复 Hugo 缓存，加快构建速度
       - name: 恢复缓存
         id: cache-restore

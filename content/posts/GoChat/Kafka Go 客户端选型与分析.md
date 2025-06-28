@@ -1,12 +1,13 @@
 ---
-date: 2025-06-29T02:10:34+08:00
-draft: false
-title: Kafka Go 客户端选型与分析
-slug: 20250629-f2sirarj
-tags:
-  - Kafka
 categories:
-  - GoChat
+- GoChat
+date: 2025-06-29 02:10:34+08:00
+draft: false
+slug: 20250629-f2sirarj
+summary: Go语言Kafka客户端对比：性能与选择解析
+tags:
+- Kafka
+title: Kafka Go 客户端选型与分析
 ---
 
 Apache Kafka 是一个开源的分布式事件流平台，其核心能力包括**高吞吐量、持久化存储、可扩展性以及容错性**。关键组件包括：

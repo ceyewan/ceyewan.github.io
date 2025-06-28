@@ -1,12 +1,13 @@
 ---
+categories:
+- Cloud Native
 date: '2025-06-28T22:03:32+08:00'
 draft: false
-title: 'K8s 实战教程'
-slug: '295cf1c4'
+slug: 295cf1c4
+summary: Kubernetes实战教程：从容器到自动化部署全流程指南
 tags:
-  - "k8s"
-categories:
-  - "Cloud Native"
+- k8s
+title: K8s 实战教程
 ---
 
 Kubernetes（简称 K8s）已成为云原生时代的标准，是构建、部署和管理可扩展应用的事实上的操作系统。掌握它对于现代软件工程师和运维专家而言至关重要。
