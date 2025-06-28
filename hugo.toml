@@ -1,29 +1,29 @@
-baseURL = "https://ceyewan.github.io/"
-title = "Ceyewan's Blog"
-theme = "PaperMod"
+baseURL = "https://ceyewan.github.io/" # 网站的根URL
+title = "Ceyewan's Blog" # 网站标题
+theme = "PaperMod" # 主题名称
 
 [pagination]
-pagerSize = 10
-languageCode = "zh-cn"
-hasCJKLanguage = true
-enableInlineShortcodes = true
-enableEmoji = true
-enableRobotsTXT = true
-buildDrafts = false
-buildFuture = false
-buildExpired = false
-pygmentsUseClasses = true
-defaultContentLanguage = "zh"
-defaultContentLanguageInSubdir = true
+pagerSize = 10 # 每页显示的文章数量
+languageCode = "zh-cn" # 语言代码
+hasCJKLanguage = true # 是否包含CJK语言，优化中文显示
+enableInlineShortcodes = true # 是否启用内联短代码
+enableEmoji = true # 是否启用Emoji表情
+enableRobotsTXT = true # 是否启用robots.txt文件
+buildDrafts = false # 是否构建草稿文章
+buildFuture = false # 是否构建未来的文章
+buildExpired = false # 是否构建过期的文章
+pygmentsUseClasses = true # 代码高亮时使用 CSS 类而非内联样式
+defaultContentLanguage = "zh" # 默认内容语言
+defaultContentLanguageInSubdir = false # 是否在子目录中使用默认内容语言
 
 [minify]
-disableXML = true
+disableXML = true # 是否禁用 XML 文件的压缩
 
 [permalinks]
-post = "/:title/"
+post = "/:title/" # 文章的永久链接格式
 
 [languages.zh]
-languageName = "Chinese"
+languageName = "Chinese" # 语言名称
 weight = 1
 
   [languages.zh.params.profileMode]
@@ -154,10 +154,11 @@ series = "series"
 unsafe = true
 
 [markup.highlight]
-codeFences = true
-guessSyntax = true
-lineNos = true
-style = "darcula"
+codeFences = true # 启用 Markdown 代码块（```）的高亮显示
+guessSyntax = true # 如果未指定代码语言，自动猜测语法类型
+lineNos = false # 显示代码行号
+style = "github" # 代码高亮配色风格，github 主题
+tabWidth = 4 # 设置代码块的制表符宽度
 
 [privacy.vimeo]
 disabled = false
