@@ -74,6 +74,7 @@ jobs:
             git push
           else
             echo "没有需要提交的更改"
+          fi
 
       # 配置 GitHub Pages 环境
       - name: 配置 Pages
