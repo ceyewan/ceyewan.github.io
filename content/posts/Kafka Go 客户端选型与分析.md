@@ -1,6 +1,6 @@
 ---
 date: 2025-06-29T02:10:34+08:00
-draft: true
+draft: false
 title: Kafka Go 客户端选型与分析
 slug: 20250629-f2sirarj
 tags:
