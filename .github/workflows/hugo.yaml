@@ -61,7 +61,7 @@ jobs:
           pip install uv || python -m pip install uv
       - name: 安装依赖（uv）
         run: |
-          cd scripts && uv pip install . --system
+          cd scripts && uv pip install pydantic
       - name: 生成摘要
         env:
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
