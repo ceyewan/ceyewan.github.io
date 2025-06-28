@@ -58,10 +58,10 @@ jobs:
           python-version: '3.12'
       - name: 安装 uv
         run: |
-          pip install uv || python -m pip install uv
+          pip install uv || python -m pip install uv 
       - name: 安装依赖（uv）
         run: |
-          cd scripts && uv pip install pydantic
+          cd scripts && uv pip install pydantic --system
       - name: 生成摘要
         env:
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
