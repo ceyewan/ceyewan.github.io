@@ -1,11 +1,13 @@
-+++
-date = '2025-06-28T21:53:07+08:00'
-draft = false
-title = 'Go 中的优雅关闭 Graceful Shutdown'
-slug = 'abf1fab9'
-tags = [""]
-categories = ["Golang"]
-+++
+---
+date: '2025-06-28T21:53:07+08:00'
+draft: false
+title: 'Go 中的优雅关闭 Graceful Shutdown'
+slug: 'abf1fab9'
+tags:
+  - ""
+categories:
+  - "Golang"
+---
 
  对于现代的 HTTP 服务器和容器化应用，优雅关闭不仅仅是一个好习惯，更是确保服务不中断的关键措施。一个优雅的关闭过程通常需要满足以下三个核心条件：
 

@@ -1,11 +1,13 @@
-+++
-date = '2025-06-28T21:53:07+08:00'
-draft = false
-title = 'Go 远程过程调用标准库与 GRPC'
-slug = 'ccbc66d4'
-tags = ["gRPC"]
-categories = ["Golang"]
-+++
+---
+date: '2025-06-28T21:53:07+08:00'
+draft: false
+title: 'Go 远程过程调用标准库与 GRPC'
+slug: 'ccbc66d4'
+tags:
+  - "gRPC"
+categories:
+  - "Golang"
+---
 
 ## 1 RPC 核心概念与通信基础
 

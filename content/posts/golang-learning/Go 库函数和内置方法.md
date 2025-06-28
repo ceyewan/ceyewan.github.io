@@ -1,11 +1,13 @@
-+++
-date = '2025-06-28T21:53:07+08:00'
-draft = false
-title = 'Go 库函数和内置方法'
-slug = '21b8541d'
-tags = [""]
-categories = ["Golang"]
-+++
+---
+date: '2025-06-28T21:53:07+08:00'
+draft: false
+title: 'Go 库函数和内置方法'
+slug: '21b8541d'
+tags:
+  - ""
+categories:
+  - "Golang"
+---
 
 ## 1 List
 
