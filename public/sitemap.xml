@@ -8,20 +8,31 @@
     <loc>http://localhost:1313/</loc>
     <lastmod>2025-06-28T12:05:45+08:00</lastmod>
   </url><url>
+    <loc>http://localhost:1313/tags/agent/</loc>
+    <lastmod>2025-06-25T22:12:45+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/ai-agent/</loc>
+    <lastmod>2025-06-25T22:12:45+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/</loc>
+    <lastmod>2025-06-25T22:12:45+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/mcp/</loc>
+    <lastmod>2025-06-25T22:12:45+08:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/posts/my-first-blog/</loc>
     <lastmod>2025-06-25T22:12:45+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/</loc>
     <lastmod>2025-06-25T22:12:45+08:00</lastmod>
   </url><url>
+    <loc>http://localhost:1313/tags/</loc>
+    <lastmod>2025-06-25T22:12:45+08:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/archives/</loc>
   </url><url>
     <loc>http://localhost:1313/search/</loc>
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
-  </url><url>
     <loc>http://localhost:1313/series/</loc>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
   </url>
 </urlset>

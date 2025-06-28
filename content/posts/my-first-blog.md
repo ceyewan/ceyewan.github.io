@@ -2,6 +2,8 @@
 date = '2025-06-25T22:12:45+08:00'
 draft = false
 title = 'Model Context Protocol Crash Course'
+categories = ["AI Agent"]
+tags = ["MCP", "Agent"]
 +++
 
 
