@@ -28,4 +28,5 @@ go.work.sum
 public/*
 .DS_Store
 
-Obsidian Vault/.obsidian/*
+# Obsidian vault files
+Obsidian Vault/*
