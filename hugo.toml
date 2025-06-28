@@ -181,3 +181,7 @@ disableInlineCSS = true
 
 [services.x]
 disableInlineCSS = true
+
+[caches]
+  [caches.images]
+    dir = ':cacheDir/images'
