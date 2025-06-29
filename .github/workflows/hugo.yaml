@@ -13,7 +13,7 @@ on:
 
 # 设置 GITHUB_TOKEN 权限，允许部署到 GitHub Pages
 permissions:
-  contents: read
+  contents: write  # 允许 Action 写入
   pages: write
   id-token: write
 
@@ -30,6 +30,7 @@ defaults:
 jobs:
   # 构建任务
   build:
+    if: github.actor != 'github-actions[bot]'  # 避免死循环
     runs-on: ubuntu-latest  # 运行环境
     env:
       HUGO_VERSION: 0.147.2  # Hugo 版本，可根据需要修改
