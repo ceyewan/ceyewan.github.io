@@ -1,14 +1,16 @@
 ---
-date: 2025-06-29T03:43:58+08:00
-draft: false
-title: MVCC 多版本并发控制
-slug: 20250629-8oollnu3
-tags:
-  - MVCC
-  - etcd
 categories:
-  - GoChat
+- GoChat
+date: 2025-06-29 03:43:58+08:00
+draft: false
+slug: 20250629-8oollnu3
+summary: MVCC（多版本并发控制）通过数据多版本与快照机制，提升数据库并发性能，广泛应用于MySQL与etcd，适用于高并发读写场景。
+tags:
+- MVCC
+- etcd
+title: MVCC 多版本并发控制
 ---
+
 ## 1 **MVCC 基础概念**
 
 ### 1.1 **什么是 MVCC？**
