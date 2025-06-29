@@ -33,3 +33,6 @@ Obsidian Vault/*
 
 # 虚拟环境
 scripts/.venv/*
+
+# 静态文件
+public/*

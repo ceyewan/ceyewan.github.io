@@ -1,19 +1,19 @@
 baseURL = "https://ceyewan.github.io/" # 网站的根URL
-title = "Ceyewan's Blog" # 网站标题
-theme = "PaperMod" # 主题名称
+title = "Ceyewan's Blog"               # 网站标题
+theme = "PaperMod"                     # 主题名称
 
 [pagination]
-pagerSize = 10 # 每页显示的文章数量
-languageCode = "zh-cn" # 语言代码
-hasCJKLanguage = true # 是否包含CJK语言，优化中文显示
-enableInlineShortcodes = true # 是否启用内联短代码
-enableEmoji = true # 是否启用Emoji表情
-enableRobotsTXT = true # 是否启用robots.txt文件
-buildDrafts = false # 是否构建草稿文章
-buildFuture = false # 是否构建未来的文章
-buildExpired = false # 是否构建过期的文章
-pygmentsUseClasses = true # 代码高亮时使用 CSS 类而非内联样式
-defaultContentLanguage = "zh" # 默认内容语言
+pagerSize = 10                         # 每页显示的文章数量
+languageCode = "zh-cn"                 # 语言代码
+hasCJKLanguage = true                  # 是否包含CJK语言，优化中文显示
+enableInlineShortcodes = true          # 是否启用内联短代码
+enableEmoji = true                     # 是否启用Emoji表情
+enableRobotsTXT = true                 # 是否启用robots.txt文件
+buildDrafts = false                    # 是否构建草稿文章
+buildFuture = false                    # 是否构建未来的文章
+buildExpired = false                   # 是否构建过期的文章
+pygmentsUseClasses = true              # 代码高亮时使用 CSS 类而非内联样式
+defaultContentLanguage = "zh"          # 默认内容语言
 defaultContentLanguageInSubdir = false # 是否在子目录中使用默认内容语言
 
 [minify]
@@ -27,70 +27,47 @@ post = "/post/:slug" # 文章的永久链接格式
 languageName = "Chinese" # 语言名称
 weight = 1
 
-  [languages.zh.params.profileMode]
-  enabled = true
-  title = "总之岁月漫长，然而值得等待！"
-  subtitle = ""
-  imageUrl = "https://www.shaohanyun.top/img/logo.gif"
-  imageWidth = 250
-  imageHeight = 250
-
-    [[languages.zh.params.profileMode.buttons]]
-    name = "👨🏻‍💻技术"
-    url = "posts/tech"
-
-    [[languages.zh.params.profileMode.buttons]]
-    name = "📕阅读"
-    url = "posts/read"
-
-    [[languages.zh.params.profileMode.buttons]]
-    name = "🏖生活"
-    url = "posts/life"
-
-[[languages.zh.menu.main]]
-identifier = "search"
-name = "🔍搜索"
-url = "/search"
-weight = 1
+[languages.zh.params.profileMode]
+enabled = false
 
 [[languages.zh.menu.main]]
 identifier = "home"
 name = "🏠主页"
 url = "/"
-weight = 2
-
-[[languages.zh.menu.main]]
-identifier = "posts"
-name = "📚文章"
-url = "/posts"
-weight = 3
+weight = 1
 
 [[languages.zh.menu.main]]
 identifier = "archives"
 name = "⏱时间轴"
 url = "/archives"
-weight = 10
+weight = 2
 
 [[languages.zh.menu.main]]
 identifier = "categories"
 name = "📂分类"
 url = "/categories"
-weight = 20
+weight = 3
 
 [[languages.zh.menu.main]]
 identifier = "tags"
 name = "🔖标签"
 url = "/tags"
-weight = 30
+weight = 4
+
+[[languages.zh.menu.main]]
+identifier = "search"
+name = "🔍搜索"
+url = "/search"
+weight = 5
 
 [[languages.zh.menu.main]]
 identifier = "about"
 name = "🙋🏻‍♂️关于"
 url = "/about"
-weight = 40
+weight = 6
 
 [outputs]
-home = [ "HTML", "RSS", "JSON" ]
+home = ["HTML", "RSS", "JSON"]
 
 [params]
 ShowShareButtons = false
@@ -113,36 +90,36 @@ ShowToc = true
 TocOpen = true
 comments = true
 
-  [[params.socialIcons]]
-  name = "github"
-  url = "https://github.com/tianshaohan"
+[[params.socialIcons]]
+name = "github"
+url = "https://github.com/ceyewan"
 
-  [[params.socialIcons]]
-  name = "email"
-  url = "mailto:shaohan.tian@foxmail.com"
+[[params.socialIcons]]
+name = "email"
+url = "mailto:ceyewan@gmail.com"
 
-  [[params.socialIcons]]
-  name = "RSS"
-  url = "index.xml"
+[[params.socialIcons]]
+name = "RSS"
+url = "index.xml"
 
-  [params.assets]
-  favicon = "img/logo.gif"
-  favicon16x16 = "img/logo.gif"
-  favicon32x32 = "img/logo.gif"
-  apple_touch_icon = "logo.gif"
-  safari_pinned_tab = "logo.gif"
+[params.assets]
+favicon = "img/logo.gif"
+favicon16x16 = "img/logo.gif"
+favicon32x32 = "img/logo.gif"
+apple_touch_icon = "logo.gif"
+safari_pinned_tab = "logo.gif"
 
-  [params.fuseOpts]
-  isCaseSensitive = false
-  shouldSort = true
-  location = 0
-  distance = 1_000
-  threshold = 1
-  minMatchCharLength = 0
-  keys = [ "title", "permalink", "summary" ]
+[params.fuseOpts]
+isCaseSensitive = false
+shouldSort = true
+location = 0
+distance = 1_000
+threshold = 1
+minMatchCharLength = 0
+keys = ["title", "permalink", "summary"]
 
-  [params.twikoo]
-  version = "1.4.11"
+[params.twikoo]
+version = "1.4.11"
 
 [taxonomies]
 category = "categories"
@@ -153,11 +130,11 @@ series = "series"
 unsafe = true
 
 [markup.highlight]
-codeFences = true # 启用 Markdown 代码块（```）的高亮显示
+codeFences = true  # 启用 Markdown 代码块（```）的高亮显示
 guessSyntax = true # 如果未指定代码语言，自动猜测语法类型
-lineNos = false # 显示代码行号
-style = "monokai" # 代码高亮配色风格，monokai 主题
-tabWidth = 4 # 设置代码块的制表符宽度
+lineNos = false    # 显示代码行号
+style = "monokai"  # 代码高亮配色风格，monokai 主题
+tabWidth = 4       # 设置代码块的制表符宽度
 
 [privacy.vimeo]
 disabled = false
@@ -183,5 +160,5 @@ disableInlineCSS = true
 disableInlineCSS = true
 
 [caches]
-  [caches.images]
-    dir = ':cacheDir/images'
+[caches.images]
+dir = ':cacheDir/images'
