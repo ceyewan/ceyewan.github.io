@@ -156,7 +156,7 @@ unsafe = true
 codeFences = true # 启用 Markdown 代码块（```）的高亮显示
 guessSyntax = true # 如果未指定代码语言，自动猜测语法类型
 lineNos = false # 显示代码行号
-style = "github" # 代码高亮配色风格，github 主题
+style = "monokai" # 代码高亮配色风格，monokai 主题
 tabWidth = 4 # 设置代码块的制表符宽度
 
 [privacy.vimeo]

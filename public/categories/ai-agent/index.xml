@@ -10,62 +10,10 @@
     <atom:link href="http://localhost:1313/categories/ai-agent/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Model Context Protocol Crash Course</title>
-      <link>http://localhost:1313/posts/model-context-protocol-crash-course/</link>
+      <link>http://localhost:1313/posts/ai-agent/model-context-protocol-crash-course/</link>
       <pubDate>Wed, 25 Jun 2025 22:12:45 +0800</pubDate>
-      <guid>http://localhost:1313/posts/model-context-protocol-crash-course/</guid>
-      <description>&lt;h2 id=&#34;1-引言&#34;&gt;1 引言&lt;/h2&gt;
-&lt;p&gt;在 AI 领域，尤其是大语言模型（LLM）应用中，&lt;strong&gt;如何让模型灵活获取外部实时信息、调用工具、集成多源数据&lt;/strong&gt;，一直是开发者面临的核心难题。&lt;br&gt;
-MCP（Model Context Protocol，模型上下文协议）正是为了解决这一痛点而诞生的，它就像 AI 世界的 &amp;ldquo;USB-C&amp;rdquo;，统一了 AI 与外部能力（工具、资源等）之间的连接标准。&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/20250621105636.png&#34;&gt;&lt;/p&gt;
-&lt;h3 id=&#34;11-llm-的局限与需求&#34;&gt;1.1 LLM 的局限与需求&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;LLM 的知识固化在训练数据中，无法主动获取实时信息。&lt;/li&gt;
-&lt;li&gt;传统 prompt 工程、RAG 检索、手动集成工具等方式各有不足，难以满足复杂、动态需求。&lt;/li&gt;
-&lt;li&gt;需要一个&lt;strong&gt;标准化、可扩展、易集成的协议&lt;/strong&gt;，让模型能像调用 USB 设备一样调用外部能力。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;2-llms-的上下文管理&#34;&gt;2 LLMs 的上下文管理&lt;/h2&gt;
-&lt;h3 id=&#34;21-传统方法&#34;&gt;2.1 传统方法&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;截断/滑动窗口&lt;/strong&gt;：保留最近对话，丢弃旧信息，易丢失重要上下文。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;摘要法&lt;/strong&gt;：对长内容做摘要，易丢失细节且需要额外计算。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;模板化 prompt&lt;/strong&gt;：预留插槽（slots）手动填充信息，开发负担大。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;22-rag检索增强生成&#34;&gt;2.2 RAG（检索增强生成）&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;外部系统负责检索，模型被动接收，无法主动发起信息获取。&lt;/li&gt;
-&lt;li&gt;主要解决知识查找，但不支持 &amp;quot; 调用工具 &amp;quot; 类操作。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;23-prompt-链与-agent&#34;&gt;2.3 Prompt 链与 Agent&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;利用模型输出特殊指令（如 &lt;code&gt;SEARCH: xxx&lt;/code&gt;）由外部系统解析执行。&lt;/li&gt;
-&lt;li&gt;实现了初步的 &amp;quot; 推理 + 行动 &amp;ldquo;（ReAct），但缺乏标准，集成脆弱，难以复用。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;24-函数调用-function-calling&#34;&gt;2.4 函数调用 Function Calling&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;结构化定义可调用函数，模型输出 JSON 指令，由外部执行并反馈结果。&lt;/li&gt;
-&lt;li&gt;结构化程度提升，但仍需为每对模型与工具定制 glue code，维护困难。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;25-mn-集成难题&#34;&gt;2.5 M×N 集成难题&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;N 个工具 × M 个 AI 应用，需开发 N×M 套集成代码，极其低效。&lt;/li&gt;
-&lt;li&gt;工具与模型间缺乏统一标准，导致 &amp;quot; 集成地狱 &amp;ldquo;，迫切需要一套标准协议。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;3-mcp模型上下文协议&#34;&gt;3 MCP：模型上下文协议&lt;/h2&gt;
-&lt;h3 id=&#34;31-mcp-是什么&#34;&gt;3.1 MCP 是什么？&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;定义&lt;/strong&gt;：MCP 是一种开放的、标准化的协议，规范了 AI 应用与外部工具/资源的交互方式。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;作用&lt;/strong&gt;：像 USB-C 一样，MCP 让任何 AI 应用与任何 MCP 能力（工具/资源/提示词）都能即插即用、互操作。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;意义&lt;/strong&gt;：
-&lt;ul&gt;
-&lt;li&gt;开发者只需实现一次 MCP 客户端/服务器，即可集成所有能力，极大降低开发和维护成本。&lt;/li&gt;
-&lt;li&gt;工具/资源提供方只需实现一次 MCP 服务端，即可服务所有支持 MCP 的 AI 应用。&lt;/li&gt;
-&lt;li&gt;用户获得更强大、更灵活、更实时的 AI 助手体验。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;img alt=&#34;image.png&#34; loading=&#34;lazy&#34; src=&#34;https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/20250621111133.png&#34;&gt;&lt;/p&gt;</description>
+      <guid>http://localhost:1313/posts/ai-agent/model-context-protocol-crash-course/</guid>
+      <description>MCP 协议：AI 工具调用的“USB-C”，实现模型与外部能力标准化互操作。</description>
     </item>
   </channel>
 </rss>

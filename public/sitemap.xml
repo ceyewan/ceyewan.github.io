@@ -3,10 +3,34 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://localhost:1313/categories/</loc>
-    <lastmod>2025-06-28T22:03:32+08:00</lastmod>
+    <lastmod>2025-06-29T03:43:58+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/</loc>
-    <lastmod>2025-06-28T22:03:32+08:00</lastmod>
+    <lastmod>2025-06-29T03:43:58+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/etcd/</loc>
+    <lastmod>2025-06-29T03:43:58+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/gochat/</loc>
+    <lastmod>2025-06-29T03:43:58+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/mvcc/</loc>
+    <lastmod>2025-06-29T03:43:58+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/gochat/20250629-8oollnu3/</loc>
+    <lastmod>2025-06-29T03:43:58+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/</loc>
+    <lastmod>2025-06-29T03:43:58+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/</loc>
+    <lastmod>2025-06-29T03:43:58+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/kafka/</loc>
+    <lastmod>2025-06-29T02:10:34+08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/gochat/20250629-f2sirarj/</loc>
+    <lastmod>2025-06-29T02:10:34+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/categories/cloud-native/</loc>
     <lastmod>2025-06-28T22:03:32+08:00</lastmod>
@@ -15,12 +39,6 @@
     <lastmod>2025-06-28T22:03:32+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/cloud-native/295cf1c4/</loc>
-    <lastmod>2025-06-28T22:03:32+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2025-06-28T22:03:32+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
     <lastmod>2025-06-28T22:03:32+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/cloud-native/4b9fc30e/</loc>
@@ -71,7 +89,7 @@
     <loc>http://localhost:1313/tags/mcp/</loc>
     <lastmod>2025-06-25T22:12:45+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/model-context-protocol-crash-course/</loc>
+    <loc>http://localhost:1313/posts/ai-agent/model-context-protocol-crash-course/</loc>
     <lastmod>2025-06-25T22:12:45+08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/archives/</loc>
