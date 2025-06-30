@@ -1,164 +1,239 @@
-baseURL = "https://ceyewan.github.io/" # 网站的根URL
-title = "Ceyewan's Blog"               # 网站标题
-theme = "PaperMod"                     # 主题名称
+# 网站的根URL，生成的所有链接会基于此地址
+baseURL = "https://ceyewan.github.io/"
+
+# 网站标题
+title = "Ceyewan's Blog"
+
+# 使用的主题名称
+theme = "PaperMod"
 
 [pagination]
-pagerSize = 10                         # 每页显示的文章数量
-languageCode = "zh-cn"                 # 语言代码
-hasCJKLanguage = true                  # 是否包含CJK语言，优化中文显示
-enableInlineShortcodes = true          # 是否启用内联短代码
-enableEmoji = true                     # 是否启用Emoji表情
-enableRobotsTXT = true                 # 是否启用robots.txt文件
-buildDrafts = false                    # 是否构建草稿文章
-buildFuture = false                    # 是否构建未来的文章
-buildExpired = false                   # 是否构建过期的文章
-pygmentsUseClasses = true              # 代码高亮时使用 CSS 类而非内联样式
-defaultContentLanguage = "zh"          # 默认内容语言
-defaultContentLanguageInSubdir = false # 是否在子目录中使用默认内容语言
+  # 每页显示的文章数量
+  pagerSize = 10
+  # 网站的主要语言代码
+  languageCode = "zh-cn"
+  # 是否包含中日韩文字，优化断字和搜索
+  hasCJKLanguage = true
+  # 是否启用内联短代码
+  enableInlineShortcodes = true
+  # 是否启用 Emoji 表情支持
+  enableEmoji = true
+  # 是否生成 robots.txt 文件
+  enableRobotsTXT = true
+  # 是否构建草稿文章
+  buildDrafts = false
+  # 是否构建未来发布时间的文章
+  buildFuture = false
+  # 是否构建已过期的文章
+  buildExpired = false
+  # 代码高亮时使用 CSS 类而不是内联样式
+  pygmentsUseClasses = true
+  # 默认内容语言
+  defaultContentLanguage = "zh"
+  # 默认语言内容是否放在子目录
+  defaultContentLanguageInSubdir = false
 
 [minify]
-disableXML = true # 是否禁用 XML 文件的压缩
+  # 是否禁用 XML 文件压缩
+  disableXML = true
 
 [permalinks]
-post = "/post/:slug" # 文章的永久链接格式
-
+  # 文章永久链接格式
+  post = "/post/:slug"
 
 [languages.zh]
-languageName = "Chinese" # 语言名称
-weight = 1
+  # 语言名称
+  languageName = "Chinese"
+  # 语言权重，决定排序
+  weight = 1
 
 [languages.zh.params.profileMode]
-enabled = false
+  # 是否启用个人资料模式
+  enabled = false
+
+# 主菜单配置，每个菜单项都包含唯一标识、名称、链接和排序权重
+[[languages.zh.menu.main]]
+  identifier = "home"
+  name = "🏠主页"
+  url = "/"
+  weight = 1
 
 [[languages.zh.menu.main]]
-identifier = "home"
-name = "🏠主页"
-url = "/"
-weight = 1
+  identifier = "archives"
+  name = "⏱时间轴"
+  url = "/archives"
+  weight = 2
 
 [[languages.zh.menu.main]]
-identifier = "archives"
-name = "⏱时间轴"
-url = "/archives"
-weight = 2
+  identifier = "categories"
+  name = "📂分类"
+  url = "/categories"
+  weight = 3
 
 [[languages.zh.menu.main]]
-identifier = "categories"
-name = "📂分类"
-url = "/categories"
-weight = 3
+  identifier = "tags"
+  name = "🔖标签"
+  url = "/tags"
+  weight = 4
 
 [[languages.zh.menu.main]]
-identifier = "tags"
-name = "🔖标签"
-url = "/tags"
-weight = 4
+  identifier = "about"
+  name = "🙋🏻‍♂️关于"
+  url = "/about"
+  weight = 5
 
-[[languages.zh.menu.main]]
-identifier = "search"
-name = "🔍搜索"
-url = "/search"
-weight = 5
-
-[[languages.zh.menu.main]]
-identifier = "about"
-name = "🙋🏻‍♂️关于"
-url = "/about"
-weight = 6
+  [[languages.zh.menu.main]]
+  identifier = "search"
+  name = "🔍搜索"
+  url = "/search"
+  weight = 6
 
 [outputs]
-home = ["HTML", "RSS", "JSON"]
+  # 首页输出格式
+  home = ["HTML", "RSS", "JSON"]
 
 [params]
-ShowShareButtons = false
-env = "production"
-description = "这是一个纯粹的博客......"
-author = "ceyewan"
-defaultTheme = "auto"
-disableThemeToggle = false
-DateFormat = "2006-01-02"
-ShowReadingTime = true
-displayFullLangName = true
-ShowPostNavLinks = true
-ShowBreadCrumbs = true
-ShowCodeCopyButtons = true
-hideFooter = false
-ShowWordCounts = true
-VisitCount = true
-ShowLastMod = true
-ShowToc = true
-TocOpen = true
-comments = true
+  # 是否显示分享按钮
+  ShowShareButtons = false
+  # 环境类型
+  env = "production"
+  # 网站描述
+  description = "这是一个纯粹的博客......"
+  # 作者名
+  author = "ceyewan"
+  # 默认主题（自动/亮/暗）
+  defaultTheme = "auto"
+  # 是否禁用主题切换
+  disableThemeToggle = false
+  # 日期显示格式
+  DateFormat = "2006-01-02"
+  # 是否显示阅读时间
+  ShowReadingTime = true
+  # 是否显示完整语言名
+  displayFullLangName = true
+  # 是否显示前后文章导航
+  ShowPostNavLinks = true
+  # 是否显示面包屑导航
+  ShowBreadCrumbs = true
+  # 是否显示代码复制按钮
+  ShowCodeCopyButtons = true
+  # 是否隐藏页脚
+  hideFooter = false
+  # 是否显示字数统计
+  ShowWordCounts = true
+  # 是否显示访问量
+  VisitCount = true
+  # 是否显示最后修改时间
+  ShowLastMod = true
+  # 是否显示目录
+  ShowToc = true
+  # 目录默认展开
+  TocOpen = true
+  # 是否启用评论
+  comments = true
+  # 是否禁用首页特殊处理
+  disableSpecial1stPost = true
 
-[[params.socialIcons]]
-name = "github"
-url = "https://github.com/ceyewan"
+  # 社交图标配置
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/ceyewan"
 
-[[params.socialIcons]]
-name = "email"
-url = "mailto:ceyewan@gmail.com"
+  [[params.socialIcons]]
+    name = "email"
+    url = "mailto:ceyewan@gmail.com"
 
-[[params.socialIcons]]
-name = "RSS"
-url = "index.xml"
+  [[params.socialIcons]]
+    name = "RSS"
+    url = "index.xml"
 
-[params.assets]
-favicon = "img/logo.gif"
-favicon16x16 = "img/logo.gif"
-favicon32x32 = "img/logo.gif"
-apple_touch_icon = "logo.gif"
-safari_pinned_tab = "logo.gif"
+  [params.assets]
+    # 网站 favicon 路径
+    favicon = "img/logo.gif"
+    favicon16x16 = "img/logo.gif"
+    favicon32x32 = "img/logo.gif"
+    apple_touch_icon = "logo.gif"
+    safari_pinned_tab = "logo.gif"
 
-[params.fuseOpts]
-isCaseSensitive = false
-shouldSort = true
-location = 0
-distance = 1_000
-threshold = 1
-minMatchCharLength = 0
-keys = ["title", "permalink", "summary"]
+  [params.fuseOpts]
+    # 搜索是否区分大小写
+    isCaseSensitive = false
+    # 搜索结果是否排序
+    shouldSort = true
+    # 匹配位置权重
+    location = 0
+    # 匹配距离
+    distance = 1_000
+    # 匹配阈值
+    threshold = 1
+    # 最小匹配字符数
+    minMatchCharLength = 0
+    # 搜索字段
+    keys = ["title", "permalink", "summary"]
 
-[params.twikoo]
-version = "1.4.11"
+  [params.twikoo]
+    # Twikoo 评论系统版本
+    version = "1.4.11"
 
 [taxonomies]
-category = "categories"
-tag = "tags"
-series = "series"
+  # 分类法：category
+  category = "categories"
+  # 分类法：tag
+  tag = "tags"
+  # 分类法：series
+  series = "series"
 
 [markup.goldmark.renderer]
-unsafe = true
+  # 是否允许渲染不安全内容（如 HTML）
+  unsafe = true
 
 [markup.highlight]
-codeFences = true  # 启用 Markdown 代码块（```）的高亮显示
-guessSyntax = true # 如果未指定代码语言，自动猜测语法类型
-lineNos = false    # 显示代码行号
-style = "monokai"  # 代码高亮配色风格，monokai 主题
-tabWidth = 4       # 设置代码块的制表符宽度
+  # 启用 Markdown 代码块高亮
+  codeFences = true
+  # 自动猜测代码语言
+  guessSyntax = true
+  # 是否显示行号
+  lineNos = false
+  # 代码高亮主题
+  style = "monokai"
+  # 制表符宽度
+  tabWidth = 4
 
 [privacy.vimeo]
-disabled = false
-simple = true
+  # 是否禁用 Vimeo 嵌入
+  disabled = false
+  # 是否使用简化模式
+  simple = true
 
 [privacy.x]
-disabled = false
-enableDNT = true
-simple = true
+  # 是否禁用 X（推特）嵌入
+  disabled = false
+  # 启用 Do Not Track
+  enableDNT = true
+  # 是否使用简化模式
+  simple = true
 
 [privacy.instagram]
-disabled = false
-simple = true
+  # 是否禁用 Instagram 嵌入
+  disabled = false
+  # 是否使用简化模式
+  simple = true
 
 [privacy.youtube]
-disabled = false
-privacyEnhanced = true
+  # 是否禁用 YouTube 嵌入
+  disabled = false
+  # 启用隐私增强模式
+  privacyEnhanced = true
 
 [services.instagram]
-disableInlineCSS = true
+  # 禁用内联 CSS
+  disableInlineCSS = true
 
 [services.x]
-disableInlineCSS = true
+  # 禁用内联 CSS
+  disableInlineCSS = true
 
 [caches]
-[caches.images]
-dir = ':cacheDir/images'
+  [caches.images]
+    # 图片缓存目录
+    dir = ':cacheDir/images'

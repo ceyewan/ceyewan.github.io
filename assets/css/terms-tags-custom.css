@@ -1,0 +1,34 @@
+.tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 20px 0;
+}
+
+.tag-cloud li {
+    display: inline-block;
+    margin: 0;
+    list-style: none;
+}
+
+.tag-cloud a {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 8px;
+    background: var(--tertiary);
+    color: var(--primary);
+    font-weight: 600;
+    transition: transform 0.1s, background 0.2s, color 0.2s;
+    line-height: 1.2;
+    text-decoration: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    will-change: transform;
+}
+
+.tag-cloud a:hover {
+    background: var(--primary);
+    color: var(--bg);
+    transform: scale(1.08);
+}

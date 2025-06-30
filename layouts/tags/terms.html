@@ -1,0 +1,36 @@
+{{- define "main" }}
+{{- /* 加载自定义 tag cloud 样式 */ -}}
+<link rel="stylesheet" href="/css/terms-tags-custom.css">
+
+{{- if .Title }}
+<header class="page-header">
+    <h1>{{ .Title }}</h1>
+    {{- if .Description }}
+    <div class="post-description">
+        {{ .Description }}
+    </div>
+    {{- end }}
+</header>
+{{- end }}
+
+<ul class="terms-tags tag-cloud">
+    {{- $type := .Type }}
+    {{- $min := 99999 }}
+    {{- $max := 0 }}
+    {{- range .Data.Terms.Alphabetical }}
+        {{- if lt .Count $min }}{{- $min = .Count }}{{- end }}
+        {{- if gt .Count $max }}{{- $max = .Count }}{{- end }}
+    {{- end }}
+    {{- range $key, $value := .Data.Terms.Alphabetical }}
+    {{- $name := .Name }}
+    {{- $count := .Count }}
+    {{- $size := mul 1.0 (div (sub $count $min) (add (sub $max $min) 1.0)) | add 1.0 | mul 1.2 | printf "%.2f" }}
+    {{- with site.GetPage (printf "/%s/%s" $type $name) }}
+    <li>
+        <a href="{{ .Permalink }}" style="font-size: {{ $size }}em">{{ .Name }} <sup><strong><sup>{{ $count }}</sup></strong></sup></a>
+    </li>
+    {{- end }}
+    {{- end }}
+</ul>
+
+{{- end }}{{/* end main */ -}}
