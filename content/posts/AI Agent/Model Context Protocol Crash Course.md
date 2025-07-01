@@ -430,6 +430,7 @@ Prompts 将 MCP 从简单的任务执行层提升为**上下文感知的智能�
 通过 Tools（行动）、Resources（认知）、Prompts（思考）的三位一体，MCP 成为设计智能系统的完整语言。
 
 当前主流的 MCP 客户端对资源支持普遍较弱。理论上，Claude Desktop 应该同时支持提示词和资源，但我在试用时未能正常使用资源；Cline 虽支持资源，但不支持提示词；CherryStudio 则似乎都不支持使用。不过，在 Agent 中，这一切都由我们自主掌控，资源与提示词的使用方式完全可定制！
+
 ### 11.3 总结
 
 |      原语       | 控制方式 | 主要用途 |       使用场景       |
@@ -437,29 +438,30 @@ Prompts 将 MCP 从简单的任务执行层提升为**上下文感知的智能�
 |   **Tools**   | 模型控制 | 执行操作 | 动态数据获取、计算、API 调用 |
 | **Resources** | 应用控制 | 提供知识 |   静态文档、配置、背景信息   |
 |  **Prompts**  | 用户控制 | 指导思考 |   标准化工作流、专业指导    |
+
 ## 12 Sampling 采样
 
 ### 12.1 核心概念
 
-MCP（Model Context Protocol）采样是一个革命性的功能，它实现了**双向架构**的核心理念。传统的MCP架构中，客户端调用服务器的工具、资源和提示，但采样机制彻底改变了这种单向流动模式。通过采样，**服务器可以反向请求客户端的LLM执行文本生成任务**，这种"反转"创造了一个真正的双向智能协作环境。
+MCP（Model Context Protocol）采样是一个革命性的功能，它实现了**双向架构**的核心理念。传统的 MCP 架构中，客户端调用服务器的工具、资源和提示，但采样机制彻底改变了这种单向流动模式。通过采样，**服务器可以反向请求客户端的 LLM 执行文本生成任务**，这种"反转"创造了一个真正的双向智能协作环境。
 
-采样的本质是**智能任务的分布式委托**。当服务器在执行过程中需要进行自然语言理解、生成或推理时，它不再需要自己集成LLM或调用外部API，而是可以将这些计算密集型任务委托给客户端的模型。这种设计带来了显著的架构优势：首先是**可扩展性**，服务器避免了计算密集型的推理工作，能够处理更多并发请求；其次是**成本效率**，所有LLM相关的API成本和计算负载都由客户端承担；第三是**模型选择的灵活性**，不同客户端可以使用不同的模型，服务器无需修改；最后是**避免瓶颈**，每个用户的环境处理自己的请求，防止服务器端队列堆积。
+采样的本质是**智能任务的分布式委托**。当服务器在执行过程中需要进行自然语言理解、生成或推理时，它不再需要自己集成 LLM 或调用外部 API，而是可以将这些计算密集型任务委托给客户端的模型。这种设计带来了显著的架构优势：首先是**可扩展性**，服务器避免了计算密集型的推理工作，能够处理更多并发请求；其次是**成本效率**，所有 LLM 相关的 API 成本和计算负载都由客户端承担；第三是**模型选择的灵活性**，不同客户端可以使用不同的模型，服务器无需修改；最后是**避免瓶颈**，每个用户的环境处理自己的请求，防止服务器端队列堆积。
 
 ### 12.2 架构流程详解
 
-采样的完整执行流程体现了MCP协议的精妙设计。当服务器的工具函数运行时，通过调用`ctx.sample()`方法触发采样请求。这个调用并不在本地执行，而是将请求打包成标准化的MCP消息发送给客户端。客户端接收到请求后，触发用户定义的`sampling_handler()`函数，该函数负责处理请求的具体逻辑，包括格式化提示、处理重试等。
+采样的完整执行流程体现了 MCP 协议的精妙设计。当服务器的工具函数运行时，通过调用 `ctx.sample()` 方法触发采样请求。这个调用并不在本地执行，而是将请求打包成标准化的 MCP 消息发送给客户端。客户端接收到请求后，触发用户定义的 `sampling_handler()` 函数，该函数负责处理请求的具体逻辑，包括格式化提示、处理重试等。
 
-客户端随后使用外部LLM API（如OpenAI）或本地模型（如LLaMA、Mistral）来完成请求，生成的文本作为完成结果返回给服务器。服务器接收到结果后，恢复在`ctx.sample(…)`处等待的协程执行，使用LLM生成的输出继续工具函数的执行。整个过程是异步的，服务器的工具协程会暂停直到结果返回，避免阻塞其他任务。
+客户端随后使用外部 LLM API（如 OpenAI）或本地模型（如 LLaMA、Mistral）来完成请求，生成的文本作为完成结果返回给服务器。服务器接收到结果后，恢复在 `ctx.sample(…)` 处等待的协程执行，使用 LLM 生成的输出继续工具函数的执行。整个过程是异步的，服务器的工具协程会暂停直到结果返回，避免阻塞其他任务。
 
-### 12.3 Context对象与采样机制
+![image.png](https://ceyewan.oss-cn-beijing.aliyuncs.com/obsidian/20250701075403.png)
 
-FastMCP通过**Context对象**为服务器函数提供强大的能力句柄。Context不仅支持LLM采样请求，还能访问日志记录、发送更新等功能。FastMCP会在工具函数包含Context参数时自动注入这个上下文对象。需要注意的是，Context对象仅在请求期间有效，不能作为全局变量存储和在工具调用外使用。
+FastMCP 通过**Context 对象**为服务器函数提供强大的能力句柄。Context 不仅支持 LLM 采样请求，还能访问日志记录、发送更新等功能。FastMCP 会在工具函数包含 Context 参数时自动注入这个上下文对象。需要注意的是，Context 对象仅在请求期间有效，不能作为全局变量存储和在工具调用外使用。
 
-`ctx.sample()`方法是采样功能的核心接口，它接受多个参数来控制生成行为。`messages`参数可以是单个字符串（被视为用户消息）或消息列表；`system_prompt`参数设置系统指令，为LLM的行为提供高级指导；`temperature`参数控制输出的随机性，较低值产生更确定性的输出；`max_tokens`参数限制生成的最大令牌数。
+`ctx.sample()` 方法是采样功能的核心接口，它接受多个参数来控制生成行为。`messages` 参数可以是单个字符串（被视为用户消息）或消息列表；`system_prompt` 参数设置系统指令，为 LLM 的行为提供高级指导；`temperature` 参数控制输出的随机性，较低值产生更确定性的输出；`max_tokens` 参数限制生成的最大令牌数。
 
-### 12.4 服务器端实现
+### 12.3 服务端和客户端实现
 
-服务器端的采样实现相对直观。在工具函数中，通过`await ctx.sample(…)`调用来请求客户端LLM的完成。例如，一个文档摘要工具可能会这样实现：
+服务器端的采样实现相对直观。在工具函数中，通过 `await ctx.sample(…)` 调用来请求客户端 LLM 的完成。例如，一个文档摘要工具可能会这样实现：
 
 ```python
 @mcp.tool()
@@ -475,39 +477,29 @@ async def summarize_document(text: str, ctx: Context) -> str:
 
 这种实现方式展现了采样的优雅性：服务器只需要专注于业务逻辑，而将复杂的文本生成任务委托给客户端的智能模型。
 
-### 12.5 客户端实现与处理
+客户端需要定义一个采样处理函数来响应服务器的采样请求。这个处理函数接收 `SamplingMessage` 对象列表、`SamplingParams` 参数对象和 `RequestContext` 上下文信息。处理函数的职责是将服务器的请求转换为适合 LLM 的格式，调用相应的模型 API，并返回生成的文本。
 
-客户端需要定义一个采样处理函数来响应服务器的采样请求。这个处理函数接收`SamplingMessage`对象列表、`SamplingParams`参数对象和`RequestContext`上下文信息。处理函数的职责是将服务器的请求转换为适合LLM的格式，调用相应的模型API，并返回生成的文本。
+一个典型的采样处理函数会构建符合 LiteLLM 格式的消息列表，处理系统提示，迭代处理消息内容，并在 try/except 块中调用 LLM 以处理潜在的网络或 API 错误。处理函数返回的字符串会被封装在 TextContent 对象中发送回服务器。
 
-一个典型的采样处理函数会构建符合LiteLLM格式的消息列表，处理系统提示，迭代处理消息内容，并在try/except块中调用LLM以处理潜在的网络或API错误。处理函数返回的字符串会被封装在TextContent对象中发送回服务器。
+### 12.4 模型偏好设置
 
-### 12.6 模型偏好设置
+FastMCP 的采样 API 包含 `model_preferences` 参数，允许服务器提示或请求客户端使用特定模型。这个可选功能在某些场景下非常有价值，比如服务器知道某个任务最适合特定模型，或用户指定了模型选择。模型偏好可以是单个字符串、字符串列表（按优先级排序）或结构化的 ModelPreferences 对象。
 
-FastMCP的采样API包含`model_preferences`参数，允许服务器提示或请求客户端使用特定模型。这个可选功能在某些场景下非常有价值，比如服务器知道某个任务最适合特定模型，或用户指定了模型选择。模型偏好可以是单个字符串、字符串列表（按优先级排序）或结构化的ModelPreferences对象。
+客户端的采样处理函数可以检查 `params.modelPreferences` 并决定如何路由请求。不过，客户端没有义务遵循偏好设置，这更多是一种提示或请求。良好行为的客户端会尝试使用指定模型，但如果无法访问，会使用默认模型或检查其他支持的偏好模型。
 
-客户端的采样处理函数可以检查`params.modelPreferences`并决定如何路由请求。不过，客户端没有义务遵循偏好设置，这更多是一种提示或请求。良好行为的客户端会尝试使用指定模型，但如果无法访问，会使用默认模型或检查其他支持的偏好模型。
+### 12.5 应用场景与高级模式
 
-### 12.7 应用场景与高级模式
+采样开启了众多应用可能性。**文本摘要**场景中，服务器可以获取数据并调用 `ctx.sample` 进行摘要，用户无需服务器自带摘要模型。**复杂问答或分析**场景结合了逻辑处理和 LLM 推理，比如销售数据分析工具先从数据库提取数字，然后需要 LLM 解释这些数据的洞察。**数据分类**场景中，虽然简单分类可以用代码完成，但使用 LLM 可以提高细致案例的准确性。
 
-采样开启了众多应用可能性。**文本摘要**场景中，服务器可以获取数据并调用`ctx.sample`进行摘要，用户无需服务器自带摘要模型。**复杂问答或分析**场景结合了逻辑处理和LLM推理，比如销售数据分析工具先从数据库提取数字，然后需要LLM解释这些数据的洞察。**数据分类**场景中，虽然简单分类可以用代码完成，但使用LLM可以提高细致案例的准确性。
+更高级的应用包括**链式推理调用**，工具可以多次顺序调用 `ctx.sample` 来分解问题。例如，数学求解工具可能先调用 `ctx.sample` 获取逐步推理，然后解析验证推理过程，再次调用获取最终答案。**代理行为**模式结合工具使用和采样创建类似代理的行为，比如研究工具内部使用采样头脑风暴问题列表，为每个问题调用 API 获取信息，然后再次采样让 LLM 编译报告。
 
-更高级的应用包括**链式推理调用**，工具可以多次顺序调用`ctx.sample`来分解问题。例如，数学求解工具可能先调用`ctx.sample`获取逐步推理，然后解析验证推理过程，再次调用获取最终答案。**代理行为**模式结合工具使用和采样创建类似代理的行为，比如研究工具内部使用采样头脑风暴问题列表，为每个问题调用API获取信息，然后再次采样让LLM编译报告。
+### 12.6 完整代码示例
 
-### 12.8 错误处理与最佳实践
-
-构建robust的MCP采样服务器需要仔细的错误处理。`ctx.sample`可能因为客户端采样处理函数异常（LLM API宕机、无效参数等）而失败。应该在`ctx.sample`周围使用try/except捕获异常，使用`ctx.error()`发送错误级别日志消息，并返回回退字符串，这样工具能够优雅完成而不是让异常传播。
-
-安全考虑也很重要。采样意味着服务器向客户端LLM发送数据，必须确保信任客户端或至少客户端是数据所有者。如果服务器持有敏感数据而客户端请求摘要，使用采样实际上是将文件内容发送给客户端LLM，如果该LLM是第三方API，可能存在隐私泄露风险。
-
-### 12.9 完整代码示例
-
-以下是一个集成采样功能的完整MCP服务器和客户端实现：
+以下是一个集成采样功能的完整 MCP 服务器和客户端实现：
 
 ```python
 # server.py - MCP服务器端
-from fastmcp import FastMCP
-from fastmcp.context import Context
-import asyncio
+from fastmcp import FastMCP, Context
 
 mcp = FastMCP("SamplingDemo")
 
@@ -520,85 +512,117 @@ async def analyze_sentiment_with_summary(text: str, ctx: Context) -> str:
             messages=f"Analyze the sentiment of this text: {text}",
             system_prompt="You are a sentiment analysis expert. Classify as positive, negative, or neutral with confidence score.",
             temperature=0.3,
-            max_tokens=100,
-            model_preferences=["gpt-4o", "claude-3-sonnet"]
+            max_tokens=1000,
+            model_preferences=["openai/qwen-turbo-latest"]
         )
-        
+
         # 第二次采样：生成详细摘要
         summary_response = await ctx.sample(
             messages=f"Provide a detailed summary of this text: {text}",
             system_prompt="You are a professional summarizer. Create comprehensive yet concise summaries.",
             temperature=0.7,
-            max_tokens=200
+            max_tokens=1000
         )
-        
-        return f"Sentiment Analysis: {sentiment_response.text}\n\nSummary: {summary_response.text}"
-        
+
+        return f"Sentiment Analysis: {getattr(sentiment_response, 'text', str(sentiment_response))}\n\nSummary: {getattr(summary_response, 'text', str(summary_response))}"
+
     except Exception as e:
         await ctx.error(f"Sampling failed: {str(e)}")
         return f"Analysis failed, but here's basic info: Text length is {len(text)} characters."
 
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run("sse", port=8080)
 
 # client.py - MCP客户端端
 import asyncio
 from fastmcp import Client
-from fastmcp.types import SamplingMessage, SamplingParams, RequestContext
+from fastmcp.client.sampling import SamplingMessage, SamplingParams
+from mcp.shared.context import RequestContext
 import litellm
+import os
+
+
+# Qwen 配置
+QWEN_API_KEY = os.getenv("QWEN_API_KEY", "")
+QWEN_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+QWEN_MODEL = "openai/qwen-plus-latest"  # 可根据需要更换
+
 
 async def sampling_handler(
-    messages: list[SamplingMessage], 
-    params: SamplingParams, 
+    messages: list[SamplingMessage],
+    params: SamplingParams,
     ctx: RequestContext
 ) -> str:
     """处理服务器的采样请求"""
     try:
+        if not QWEN_API_KEY:
+            return "Error: QWEN_API_KEY 环境变量未设置"
         # 构建消息格式
         chat_messages = []
-        
+
         # 添加系统提示（如果有）
         if params.systemPrompt:
             chat_messages.append({
-                "role": "system", 
+                "role": "system",
                 "content": params.systemPrompt
             })
-        
+
         # 添加对话消息
         for msg in messages:
+            # 安全获取 text 属性，兼容 ImageContent/AudioContent 等
+            content = getattr(msg.content, 'text', str(msg.content))
             chat_messages.append({
-                "role": msg.role, 
-                "content": msg.content.text if hasattr(msg.content, 'text') else str(msg.content)
+                "role": msg.role,
+                "content": content
             })
-        
+
         # 处理模型偏好
-        model_to_use = "gpt-3.5-turbo"  # 默认模型
-        if params.modelPreferences:
-            if isinstance(params.modelPreferences, list) and params.modelPreferences:
-                model_to_use = params.modelPreferences[0]
-            elif isinstance(params.modelPreferences, str):
-                model_to_use = params.modelPreferences
-        
-        # 调用LLM
+        model_to_use = QWEN_MODEL  # 默认用 Qwen
+        if params.modelPreferences and params.modelPreferences.hints and params.modelPreferences.hints[0].name:
+            model_to_use = params.modelPreferences.hints[0].name or QWEN_MODEL
+
+        # 确保 model_to_use 是字符串且不为 None
+        if not isinstance(model_to_use, str) or not model_to_use:
+            model_to_use = QWEN_MODEL
+
+        # 调用LLM，传递 Qwen 的 base_url 和 api_key
         response = await litellm.acompletion(
             model=model_to_use,
             messages=chat_messages,
             temperature=params.temperature or 0.7,
-            max_tokens=params.maxTokens or 500
+            max_tokens=params.maxTokens or 500,
+            base_url=QWEN_BASE_URL,
+            api_key=QWEN_API_KEY
         )
-        
-        return response.choices[0].message.content
-        
+
+        # 只用 dict 方式安全提取内容
+        if isinstance(response, dict):
+            try:
+                content = response['choices'][0]['message']['content']
+                if content is not None:
+                    return str(content)
+            except Exception:
+                pass
+            try:
+                text = response['choices'][0]['text']
+                if text is not None:
+                    return str(text)
+            except Exception:
+                pass
+            return str(response)
+        # 兜底：直接转字符串
+        return str(response)
     except Exception as e:
         return f"Error generating response: {str(e)}"
 
+
 async def main():
     # 连接到MCP服务器
-    async with Client("stdio", "python server.py", sampling_handler=sampling_handler) as client:
+    async with Client("http://localhost:8080/sse/", sampling_handler=sampling_handler) as client:
         # 调用工具
         result = await client.call_tool(
-            "analyze_sentiment_with_summary", 
-            text="I absolutely love this new technology! It's revolutionary and will change everything for the better."
+            "analyze_sentiment_with_summary",
+            {"text": "I absolutely love this new technology! It's revolutionary and will change everything for the better."}
         )
         print("Analysis Result:")
         print(result)
@@ -607,7 +631,36 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-这个示例展示了采样的完整生命周期：服务器端工具进行双重采样（情感分析和摘要生成），客户端处理函数智能路由请求到合适的模型，并且包含了错误处理和模型偏好设置。通过这种方式，我们实现了一个既强大又灵活的分布式AI系统，服务器专注于业务逻辑，而将智能生成任务委托给客户端的模型资源。
+这个示例展示了采样的完整生命周期：服务器端工具进行双重采样（情感分析和摘要生成），客户端处理函数智能路由请求到合适的模型，并且包含了错误处理和模型偏好设置。通过这种方式，我们实现了一个既强大又灵活的分布式 AI 系统，服务器专注于业务逻辑，而将智能生成任务委托给客户端的模型资源。
 
-![image.png](https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/20250630225206.png)
-![image.png](https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/20250701075403.png)
+![image.png](https://ceyewan.oss-cn-beijing.aliyuncs.com/obsidian/20250701105700498.png)
+
+在这个架构中，Context 对象扮演着双重角色。服务器端的 Context 是业务编排器，提供 `ctx.sample()` 发起采样请求和 `ctx.info/error/debug()` 记录日志的能力，不是客户端向服务器传递 `ctx` 参数，而是由 FastMCP 框架自动创建并注入到每个工具调用中。客户端的 RequestContext 则是执行上下文，为每次采样提供请求元数据（如 request_id、session_id）和执行环境信息，支持智能路由和资源管理。
+
+系统的核心特性体现在采样的完全独立性上。服务器端的两次 `ctx.sample()` 调用（情感分析和摘要生成）是完全独立的，客户端的 `sampling_handler` 接收到两个独立的请求，每次都有唯一的 request_id 和独立的参数配置，不存在状态共享。同时，系统支持智能模型路由，服务器端可以通过 `model_preferences` 指定模型偏好，客户端根据这些偏好智能选择最适合的 LLM 进行推理。
+
+## 13 测试、安全性和沙箱
+
+在 MCP 环境的测试与验证中，官方提供的 **MCP Inspector** 工具扮演着核心角色。它提供了一套全面的功能，允许用户深入查看和管理相关的工具、资源、提示词配置以及采样功能，同时也能有效测试系统间的连接性，确保整个 MCP 生态系统的健壮性与协同工作能力。
+
+为了保障 MCP Server 的安全与稳定运行，采用沙箱化部署是关键实践。通过利用 Docker 等容器化技术，我们可以为 MCP Server 建立一个受严格限制的运行环境。这种沙箱机制能够有效地定义并约束服务器的能力边界，从而显著降低潜在的安全风险，并确保其操作的隔离性与可控性。
+
+MCP 系统面临的主要安全挑战源于其设计特点：AI 模型可以轻松访问文档、数据、API 等各种资源，但这种便利性如果处理不当，就可能成为系统的薄弱环节。在企业和消费级环境中，我们需要确保只有经过批准的工具被使用，只有预期的数据被共享，并且没有恶意行为能够悄悄渗透。
+
+### 13.1 主要攻击方法
+
+1. **提示注入攻击**：提示注入是一类将恶意指令隐藏在用户内容或外部数据中的攻击方式。AI 系统无法区分哪些指令是真实的，哪些是攻击的一部分，因为它们在 LLM 眼中都只是文本。攻击者可以通过在正常请求中嵌入恶意指令来覆盖原始任务，从而控制模型的行为。
+2. **工具污染攻击**：工具污染是提示注入的一种变体，攻击者将恶意指令隐藏在 MCP 工具的描述中。这种攻击特别危险，因为工具描述对用户来说通常是不可见的，但对 AI 模型完全可见。攻击者可以在看似无害的计算器工具描述中嵌入恶意指令，让 AI 在执行正常计算的同时，秘密读取用户的私钥或配置文件，并将这些敏感信息发送到攻击者控制的服务器。
+3. **跑路攻击**：在跑路攻击中，恶意服务器在获得用户信任后，悄悄更改其工具描述或行为。由于大多数 MCP 客户端不会通知用户工具描述的变更，用户可能在不知情的情况下继续使用已被篡改的工具。
+4. **过度能力暴露**：MCP 系统中客户端和服务器双向暴露能力，恶意服务器可能滥用客户端的 LLM 资源，通过采样工作流控制 LLM 行为，可能导致费用增加或资源滥用。
+5. **服务器名称冲突和工具名称冲突**：攻击者可以注册与热门服务器几乎相同名称的恶意服务器，或者创建与合法工具同名的恶意工具。由于客户端通常依赖名称和简短描述来识别工具，用户可能误装恶意服务器或工具，导致敏感数据泄露。
+
+### 13.2 MCP Roots
+
+MCP Roots 是一种类似沙箱的边界机制，它为 MCP 服务器定义了明确的操作范围。通过设置 Roots，客户端可以告诉服务器："你只能在这个特定的文件夹、数据库或 API 路径中操作。"Roots 以 URI 形式表示，如文件路径、API 端点或数据库模式，它们限制了服务器的访问范围。
+
+MCP Roots 通过限制服务器的访问范围来提供多层安全保护。首先，它们限制了数据泄露的可能性，因为 AI 无法泄露它看不到的内容。其次，它们减少了隐私风险，因为根目录之外的个人或机密数据保持隐藏状态。最后，它们提升了用户信任度，因为用户明确知道哪些数据在访问范围内。
+
+在连接握手过程中，支持 Roots 的客户端会声明其支持并提供根 URI 列表。服务器确认这些根目录并相应地限制其操作范围。如果根目录发生变化，客户端会发送更新，服务器会调整其可访问的数据范围。所有搜索、文件操作或资源列表都被严格限制在指定的根目录内。
+
+通过正确配置 Roots，即使面对巧妙的提示注入攻击，系统也能保持安全。例如，在前面提到的文件系统攻击案例中，如果设置了适当的根目录限制，服务器就无法访问 `.bashrc` 文件或其他敏感系统文件，从而阻止了后门的植入。
