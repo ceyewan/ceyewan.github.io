@@ -3,7 +3,7 @@ categories:
 - AI Agent
 date: '2025-07-04T18:57:45+08:00'
 draft: true
-summary: 
+summary: AI 智能体凭借动态推理与自主决策能力，超越传统 RAG 系统与固定逻辑软件，展现更强适应性与扩展性。通过角色定义、任务分工、工具集成及多智能体协作机制，结合安全控制与记忆管理，实现高效精准的任务执行，推动自动化系统迈向真正智能化。
 tags:
 - Agent
 title: Agentic Systems 101
