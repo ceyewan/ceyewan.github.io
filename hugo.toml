@@ -138,8 +138,8 @@ theme = "PaperMod"
 \\
 典型的“折腾”爱好者，博客搭了几个版本，文章却没产出几篇。大概是表达欲旺盛，但将脑中的代码和想法清晰地转为文字对我而言仍是一项挑战。\
 我爱 Go，一种丑陋里藏着简洁，简洁中透着优雅的语言；\
-懂一点 C++，为了写 LLM 开发不得不写 Python，主要框架是 FastMCP、LangChain、CrewAI；\
-对安全、后量子、区块链有些了解；主要兴趣在后端开发、云原生、微服务与容器化；\
+懂一点 C++，为了写 LLM 开发不得不写 Python;\
+对安全、后量子、区块链有些了解；主要兴趣在后端开发、微服务、容器化和云原生技术；\
 学的很杂，可能都知道一点，但又什么都不精通。\
 \\
 \\
@@ -158,14 +158,6 @@ theme = "PaperMod"
   [[params.socialIcons]]
     name = "RSS"
     url = "index.xml"
-
-  [params.assets]
-    # 网站 favicon 路径
-    favicon = "img/logo.gif"
-    favicon16x16 = "img/logo.gif"
-    favicon32x32 = "img/logo.gif"
-    apple_touch_icon = "logo.gif"
-    safari_pinned_tab = "logo.gif"
 
   [params.fuseOpts]
     # 搜索是否区分大小写

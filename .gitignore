@@ -28,10 +28,6 @@ go.work.sum
 public/*
 .DS_Store
 
-# Obsidian vault files
-Obsidian Vault/*
-Obsidian-Vault/*
-
 # 虚拟环境
 scripts/.venv/*
 

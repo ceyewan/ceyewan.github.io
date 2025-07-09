@@ -1,0 +1,9 @@
+{
+  "cssTheme": "GitHub Theme",
+  "theme": "moonstone",
+  "baseFontSizeAction": true,
+  "showRibbon": true,
+  "nativeMenus": false,
+  "translucency": false,
+  "showViewHeader": true
+}
