@@ -3,11 +3,11 @@ categories:
 - AI Agent
 date: '2025-06-25T22:12:45+08:00'
 draft: false
-summary: MCP 协议：AI 工具调用的“USB-C”，实现模型与外部能力标准化互操作。
+summary: 本文深入解析了模型上下文协议（MCP）如何解决大型语言模型（LLM）在知识时效性、上下文管理和工具集成方面的核心限制，通过标准化能力连接提升AI系统的智能性与扩展性。
 tags:
 - MCP
 - Agent
-title: Model Context Protocol Crash Course
+title: MCP协议：打破LLM限制的模型上下文新标准
 ---
 
 ## 1 引言

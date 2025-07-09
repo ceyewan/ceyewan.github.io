@@ -1,13 +1,13 @@
 ---
 categories:
-  - Golang
-date: 2025-07-06 21:55:23+08:00
+- Golang
+date: 2025-07-06 13:55:23
 draft: false
 slug: 20250706-fywmg4pn
-summary: 本文深入解析 gRPC-Go 客户端从 `grpc.Dial` 到 `grpc.NewClient` 的演进过程，探讨连接管理与重试策略的优化方案。对比不同重试方式的优劣，重点介绍内置透明重试机制的配置与实践。
+summary: 本文深入解析gRPC-Go客户端从`grpc.Dial`到`grpc.NewClient`的演进，探讨连接管理与重试策略的最佳实践，涵盖懒加载机制、内置重试配置及关键实现要点，助力开发者构建高韧性Go应用。
 tags:
-  - gRPC
-title: gRPC NewClient 方法重试机制探究
+- gRPC
+title: gRPC-Go客户端重试策略演进与最佳实践
 ---
 
 gRPC-Go 作为 Go 生态中 RPC 的首选框架，其客户端创建和连接管理的理念经历了一次重要的演进。这一变化是从 `grpc.Dial` 到 `grpc.NewClient` 的迁移，也从根本上改变了我们实现重试逻辑的最佳位置和方式。本文将深入探讨这一演进过程，分析不同重试策略的利弊，并最终给出现代 gRPC 应用的最佳实践。

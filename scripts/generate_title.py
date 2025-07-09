@@ -10,12 +10,12 @@ import shutil
 # 博客文章所在的根目录
 POSTS_DIRECTORY = "./content/posts"
 
-# 用于生成摘要的 LLM 模型
+# 用于生成标题的 LLM 模型
 LLM_MODEL = "qwen-plus-latest"
 
 # 给 LLM 的指令 (Prompt)
 PROMPT_TEMPLATE = """
-你是一个专业的SEO内容优化师。请为以下博客文章生成更适合搜索引擎排名的摘要。
+你是一个专业的SEO内容优化师。请为以下博客文章生成更适合搜索引擎排名的标题。
 
 文章内容：
 ---
@@ -24,29 +24,28 @@ PROMPT_TEMPLATE = """
 
 请根据以下要求优化：
 
-**摘要要求：**
-1. 长度控制在60-80个汉字
-2. 包含文章的核心关键词
-3. 准确概括文章价值和亮点
-4. 使用第三人称描述
-5. 适合作为搜索结果的描述片段
-6. 结构清晰，易于理解
+**标题要求：**
+1. 长度控制在10-30个汉字
+2. 包含核心关键词，提高搜索排名
+3. 具有吸引力和点击欲望
+4. 避免过于夸张的词汇
+5. 符合文章实际内容
 
-请直接生成摘要，不要包含任何额外的解释或前缀。
+请直接生成标题，不要包含任何额外的解释或前缀。
 """
 
 # --- 脚本主体 ---
 
 
-def generate_summary_with_llm(content: str) -> str:
+def generate_title_with_llm(content: str) -> str:
     """
-    使用 ALYUN BAILIAN 为给定内容生成摘要。
+    使用 ALYUN BAILIAN 为给定内容生成标题。
 
     Args:
         content: 博客文章的正文内容。
 
     Returns:
-        由 LLM 生成的摘要文本。
+        由 LLM 生成的标题文本。
     """
     try:
         client = OpenAI(
@@ -65,8 +64,8 @@ def generate_summary_with_llm(content: str) -> str:
             max_tokens=16384,  # 限制最大 token 数，以控制成本和长度
         )
         content_value = response.choices[0].message.content or ""
-        summary = content_value.strip()
-        return summary
+        title = content_value.strip()
+        return title
     except Exception as e:
         print(f"    ❌ 调用 API 时出错: {e}")
         return ""
@@ -74,7 +73,7 @@ def generate_summary_with_llm(content: str) -> str:
 
 def process_markdown_file(filepath: Path):
     """
-    处理单个 Markdown 文件：读取、检查摘要、生成摘要并写回。
+    处理单个 Markdown 文件：读取、检查标题、生成标题并写回。
 
     Args:
         filepath: 指向 Markdown 文件的 Path 对象。
@@ -86,10 +85,10 @@ def process_markdown_file(filepath: Path):
         with open(filepath, 'r', encoding='utf-8') as f:
             post = frontmatter.load(f)
 
-        # 检查是否已有摘要
-        summary_val = post.get('summary')
-        if summary_val and str(summary_val).strip():
-            print("    ✅ 摘要已存在，跳过。")
+        # 检查是否已有标题
+        title_val = post.get('title')
+        if title_val and str(title_val).strip():
+            print("    ✅ 标题已存在，跳过。")
             return
 
         # 如果没有内容，也跳过
@@ -97,14 +96,14 @@ def process_markdown_file(filepath: Path):
             print("    ⚠️ 文章内容为空，跳过。")
             return
 
-        print("    ✨ 摘要不存在，准备生成...")
+        print("    ✨ 标题不存在，准备生成...")
 
-        # 调用 LLM 生成摘要
-        new_summary = generate_summary_with_llm(post.content)
+        # 调用 LLM 生成标题
+        new_title = generate_title_with_llm(post.content)
 
-        if new_summary:
-            # 将新摘要添加到 frontmatter 中
-            post['summary'] = new_summary
+        if new_title:
+            # 将新标题添加到 frontmatter 中
+            post['title'] = new_title
             # 写入前先备份原文件
             shutil.copy2(filepath, backup_path)
             try:
@@ -112,7 +111,7 @@ def process_markdown_file(filepath: Path):
                 new_content = frontmatter.dumps(post)
                 with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(new_content)
-                print(f"    ✅ 成功生成并写入摘要！")
+                print(f"    ✅ 成功生成并写入标题！")
                 # 写入成功后删除备份
                 if backup_path.exists():
                     backup_path.unlink()
@@ -123,7 +122,7 @@ def process_markdown_file(filepath: Path):
                     shutil.copy2(backup_path, filepath)
                 print("    ⚠️ 已恢复原文件内容。")
         else:
-            print("    ❌ 未能生成摘要，文件未被修改。")
+            print("    ❌ 未能生成标题，文件未被修改。")
 
     except Exception as e:
         print(f"    ❌ 处理文件时发生错误: {e}")

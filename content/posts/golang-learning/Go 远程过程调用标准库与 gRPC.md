@@ -4,10 +4,10 @@ categories:
 date: '2025-06-28T21:53:07+08:00'
 draft: false
 slug: ccbc66d4
-summary: RPC与gRPC核心概念解析及实战示例
+summary: 本文深入解析RPC与gRPC核心概念、通信机制及实战应用，涵盖协议对比、服务调用模式、底层原理与优化策略，助开发者构建高性能分布式系统。
 tags:
 - gRPC
-title: Go 远程过程调用标准库与 GRPC
+title: Go语言RPC与gRPC实战：协议解析与高性能服务构建
 ---
 
 ## 1 RPC 核心概念与通信基础

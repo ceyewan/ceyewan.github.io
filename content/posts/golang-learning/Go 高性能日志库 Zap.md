@@ -4,10 +4,11 @@ categories:
 date: '2025-06-28T21:53:07+08:00'
 draft: false
 slug: 22e8abab
-summary: Zap 是 Uber 开源的高性能 Go 日志库，支持结构化日志、分级记录，并提供极致性能优化与灵活扩展。
+summary: Zap 是 Uber 开源的高性能 Go 结构化日志库，支持强类型字段、高效序列化及分级日志记录。提供 Logger 与 SugaredLogger
+  两种 API，兼顾性能与开发体验，适用于高并发、性能敏感场景，具备优秀的扩展性与灵活性。
 tags:
 - zap
-title: Go 高性能日志库 Zap
+title: Zap日志库详解：高性能Go日志解决方案
 ---
 
 [Zap](https://github.com/uber-go/zap) 是 Uber 开源的一款**结构化**、**分级**、**极致性能优化**的 Go 日志库。它专为性能敏感的场景设计，支持**强类型字段**、**高效序列化**，并兼顾开发体验。

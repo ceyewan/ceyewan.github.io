@@ -4,10 +4,10 @@ categories:
 date: '2025-06-28T21:53:07+08:00'
 draft: false
 slug: 21b8541d
-summary: Go标准库常用包详解：List、Heap、Unicode、Strings及更多实用方法
+summary: 本文详细解析了Go语言中常用标准库的使用方法与技巧，涵盖list、heap、unicode、strings等核心包的关键函数。适合开发者快速掌握数据结构操作、字符串处理及排序算法，提升编程效率与代码质量。
 tags:
 - ''
-title: Go 库函数和内置方法
+title: Go语言标准库常用包详解：List、Heap、Unicode与更多实用工具
 ---
 
 ## 1 List

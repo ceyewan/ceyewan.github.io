@@ -1,13 +1,14 @@
 ---
 categories:
 - GoChat
-date: 2025-06-29 02:10:34+08:00
+date: 2025-06-28 18:10:34
 draft: false
 slug: 20250629-f2sirarj
-summary: Go语言Kafka客户端对比：性能与选择解析
+summary: 本文深入解析了 Apache Kafka 的核心概念及其在 Go 语言中的四大主流客户端库，包括 confluent-kafka-go、Sarama、kafka-go
+  和 franz-go。通过功能、性能与架构对比，帮助开发者选择最适合的 Kafka Go 客户端方案，提升开发效率与系统稳定性。
 tags:
 - Kafka
-title: Kafka Go 客户端选型与分析
+title: Go语言Kafka客户端对比：性能与功能解析
 ---
 
 Apache Kafka 是一个开源的分布式事件流平台，其核心能力包括**高吞吐量、持久化存储、可扩展性以及容错性**。关键组件包括：

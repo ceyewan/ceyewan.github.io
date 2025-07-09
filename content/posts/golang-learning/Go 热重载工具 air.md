@@ -4,10 +4,10 @@ categories:
 date: '2025-06-28T21:53:07+08:00'
 draft: false
 slug: a793fe12
-summary: Go项目热重载工具air提升开发效率
+summary: 本文介绍 Go 语言热重载工具 air，支持自动编译重启、自定义构建命令及灵活配置，显著提升本地开发效率，适合 Go 开发者使用。
 tags:
 - air
-title: Go 热重载工具 Air
+title: Go语言热重载工具air使用指南：提升本地开发效率
 ---
 
 air 是一款专为 Go 项目设计的**热重载工具**，它能够在开发者保存代码文件时自动触发重新编译并重启程序。相比直接使用 `go run` 命令，air 提供了更多实用功能：

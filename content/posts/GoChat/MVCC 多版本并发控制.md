@@ -1,14 +1,14 @@
 ---
 categories:
 - GoChat
-date: 2025-06-29 03:43:58+08:00
+date: 2025-06-28 19:43:58
 draft: false
 slug: 20250629-8oollnu3
-summary: MVCC（多版本并发控制）通过数据多版本与快照机制，提升数据库并发性能，广泛应用于MySQL与etcd，适用于高并发读写场景。
+summary: 本文深入解析MVCC（多版本并发控制）的核心概念、实现机制及其在MySQL与etcd中的应用，涵盖事务隔离性、数据版本管理、并发优化等关键技术点，帮助开发者全面理解MVCC在高并发系统中的作用与优势。
 tags:
 - MVCC
 - etcd
-title: MVCC 多版本并发控制
+title: MVCC多版本并发控制详解：MySQL与Etcd实现对比
 ---
 
 ## 1 **MVCC 基础概念**
