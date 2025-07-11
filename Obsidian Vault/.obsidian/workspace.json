@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "80baebab6e1227d6",
+        "id": "03c81958f068f361",
         "type": "tabs",
         "children": [
           {
-            "id": "a4c5a6d3c10b7213",
+            "id": "82f12c7fd6de04dc",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Blog/AI Agent/Agentic Systems 101.md",
+                "file": "Blog/AI Agent/MCP OAuth 认证协议详解.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Agentic Systems 101"
+              "title": "MCP OAuth 认证协议详解"
             }
           }
         ]
@@ -95,13 +95,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Blog/GoChat/架构设计-ChatGPT.md",
+                "file": "Blog/AI Agent/MCP OAuth 认证协议详解.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "架构设计-ChatGPT 的大纲"
+              "title": "MCP OAuth 认证协议详解 的大纲"
             }
           },
           {
@@ -169,13 +169,16 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "a4c5a6d3c10b7213",
+  "active": "82f12c7fd6de04dc",
   "lastOpenFiles": [
+    "Templates/Hugo-Post-Templates.md",
+    "HomePage.md",
+    "Blog/AI Agent/MCP OAuth 认证协议详解.md",
+    "Blog/AI Agent/Agentic Systems 101.md",
     "Blog/golang-learning/gRPC NewClient 方法重试机制探究.md",
     "Blog/GoChat/架构设计-ChatGPT.md",
     "Blog/GoChat/详细设计-Gemini.md",
     "分布式微服务IM系统/系统设计-ChatGPT.md",
-    "Blog/AI Agent/Agentic Systems 101.md",
     "Blog/GoChat/Kafka Go 客户端选型与分析.md",
     "Blog/cloud-native/K8s实战教程.md",
     "Blog/cloud-native/虚拟化与容器化概述.md",
@@ -187,7 +190,6 @@
     "Blog/golang-learning/Go 高性能日志库 Zap.md",
     "Blog/AI Agent",
     "Blog/GoChat",
-    "Templates/Hugo-Post-Templates.md",
     "Blog/未命名.md",
     "分布式微服务IM系统/Kafka Go 客户端选型与分析.md",
     "大语言模型 LLM/Model Context Protocol Crash Course.md",
@@ -195,11 +197,9 @@
     "未命名.md",
     "Templates/Hugo-Post-Templates.md~",
     "我的第一篇无感发布文章.md",
-    "HomePage.md",
     "新闻只.md",
     "硕士论文写作.md",
     "秋招准备计划.md",
-    "【极客时间】消息队列高手课.md",
     "Templates",
     "Excalidraw",
     "深入高可用系统原理与设计",

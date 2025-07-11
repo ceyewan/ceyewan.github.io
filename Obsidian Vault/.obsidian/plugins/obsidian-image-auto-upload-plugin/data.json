@@ -4,7 +4,7 @@
   "uploadServer": "http://127.0.0.1:36677/upload",
   "deleteServer": "http://127.0.0.1:36677/delete",
   "imageSizeSuffix": "",
-  "picgoCorePath": "\\. \"/Users/harrick/.nvm/nvm.sh\" && export PATH=\"/opt/homebrew/bin:$PATH\" && /opt/homebrew/bin/npx picgo u",
+  "picgoCorePath": "export PATH=\"/opt/homebrew/bin:$PATH\" && /opt/homebrew/bin/npx picgo u",
   "workOnNetWork": true,
   "fixPath": false,
   "applyImage": true,
