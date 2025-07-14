@@ -1,14 +1,13 @@
 ---
 categories:
-- AI Agent
+  - AI Agent
 date: 2025-07-11 15:07:32+08:00
-draft: true
+draft: false
 slug: 20250711-y4fj893d
-summary: 本文详解 MCP 生态中 OAuth 2.0 认证授权流程，涵盖服务发现、客户端注册、PKCE 动态验证及令牌交换等关键步骤，助力开发者构建安全、合规的
-  Agent 工具。
+summary: 本文详解 MCP 生态中 OAuth 2.0 认证授权流程，涵盖服务发现、客户端注册、PKCE 动态验证及令牌交换等关键步骤，助力开发者构建安全、合规的 Agent 工具。
 tags:
-- MCP
-- OAuth
+  - MCP
+  - OAuth
 title: 掌握 MCP Server 的 OAuth 2.0 认证：从零到一的实现指南
 ---
 
