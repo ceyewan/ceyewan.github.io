@@ -1,12 +1,13 @@
 ---
-date: 2025-07-14T17:48:40+08:00
-draft: true
-title: 实力派 AI 大赛选题
-slug: 20250714-btzevyii
-tags:
-  - 标签
 categories:
-  - 分类
+- 分类
+date: 2025-07-14 17:48:40+08:00
+draft: true
+slug: 20250714-btzevyii
+summary: K8s-Copilot 是面向 Kubernetes 全生命周期的 AIOps 智能体，融合 LLM 与云原生知识，实现集群规划、智能部署、主动运维、故障自愈等能力，提升云原生系统稳定性与运维效率。
+tags:
+- 标签
+title: 实力派 AI 大赛选题
 ---
 
 ## 1 项目概述
