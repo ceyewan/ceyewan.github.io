@@ -10,112 +10,200 @@ tags:
 title: GoChat即时通讯系统架构设计与实现方案
 ---
 
-### 0.1 **GoChat 即时通讯系统详细设计方案**
+## 1 引言
 
-**版本**: 1.0  
-**日期**: 2025-07-05
+### 1.1 文档目的
 
-## 1 核心业务流程设计
+本文档旨在为 GoChat 后端系统的开发、测试和运维提供全面、精确的技术指导。它详细描述了系统的模块划分、核心业务流程、接口协议、数据模型、关键算法及非功能性设计，是连接架构蓝图与代码实现的桥梁。
 
-#### 1.1.1 用户注册与登录
+### 1.2 范围
 
-**流程描述:**
-1.  **用户注册**:
-    *   客户端提交用户名、密码等信息到 `im-logic` 提供的 HTTP RESTful API (`/register`)。
-    *   `im-logic` 对参数进行校验（如用户名是否已存在）。
-    *   使用 `bcrypt` 等高强度哈希算法对密码进行加盐哈希。
-    *   通过 `im-data` 服务将用户信息（用户ID、用户名、哈希后的密码、创建时间等）存入 `users` 表。
-    *   注册成功，返回成功响应。
+本文档覆盖 `im-gateway`, `im-logic`, `im-task`, `im-repo` 四大核心服务及 `im-infra` 基础库的详细设计。
 
-2.  **用户登录**:
-    *   客户端提交用户名、密码到 `im-logic` 提供的 HTTP RESTful API (`/login`)。
-    *   `im-logic` 通过 `im-data` 查询用户信息。
-    *   校验用户是否存在，并使用 `bcrypt.CompareHashAndPassword` 比较提交的密码与数据库中存储的哈希值。
-    *   验证通过后，生成 **JWT (JSON Web Token)**，其中包含 `user_id`、`expire_time` 等信息。
-    *   将 JWT 返回给客户端。
+### 1.3 读者对象
 
-3.  **连接认证**:
-    *   客户端在后续所有请求中（包括建立 WebSocket 连接），需在请求头或连接参数中携带此 JWT。
-    *   `im-gateway` 在收到 WebSocket 连接请求时，解析并验证 JWT 的有效性。验证通过后，才建立长连接，并将 `user_id` 与该连接进行绑定，存入 Redis。
+本文档的主要读者为 GoChat 项目的后端开发工程师、测试工程师、运维工程师及项目经理。
 
-#### 1.1.2 单聊会话维护与数据流向
+## 2 核心实体与 ID 设计
 
-**会话维护:**
-*   **会话ID (`conversation_id`)**: 对于单聊，会话ID是唯一的。为了保证幂等性，可以由两个用户的 `user_id` 拼接并哈希生成，例如 `md5(min(user_id1, user_id2) + max(user_id1, user_id2))`。客户端和服务器都遵循此规则，无需额外存储会话关系。
+为保证系统的全局唯一性和可扩展性，ID 设计是基础。
 
-**核心保障机制:**
-*   **低延迟**:
-    1.  客户端与 `im-gateway` 之间使用 WebSocket，保持长连接，避免频繁建连开销。
-    2.  服务间使用 gRPC，基于 HTTP/2，性能优于 REST。
-    3.  消息流转核心路径采用 Kafka 异步化，`im-logic` 不会被下游服务阻塞。
-    4.  用户在线状态及所在 `gateway` 地址缓存在 Redis，实现快速路由。
-*   **有序性**:
-    *   引入 **会话内单调递增序列号 (`seq_id`)**。每个会话（`conversation_id`）维护一个 `seq_id`。
-    *   `im-logic` 在处理每条消息时，从 Redis 中通过 `INCR conv_seq:{conversation_id}` 原子地获取一个新的 `seq_id` 并赋给该消息。
-    *   客户端根据 `seq_id` 对收到的消息进行排序。如果发现 `seq_id` 不连续（如收到 1, 2, 4），则主动向服务端请求拉取缺失的消息（3）。
-*   **唯一性 (消息去重)**:
-    *   客户端在发送每条消息时，生成一个唯一的 **客户端消息ID (`client_msg_id`)**，通常由 `user_id + timestamp + random_number` 构成。
-    *   `im-logic` 在处理消息时，会先检查此 `client_msg_id` 是否在短时间内（如最近1分钟）处理过（可使用 Redis 缓存）。若已处理，则直接丢弃，防止因客户端重试导致消息重复。
+-   **`user_id`**: `BIGINT UNSIGNED`。由 `IDGen` 服务（Snowflake）生成。
+-   **`group_id`**: `BIGINT UNSIGNED`。由 `IDGen` 服务（Snowflake）生成。
+-   **`message_id`**: `BIGINT UNSIGNED`。由 `IDGen` 服务（Snowflake）在 `im-logic` 中生成。
+-   **`conversation_id`**: `VARCHAR(64)`。
+    -   **单聊**: `md5(min(user_id1, user_id2) + "_" + max(user_id1, user_id2))`。
+    -   **群聊**: `group_id` 的字符串形式。
+-   **`seq_id`**: `BIGINT UNSIGNED`。会话内单调递增序列，由 `im-logic` 通过 Redis `INCR conv_seq:{conversation_id}` 命令获取。
+-   **`client_msg_id`**: `VARCHAR(64)`。由客户端生成（`user_id + "_" + timestamp_ms + "_" + random_int`），用于实现**发送幂等性**。
 
-**数据流向 (发送消息):**
-1.  **Client -> Gateway**: 客户端通过 WebSocket 发送消息（包含 `to_user_id`, `content`, `client_msg_id`）。
-2.  **Gateway -> Kafka**: `im-gateway` 验证 JWT，将消息封装（加上 `from_user_id`）后，生产到 Kafka 的上行主题 `im-upstream-topic`。
-3.  **Kafka -> Logic**: `im-logic` 消费消息，执行核心业务：
-    *   通过 `client_msg_id` 进行消息去重。
-    *   生成 `conversation_id`。
-    *   从 Redis 获取并递增 `seq_id`。
-    *   调用 `im-data` 将消息持久化到 MySQL。
-    *   调用 `im-data` 查询接收者 `to_user_id` 的在线状态及其所在的 `gateway_id`。
-4.  **Logic -> Kafka**:
-    *   **在线推送**: 若接收者在线，`im-logic` 将消息（包含 `payload`, `to_user_id`, `seq_id` 等）生产到 Kafka 的下行主题 `im-downstream-topic-{gateway_id}`。
-    *   **离线推送**: 若接收者离线，`im-logic` 将推送任务（如 `user_id`, `alert_content`）生产到 Kafka 的任务主题 `im-task-topic`。
-5.  **Kafka -> Gateway/Task**:
-    *   `im-gateway` 实例消费其对应的下行主题，通过本地 `user_id -> conn` 映射，将消息通过 WebSocket 推送给目标客户端。
-    *   `im-task` 服务消费任务主题，调用第三方推送服务（APNs, FCM）进行离线推送。
+## 3 核心业务流程详解
 
-#### 1.1.3 群聊会话
+### 3.1 用户生命周期与数据同步
 
-*   **创建群聊**: 用户通过 API 创建群聊，`im-logic` 生成唯一的 `group_id`，并将创建者作为群主写入 `groups` 和 `group_members` 表。
-*   **加群/退群**: 通过 API 实现，`im-logic` 更新 `group_members` 表，并向群内广播“xxx加入/退出群聊”的系统消息。
-*   **@操作**:
-    *   客户端层面，输入 `@` 时触发成员列表供选择。发送时，消息体中包含特殊标记，如 `content: "你好 @[user_id:123]"`。
-    *   `im-logic` 解析消息内容，识别出被 `@` 的用户列表。
-    *   除了正常的消息扩散，`im-logic` 会为被 `@` 的用户生成一条特殊的“提及”记录，并可能触发强提醒（如特殊通知音、角标等）。
-*   **数据流向**:
-    1.  与单聊类似，消息先到达 `im-logic`。
-    2.  `im-logic` 接收到群聊消息后，通过 `group_id` 从 `im-data`（优先查 Redis 缓存）获取该群所有成员的 `user_id` 列表。
-    3.  **消息扩散 (Fan-out)**: `im-logic` 遍历成员列表，查询每个成员的在线状态和 `gateway_id`。
-    4.  为每个在线成员，向其对应的 `im-downstream-topic-{gateway_id}` 生产一条消息。
-    5.  对于离线成员，聚合后生成离线推送任务。
+#### 3.1.1 注册/登录流程
 
-#### 1.1.4 万人群聊的权衡 (写扩散 vs 读扩散)
+1.  **Client -> Gateway (HTTP)**: `POST /api/auth/login` 或 `POST /api/auth/register`。
+2.  **Gateway -> Logic (gRPC)**: 调用 `logic.AuthService` 的相应 RPC。
+3.  **Logic -> Repo (gRPC)**:
+    -   **注册**: 调用 `repo.UserRepo.CreateUser`。`im-repo` 需处理 `username` 的唯一性约束冲突。
+    -   **登录**: 调用 `repo.UserRepo.GetUserByUsername`。
+4.  **Logic (处理)**:
+    - 密码使用 `bcrypt` 进行哈希存储和比较。
+    - 登录成功后，生成 JWT，Payload 包含 `{"user_id": "…", "exp": …}`。
+5.  **Logic -> Gateway -> Client**: 返回 JWT 及用户信息。
 
-*   **写扩散 (Push Model)**: 即当前设计，一条消息由服务器主动推送给所有群成员。
-    *   **优点**: 实时性高，用户体验好。
-    *   **缺点**: 对于万人群，一条消息意味着 `im-logic` 需要处理上万次查询和消息生产，对服务器和 Kafka 造成巨大压力，延迟会显著增加。这就是 **写扩散风暴**。
+#### 3.1.2 WebSocket 连接与会话建立
 
-*   **读扩散 (Pull Model)**: 消息不主动推送，而是写入一个“群消息时间线”中。
-    *   **优点**: 服务端压力小，写入成本固定。适合不活跃用户占多数的超大群组。
-    *   **缺点**: 实时性差，客户端需要轮询或通过信令来拉取新消息，增加了客户端的复杂性和耗电。
+1.  **Client**: 使用获取的 JWT 发起 `ws://…/ws?token={jwt}` 连接。
+2.  **Gateway**:
+    - 拦截连接请求，解析并验证 JWT。失败则拒绝连接。
+    - 成功后，向 Redis 写入在线状态: `HSET user_session:{user_id} gateway_id {current_gateway_id} login_at {timestamp}`。
+    - 在本地内存中建立 `user_id -> websocket_connection` 的映射，用于快速消息推送。
+    - 启动该连接的 `readPump` 和 `writePump` goroutine。
 
-*   **权衡与设计方案 (混合模型)**:
-    1.  **在线用户用“写扩散”**: 对当前活跃在群聊界面的在线用户，继续采用 Push 模式，保证实时体验。
-    2.  **离线和非活跃用户用“读扩散”**:
-        *   `im-logic` 只将消息写入群的消息时间线（如 Redis ZSET）。
-        *   当用户变为在线或点开该群聊时，客户端主动拉取其离线期间的所有消息。
-        *   通过一个轻量级的通知信令（如“群里有新消息”），告知客户端需要拉取，而非直接推送完整消息体。
-    3.  **优化**: 对于万人群，可以默认关闭已读回执、"正在输入"等强交互功能，以减少信令风暴。
+#### 3.1.3 首次登录/重连后的数据拉取
 
----
+1.  **Client**: 在 WebSocket 连接成功后，立即发起 `GET /api/conversations` 请求。
+2.  **Gateway -> Logic (gRPC)**: 调用 `logic.ConversationService.GetConversations`。
+3.  **Logic (实现)**:
+    - 调用 `repo.ConversationRepo.GetUserConversations(user_id)` 获取用户的所有 `conversation_id` 列表。
+    -   **并行/批量处理**:
+        - 批量从 Redis 获取所有会话的未读数: `MGET unread:conv_id1:user_id1 unread:conv_id2:user_id1 …`。
+        - 批量从 Redis 获取所有会话的最后一条消息: 使用 Redis Pipeline 执行多个 `ZREVRANGE hot_messages:conv_id 0 0`。
+        - 批量从 `im-repo` 获取所有会话对端（好友/群组）的详细信息。
+    - 聚合所有信息，按 `last_message_time` 排序后返回。
 
-## 2 数据库与缓存设计
+### 3.2 消息生命周期
 
-#### 2.1.1 数据库表结构 (MySQL)
+#### 3.2.1 消息发送 (上行)
 
-```sql
+1.  **Client**: 构造消息体 JSON，包含 `conversationId`, `content`, `messageType`, `tempMessageId` (`client_msg_id`)，通过 WebSocket 发送。
+2.  **Gateway (`readPump`)**:
+    - 读取到消息，解析 JSON。
+    - 将消息体转换为 `protobuf.SendMessageRequest`。
+    - 构造 `protobuf.KafkaMessage`，生成 `trace_id`。
+    - 调用 `infra.mq.Producer` 将消息生产到 Kafka Topic: `im-upstream-topic`。
+    -   **立即**向客户端的 `writePump` channel 发送一个 `message-ack` 消息，包含 `tempMessageId` 和一个临时 `messageId` (可以是 `tempMessageId` 本身)，用于优化 UI。
+
+#### 3.2.2 消息处理 (核心逻辑)
+
+1.  **Logic (消费)**: 作为消费者组消费 `im-upstream-topic`。
+2.  **Logic (幂等性)**: `SET msg_dedup:{client_msg_id} 1 EX 60 NX`。失败则日志记录并直接 `ack` 消息，流程终止。
+3.  **Logic (ID 与序列生成)**:
+    - 调用 `infra.idgen` 生成全局唯一的 `message_id`。
+    - 调用 Redis `INCR conv_seq:{conversation_id}` 获取 `seq_id`。
+4.  **Logic (持久化)**:
+    - 构造 `repo.SaveMessageRequest`，包含所有消息字段。
+    - 调用 `repo.MessageRepo.SaveMessage` RPC。
+    -   `im-repo` 内部实现：
+        - 将消息写入 MySQL `messages` 表。
+        - 将消息（序列化为 JSON）写入 Redis 的热点消息缓存: `ZADD hot_messages:{conversation_id} {seq_id} {message_json}`。同时修剪 ZSET，只保留最近 N 条（如 300 条）。
+5.  **Logic (分发决策)**:
+    -   **单聊**: 调用 `repo.UserRepo.GetUserSession(to_user_id)` 获取其 `gateway_id`。
+    -   **群聊**: 调用 `repo.GroupRepo.GetGroupInfo(group_id)` 获取群成员数，根据**混合模型**决策。
+        -   **中小群**: 调用 `repo.GroupRepo.GetOnlineGroupMembers(group_id)` 获取在线成员列表和其 `gateway_id`。
+        -   **超大群**: 构造任务消息，生产到 `im-task-large-group-fanout-topic`。
+6.  **Logic (推送)**: 将待推送的消息（包含完整的消息体和 `seq_id`）生产到对应的下行 Topic: `im-downstream-topic-{gateway_id}`。对于群聊，会生产多条消息到不同的 Topic。
+
+#### 3.2.3 消息接收 (下行)
+
+1.  **Gateway (消费)**: 每个 `gateway` 实例消费自己的下行 Topic。
+2.  **Gateway (`writePump`)**:
+    - 从 Topic 收到消息，解析出 `user_id`。
+    - 从内存 `user_id -> websocket_connection` 映射中找到对应的连接。
+    - 将消息（格式化为 `new-message` JSON）写入该连接的 `writePump` channel。
+    -   `writePump` goroutine 将消息通过 WebSocket 发送给客户端。
+3.  **Client**: 接收到 `new-message`，根据 `seq_id` 渲染到正确位置。若发现 `seq_id` 不连续，可主动调用 API 拉取缺失消息。
+
+## 4 模块详细设计
+
+### 4.1 `im-infra` (基础库)
+
+-   **定位**: 提供被所有服务依赖的、标准化的基础能力封装。
+-   **`rpc-proto`**: 定义所有服务间的 gRPC 接口 (`.proto` 文件)。
+-   **`config`**: `viper` 封装，支持从文件和 etcd 加载配置。
+-   **`logger`**: `zap` 封装，提供结构化、带 `TraceID` 的日志。
+-   **`mq`**: `segmentio/kafka-go` 封装，提供简洁的 `Producer` 和 `ConsumerGroup` 接口。
+-   **`redis`**: `go-redis/v8` 封装，支持集群模式，提供常用命令的封装。
+-   **`mysql`**: `gorm` 封装，管理主从连接池。
+-   **`etcd`**: `etcd/client/v3` 封装，提供服务注册、发现和分布式锁的工具函数。
+-   **`idgen`**: Snowflake 算法实现。
+-   **`tracing`**: OpenTelemetry SDK 封装，提供 gRPC 和 Kafka 的拦截器/中间件，自动注入和提取 `TraceID`。
+
+### 4.2 `im-repo` (仓储层)
+
+-   **gRPC 接口**:
+
+    ```protobuf
+    // message_repo.proto
+    service MessageRepo {
+      // 保存消息到MySQL并更新缓存
+      rpc SaveMessage(SaveMessageRequest) returns (google.protobuf.Empty);
+      // 从MySQL分页获取历史消息
+      rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse);
+    }
+    ```
+
+-   **实现细节**:
+    - 所有 gRPC 方法需处理数据库错误和缓存操作错误。
+    -   `gorm` 配置需开启日志，用于调试。
+    -   **读写分离**: 在 `im-repo` 内部维护两个 `gorm.DB` 实例（主库和从库），所有写操作走主库，读操作走从库。
+
+### 4.3 `im-logic` (逻辑层)
+
+-   **gRPC 接口**:
+
+    ```protobuf
+    // conversation_logic.proto
+    service ConversationLogic {
+      // 获取会话列表
+      rpc GetConversations(GetConversationsRequest) returns (GetConversationsResponse);
+      // 标记会话已读
+      rpc MarkConversationAsRead(MarkAsReadRequest) returns (google.protobuf.Empty);
+    }
+    ```
+
+-   **实现细节**:
+    - 服务启动时，初始化 Kafka 消费者组，开始消费上行消息。
+    - 所有业务逻辑严格遵守：**输入校验 -> 调用 `im-repo` -> 业务决策 -> 调用 `im-repo`/`mq`** 的模式。
+    -   **并发控制**: 对于需要访问外部资源的操作（如调用多个 `im-repo` RPC），应使用 `goroutine` 和 `sync.WaitGroup` 或 `errgroup` 进行并发处理，以降低延迟。
+
+### 4.4 `im-gateway` (网关层)
+
+-   **实现细节**:
+    -   **`main.go`**: 初始化配置、日志、etcd、gRPC 客户端、Kafka 生产者等。启动 HTTP 和 WebSocket 服务。
+    -   **`http_handler.go`**: `gin` 路由和处理器，负责将 HTTP 请求转换为 gRPC 调用。
+    -   **`ws_handler.go`**: WebSocket `Upgrade` 逻辑和连接管理。
+    -   **`ws_conn.go`**: 定义 `Connection` 结构体，封装 `*websocket.Conn`，包含 `readPump`, `writePump` 方法和 `send chan []byte`。
+    -   **`kafka_consumer.go`**: `gateway` 的 Kafka 消费者实现，收到消息后分发到对应的 `Connection.send` channel。
+
+### 4.5 `im-task` (任务层)
+
+-   **实现细节**:
+    -   **`main.go`**: 初始化配置、日志、gRPC 客户端、Kafka 生产者/消费者。
+    -   **`consumer.go`**: 启动消费者组，循环消费 `im-task-topic`。
+    -   **`processor.go`**: 定义任务分发器和各个任务的处理器。
+
+        ```go
+        // 任务处理器接口
+        type TaskProcessor interface {
+            Process(ctx context.Context, msg *sarama.ConsumerMessage) error
+        }
+        ```
+
+    -   **`large_group_fanout.go`**: `TaskProcessor` 的具体实现，处理大群扩散逻辑。内部可能包含分片逻辑，将一个大任务拆分成多个小任务再次投递到 Kafka。
+
+## 5 数据模型详细设计
+
+### 5.1 数据库表 (MySQL)
+
+所有主键 id 均不使用 AUTO_INCREMENT，改为 BIGINT UNSIGNED，由分布式 ID 服务生成，为未来分库分表做准备。
+
+```SQL
 -- 用户表
 CREATE TABLE `users` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+  `id` BIGINT UNSIGNED NOT NULL COMMENT '用户ID (由分布式ID服务生成)',
   `username` VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
   `password_hash` VARCHAR(255) NOT NULL COMMENT '哈希后的密码',
   `nickname` VARCHAR(50) DEFAULT '' COMMENT '昵称',
@@ -126,240 +214,75 @@ CREATE TABLE `users` (
 
 -- 群组表
 CREATE TABLE `groups` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '群组ID',
+  `id` BIGINT UNSIGNED NOT NULL COMMENT '群组ID',
   `name` VARCHAR(50) NOT NULL COMMENT '群名称',
   `owner_id` BIGINT UNSIGNED NOT NULL COMMENT '群主ID',
-  `avatar_url` VARCHAR(255) DEFAULT '' COMMENT '群头像URL',
-  `announcement` TEXT COMMENT '群公告',
+  `member_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '群成员数量',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_owner_id` (`owner_id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 群组成员表
 CREATE TABLE `group_members` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id` BIGINT UNSIGNED NOT NULL,
   `group_id` BIGINT UNSIGNED NOT NULL COMMENT '群组ID',
   `user_id` BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
-  `role` TINYINT NOT NULL DEFAULT '1' COMMENT '角色: 1-普通成员, 2-管理员, 3-群主',
+  `role` TINYINT NOT NULL DEFAULT '1' COMMENT '角色: 1-成员, 2-管理员, 3-群主',
   `joined_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_group_user` (`group_id`, `user_id`),
   KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 消息表 (可按 conversation_id 或时间进行分库分表)
+-- 消息表
 CREATE TABLE `messages` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id` BIGINT UNSIGNED NOT NULL COMMENT '消息ID',
   `conversation_id` VARCHAR(64) NOT NULL COMMENT '会话ID (单聊或群聊group_id)',
   `sender_id` BIGINT UNSIGNED NOT NULL COMMENT '发送者ID',
-  `message_type` TINYINT NOT NULL DEFAULT '1' COMMENT '消息类型: 1-文本, 2-图片, 3-文件, 100-系统通知等',
-  `content` TEXT NOT NULL COMMENT '消息内容 (或URL)',
-  `seq_id` BIGINT UNSIGNED NOT NULL COMMENT '会话内序列号',
-  `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间(毫秒)',
+  `message_type` TINYINT NOT NULL DEFAULT '1' COMMENT '消息类型',
+  `content` TEXT NOT NULL COMMENT '消息内容',
+  `seq_id` BIGINT UNSIGNED NOT NULL COMMENT '会话内单调递增序列号',
+  `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
+  -- 核心索引，保证消息顺序和唯一性
   UNIQUE KEY `uk_conv_seq` (`conversation_id`, `seq_id`),
+  -- 用于拉取历史消息
   KEY `idx_conv_id_time` (`conversation_id`, `created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 消息提及表 (@功能)
-CREATE TABLE `message_mentions` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `message_id` BIGINT UNSIGNED NOT NULL COMMENT '消息ID',
-  `mentioned_user_id` BIGINT UNSIGNED NOT NULL COMMENT '被@的用户ID',
-  PRIMARY KEY (`id`),
-  KEY `idx_user_id` (`mentioned_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
-#### 2.1.2 缓存设计 (Redis)
+### 5.2 缓存设计 (Redis)
 
-| 用途 | Key 格式 | Value 类型 | 描述 |
-| :--- | :--- | :--- | :--- |
-| **用户信息** | `user_info:{user_id}` | HASH | 缓存用户基本信息，如昵称、头像。减少DB查询。 |
-| **用户在线状态** | `user_session:{user_id}` | HASH | 存储 `gateway_id`, `conn_id`, `device_type` 等。 |
-| **会话序列号** | `conv_seq:{conversation_id}` | STRING | 使用 `INCR` 命令原子地生成 `seq_id`。 |
-| **群组成员** | `group_members:{group_id}` | SET | 缓存群成员 `user_id` 列表，用于快速消息扩散。 |
-| **消息去重** | `msg_dedup:{client_msg_id}` | STRING | 使用 `SETEX` 设置一个较短的过期时间（如60秒），用于消息去重。 |
-| **热点消息** | `hot_messages:{conversation_id}` | ZSET | 缓存最近的N条消息，`score` 为 `seq_id`。用于快速加载聊天界面首页。 |
+|     用途     |               Key 格式               | Value 类型 |                  描述                  |
+| :--------: | :--------------------------------: | :------: | :----------------------------------: |
+|  **用户信息**  |        user_info:{user_id}         |   HASH   |           缓存用户基本信息，减少 DB 查询。           |
+| **用户在线状态** |       user_session:{user_id}       |   HASH   |     存储 gateway_id。**系统可用性的核心**。      |
+| **会话序列号**  |     conv_seq:{conversation_id}     |  STRING  |       使用 INCR 命令原子地生成 seq_id。        |
+|  **群组成员**  |      group_members:{group_id}      |   SET    | 缓存**所有**群成员 user_id 列表，用于快速获取成员数和列表。 |
+|  **消息去重**  |     msg_dedup:{client_msg_id}      |  STRING  |       使用 SETEX 设置 60 秒过期，防止消息重复。       |
+| **会话未读数**  | unread:{conversation_id}:{user_id} |  STRING  |           使用 INCR 记录未读消息数。           |
 
-#### 2.1.3 数据流动策略 (Cache-Aside Pattern)
+## 6 非功能性设计
 
-*   **读操作**:
-    1.  `im-data` 优先从 Redis 读取数据。
-    2.  如果 Redis 命中（Cache Hit），直接返回数据。
-    3.  如果 Redis 未命中（Cache Miss），则从 MySQL 读取数据。
-    4.  将从 MySQL 读取到的数据写入 Redis 缓存，并设置合适的过期时间。
-    5.  返回数据。
-*   **写操作 (更新/删除)**:
-    1.  先更新 MySQL 中的数据。
-    2.  再删除 Redis 中对应的缓存（`DELETE user_info:{user_id}`）。
-    3.  **为什么是先更新DB再删缓存？** 这是为了保证数据一致性。如果先删缓存，在写入DB之前，另一个请求进来发现缓存没有，就会去读DB的旧数据并写回缓存，造成数据不一致。
+### 6.1 性能与可扩展性
 
----
+-   **全链路压测**: 使用 `JMeter` 或 `k6` 等工具，模拟大量用户连接和消息收发，识别系统瓶颈。
+-   **数据库优化**: 定期分析慢查询日志，优化 SQL 和索引。
+-   **伸缩策略**: 为 K8s `Deployment` 配置 `HorizontalPodAutoscaler (HPA)`，基于 CPU 和内存使用率自动伸缩服务实例。
 
-## 3 核心服务详细设计
+### 6.2 高可用性
 
-#### 3.1.1 im-gateway (网关层)
+-   **心跳机制**: WebSocket 连接采用双向心跳。客户端定时 `ping`，服务端若在 `3 * ping_interval` 内未收到则认为断线。服务端也定时 `ping`，可穿透某些网络设备的 NAT 超时。
+-   **健康检查**: 所有服务需实现 gRPC 健康检查协议，并暴露 HTTP 健康检查端点 `/healthz`，供 K8s 进行存活探针和就绪探针检测。
 
-*   **职责**: 维护海量客户端长连接，协议转换，数据代理。
-*   **请求处理**:
-    1.  **连接建立**: 监听 WebSocket 端口。客户端发起连接时，携带 JWT。
-    2.  **认证**: 解析 JWT，验证签名和有效期。失败则断开连接。
-    3.  **会话注册**: 认证成功后，生成唯一的连接ID (`conn_id`)，并将 `user_id -> {gateway_id, conn_id}` 的映射关系写入 Redis 的 `user_session` 中。
-    4.  **心跳维持**: 实现心跳机制（如客户端定时发送 `ping`，服务端回复 `pong`）。若在规定时间内未收到心跳，则认为连接断开，清理会话。
-*   **路由机制**:
-    *   **上行 (Client -> Server)**: 收到客户端消息后，不进行任何业务处理，直接封装成标准格式，推送到 Kafka 的 `im-upstream-topic`。
-    *   **下行 (Server -> Client)**: 每个 `im-gateway` 实例订阅一个专属于自己的 Kafka 主题（`im-downstream-topic-{gateway_id}`）。收到消息后，根据消息中的 `to_user_id`，从本地内存的 `user_id -> conn` 映射中找到对应的 WebSocket 连接，并将消息推送出去。
+### 6.3 安全性
 
-#### 3.1.2 im-logic (逻辑层)
+-   **输入验证**: 所有来自客户端的输入（API 参数、消息内容）都必须在 `im-gateway` 或 `im-logic` 层进行严格验证（长度、格式、类型）。
+-   **权限控制**: `im-logic` 在处理敏感操作（如解散群聊、踢人）时，必须校验操作者是否具有相应权限（如群主或管理员）。
 
-*   **职责**: 系统大脑，处理所有核心业务逻辑。
-*   **处理流程 (以单聊消息为例)**:
-    1.  **消费消息**: 从 `im-upstream-topic` 消费消息。
-    2.  **前置处理**: 反序列化消息，进行 `client_msg_id` 去重检查。
-    3.  **业务处理**:
-        *   调用 `im-data` 获取发送者和接收者的信息（如是否好友、是否被拉黑）。
-        *   生成 `conversation_id`，并从 Redis 获取原子递增的 `seq_id`。
-        *   组装完整的消息体。
-    4.  **数据持久化**: 调用 `im-data` 将消息写入 MySQL 和热点缓存。
-    5.  **消息路由/分发**:
-        *   调用 `im-data` 查询接收者的在线状态。
-        *   若在线，将消息推送到其所在 `gateway` 对应的 Kafka 下行主题。
-        *   若离线，将离线推送任务推送到 Kafka 的 `im-task-topic`。
-        *   （对于群聊，此处会进行 Fan-out 扩散）。
-    6.  **响应确认**: `im-logic` 无需直接响应客户端，整个链路是异步的。
+## 7 部署与运维
 
-#### 3.1.3 im-task (任务层)
-
-*   **职责**: 处理耗时、非核心、可失败重试的异步任务。
-*   **处理流程**:
-    1.  **消费任务**: 订阅 `im-task-topic`。
-    2.  **任务分发**: 根据消息中的任务类型（`task_type`）分发给不同的处理器。
-    3.  **具体任务示例**:
-        *   **离线推送**: 调用苹果 APNs、谷歌 FCM 或国内厂商推送通道的 API。需要处理不同厂商的速率限制和返回结果。
-        *   **内容审核**: 将消息内容（文本、图片URL）发送给第三方内容安全服务（如阿里云内容安全），根据审核结果进行处理（如拦截、打标）。
-        *   **数据归档**: 定期将冷数据从主 `messages` 表移动到历史归档表。
-
-#### 3.1.4 im-data (数据层)
-
-*   **职责**: 统一的数据访问层，屏蔽底层存储细节。
-*   **设计**:
-    *   提供清晰的 **gRPC API** 给上层服务（`im-logic`, `im-task`），如 `GetUser(id)`, `SaveMessage(msg)`, `GetGroupMembers(gid)`。
-    *   **存储策略**: 内部实现 Cache-Aside 逻辑。所有的数据访问都先经过 Redis，未命中再访问 MySQL。
-    *   **检索策略**:
-        *   对于高频访问，如用户信息、群成员，强制走缓存。
-        *   对于消息历史记录等大数据量查询，直接查询 MySQL。
-        *   未来可在此层引入 **读写分离**、**分库分表** 的代理逻辑，对上层服务透明。
-
----
-
-## 4 系统稳定性与性能保障
-
-#### 4.1.1 熔断与降级
-
-*   **熔断**: 在服务调用端（如 `im-logic` 调用 `im-data`）集成熔断器（如 `gRPC-go` 拦截器 + `Sentinel`）。
-    *   当 `im-data` 错误率或延迟超过阈值时，熔断器打开，后续请求在一段时间内直接返回错误，避免雪崩。
-*   **降级**:
-    *   **核心功能优先**: 在高负载时，优先保障消息收发。
-    *   **功能降级**: 可通过配置中心动态关闭非核心功能，如“在线状态显示”、“已读回执”、“内容审核”等，以释放资源。
-
-#### 4.1.2 限流策略
-
-*   **实现**: 采用 **令牌桶算法**，使用 Redis 实现分布式限流。
-*   **应用位置**:
-    *   **API网关/im-gateway**: 对每个 `user_id` 或 `IP` 的连接建立速率、消息发送频率进行限流。
-    *   **im-logic**: 对资源消耗大的 API（如创建群聊）进行限流。
-
-#### 4.1.3 分布式 ID 与链路追踪
-
-*   **分布式 ID**:
-    *   **消息ID (`message_id`)**: 可由 `im-logic` 使用 **Snowflake 算法** 生成。这是一个64位的ID，包含时间戳、机器ID和序列号，保证全局唯一且趋势递增。
-    *   **用户ID/群组ID**: 可使用数据库自增ID，或使用美团 Leaf、百度 UidGenerator 等分布式ID生成服务。
-*   **链路追踪**:
-    *   **标准**: 采用 **OpenTelemetry** 规范。
-    *   **实现**:
-        1.  在请求入口（`im-gateway`）生成一个全局 `TraceID`。
-        2.  通过 gRPC 的 `metadata` 和 Kafka 消息的 `headers`，将 `TraceID` 和 `SpanID` 在整个调用链中传递。
-        3.  所有服务（`gateway`, `logic`, `task`, `data`）集成 OpenTelemetry SDK，将追踪数据上报到 Jaeger 或 Zipkin 等后端，实现请求的可视化、性能分析和故障排查。
-
-#### 4.1.4 容器化与集群化部署
-
-*   **容器化**: 所有服务（`im-gateway`, `im-logic` 等）都打包成 **Docker** 镜像。
-*   **集群化**: 使用 **Kubernetes (K8s)** 进行生产环境部署和管理。
-    *   **无状态服务** (`gateway`, `logic`, `task`, `data`): 使用 K8s `Deployment` 进行部署，并配置 `HorizontalPodAutoscaler (HPA)`，根据 CPU/内存使用率自动伸缩 Pod 数量。
-    *   **有状态中间件** (`Kafka`, `Redis`, `MySQL`): 生产环境建议使用云服务商提供的托管服务，或使用 `StatefulSet` + Operator 进行部署。
-    *   **服务发现**: K8s 内置的 DNS 服务天然解决了服务发现问题。
-    *   **配置管理**: 使用 K8s `ConfigMap` 和 `Secret` 管理配置文件和敏感信息。
-
----
-
-好的，我们继续完成这份详细设计方案。
-
----
-
-## 5 前端界面简要设计 (续)
-
-前端界面采用现代IM应用的经典三栏式布局，确保用户操作直观、高效。
-
-1.  **登录/注册页面**:
-    *   提供输入用户名和密码的表单。
-    *   包含“登录”、“注册”按钮和切换链接。
-
-2.  **主界面 (三栏式布局)**
-
-    *   **第一栏 (最左侧): 功能导航栏 (Toolbar)**
-        *   **用户头像**: 显示当前登录用户的头像，点击可进入个人资料/设置页面。
-        *   **功能图标**:
-            *   **聊天**: 默认选中，显示会话列表。
-            *   **联系人**: 点击切换到联系人/群组列表。
-            *   **设置**: 点击进入应用设置界面。
-
-    *   **第二栏: 会话列表 / 联系人列表**
-        *   **搜索框**: 在顶部，用于快速搜索会话或联系人。
-        *   **“+”按钮**: 用于发起新聊天、创建群组或添加好友。
-        *   **列表区域**:
-            *   **会话模式**: 显示最近的聊天列表。每个条目包含对方头像/群头像、昵称/群名称、最后一条消息摘要、时间戳和未读消息数角标。
-            *   **联系人模式**: 显示好友列表（可按字母排序）和群组列表。
-
-    *   **第三栏: 聊天窗口 (核心交互区)**
-        *   **顶部信息栏**:
-            *   显示当前聊天对象（个人或群组）的名称和头像。
-            *   对于单聊，可显示对方的在线状态。
-            *   对于群聊，可显示成员数量，并提供一个入口（如“…”按钮）查看群成员列表、群公告、修改群设置等。
-        *   **消息记录区**:
-            *   消息以气泡形式展示，自己发送的消息靠右，接收到的消息靠左。
-            *   支持无限滚动加载历史消息。
-            *   消息内容支持：纯文本、表情符号、图片（显示缩略图，点击可预览大图）、文件（显示文件图标、名称和大小，可点击下载）。
-            *   群聊中，他人消息气泡旁会显示发送者的昵称或头像。
-            *   系统通知（如“xxx加入了群聊”）以居中、灰色文字等特殊样式展示。
-        *   **消息输入区**:
-            *   **文本输入框**: 支持多行输入。
-            *   **功能按钮栏**:
-                *   表情符号选择器。
-                *   图片/文件上传按钮。
-                *   `@` 按钮（仅群聊可见），点击后弹出群成员列表供选择。
-            *   **发送按钮**: 用于发送输入框中的内容。
-
-3.  **其他关键页面/弹窗**
-
-    *   **添加好友/群组 弹窗**:
-        *   提供搜索框，用户可通过用户ID或用户名搜索。
-        *   搜索结果列表中显示用户/群组信息，并提供“添加好友”或“申请入群”按钮。
-    *   **创建群聊 弹窗**:
-        *   引导用户从好友列表中勾选初始成员。
-        *   设置群名称和群头像。
-    *   **个人资料/设置 页面**:
-        *   允许用户查看和修改自己的昵称、头像。
-        *   提供“退出登录”功能。
-        *   管理通知设置（声音、桌面通知等）。
-
----
-
-## 6 **总结**
-
-本详细设计方案从业务流程、数据存储、核心服务架构、系统稳定性保障及前端交互等多个维度，对 GoChat 即时通讯系统进行了全面的规划。
-
-方案采纳了业界成熟的微服务架构，通过 gRPC、Kafka 和 etcd 等技术组件，构建了一个高内聚、低耦合、支持水平扩展的系统。在消息处理上，通过引入 `seq_id` 和 `client_msg_id` 保证了消息的有序性和唯一性，并针对万人大群提出了写扩散与读扩散结合的混合模型。数据库与缓存的设计采用了 Cache-Aside 模式，确保了性能与数据一致性。稳定性方面，熔断、限流、分布式追踪等机制为系统的高可用性提供了保障。最后，清晰的前端设计为用户提供了流畅的交互体验。
-
-这份方案为 GoChat 项目的顺利开发、部署和未来迭代奠定了坚实的技术基础。开发团队可基于此方案进行各模块的并行开发与实现。
+-   **容器化**: 所有服务均打包为轻量级的 Docker 镜像（基于 `alpine`）。
+-   **CI/CD**: 搭建自动化持续集成/持续部署流水线（如 Jenkins, GitLab CI），代码提交后自动运行测试、构建镜像并部署到测试环境。
+-   **配置管理**: 使用 K8s `ConfigMap` 和 `Secret` 管理配置文件和敏感信息，并通过 etcd 实现动态配置更新。
+-   **可观测性**: 部署 Prometheus + Grafana + Alertmanager 进行指标监控和告警，部署 Jaeger 进行链路追踪，部署 ELK/Loki 栈进行日志聚合与查询。

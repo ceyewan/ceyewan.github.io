@@ -33,5 +33,3 @@ scripts/.venv/*
 
 # 静态文件
 public/*
-
-Obsidian Vault/.obsidian/*
