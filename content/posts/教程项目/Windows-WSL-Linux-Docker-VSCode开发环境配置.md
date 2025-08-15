@@ -11,17 +11,17 @@ date: 2022-06-26 22:28:24
 
 前几天重装了一下系统，于是从头开始配置了一下开发环境，在这里记录一下。主要就是使用虚拟机、`wsl`、`vscode` 以及 `docker` 这几个工具。
 
-## windows 环境 C/C++ 开发环境配置
+## 1 windows 环境 C/C++ 开发环境配置
 
-### git 安装
+### 1.1 git 安装
 
 访问官网，`https://git-scm.com/` ，然后直接下载安装即可。
 
-### windows terminal 安装
+### 1.2 windows terminal 安装
 
 使用微软商店搜素下载即可。
 
-### 使用 windows terminal 打开 git bash
+### 1.3 使用 windows terminal 打开 git bash
 
 打开 `windows terminal` ，点击上方下箭头，然后设置，然后点击添加新的配置文件，内容如下：
 
@@ -33,13 +33,13 @@ date: 2022-06-26 22:28:24
 
 ![image-20220626163648872](https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626163648872.png)
 
-### 安装 gcc 套件
+### 1.4 安装 gcc 套件
 
 之前我都是从网上下载 `mingw` 文件，解压到指定目录，然后添加环境变量，感觉有点麻烦。可以从 `http://www.equation.com/servlet/equation.cmd?fa=fortran` 直接下载 `exe` 文件，傻瓜式安装即可。安装完成后打开终端，输入 `gcc --version` 、`g++ --version` 、`gdb --version` 和 `make --version` 查看是否安装成功。
 
 ![image-20220626164835575](https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626164835575.png)
 
-### 安装 vscode
+### 1.5 安装 vscode
 
 访问官网，`https://code.visualstudio.com/` ，下载安装即可。安装后打开，打开后会提示是否安装中文插件，自行选择即可。我建议在某个盘下面创建一个文件夹，比如叫做 `CodeField` 用来存放所有的代码，然后在里面创建 `CodeCpp`、`CodePy` 等存放不同语言的代码。下面有一点点错误，第七点是 `g++ hello.cpp` 和 `./a.exe` 。
 
@@ -47,7 +47,7 @@ date: 2022-06-26 22:28:24
 
 使用 `vscode` 而不是 `vs` 或者 `cLion` 等 `IDE` 是因为，我经常要写一个一个文件的小程序，搞 `project` 太麻烦了。更重要的是，`vscode` 是宇宙第一编辑器！！！
 
-### github ssh 认证
+### 1.6 github ssh 认证
 
 写代码总要用到 `git` 吧，现在都是用 `ssh` 认证了，来配置一下吧。
 
@@ -65,37 +65,37 @@ ssh -T git@github.com
 
 到此，环境配置基本完成，你可以开心的 `code` 了，细节问题在使用中逐渐完善即可。
 
-## Linux 环境 C/C++ 开发环境配置
+## 2 Linux 环境 C/C++ 开发环境配置
 
 直接虚拟机或者双系统，这两个我都折腾过，还是不太方便。因此，这里主要讲在 `windows` 下使用 `vscode` 进行远程 `Linux` 环境开发。
 
-### 安装 WSL
+### 2.1 安装 WSL
 
 打开终端，推荐使用 `windows terminal`，需要管理员模式打开。输入命令 `wsl --install`，等待安装完成即可。
 
-### 安装 Ubuntu
+### 2.2 安装 Ubuntu
 
 打开微软应用商店，搜索 `ubuntu` 自行选择版本安装即可。安装完成后，在终端中一个就有 `ubuntu` 选项了，打开，完成一些基本设置，然后就有一个全新的 `ubuntu` 系统了。首先还是推荐换源，清华源是一个很好的选择，`https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/`。执行 `sudo nano /etc/apt/sources.list`，将原本内容注释掉，将清华源加入，然后退出。执行 `sudo apt update` 和 `sudo apt upgrade` 。安装 `gcc` 的命令为 `sudo apt install gcc`，其他的以此类推。
 
-### vscode 安装 remote development 插件组件
+### 2.3 vscode 安装 remote development 插件组件
 
 左侧栏第五个是插件商店，搜索安装即可。完成后，左下角会出现一个类型闪电的标，点击，然后选择 `new WSL windows` ，不出意外的话就会进入到 `wsl` 了，左下角会显示。此时在这个窗口操作就是纯正的 `Linux` 环境。`vscode` 提供了代码编辑器和终端的功能，足矣。
 
-## 虚拟机 Linux + remote ssh 连接
+## 3 虚拟机 Linux + remote ssh 连接
 
-### 安装 vmware workstation
+### 3.1 安装 vmware workstation
 
 这是一个让你运行虚拟机的软件，进入官网，`https://www.vmware.com/cn/products/workstation-pro.html` ，下载安装即可，这个是付费软件，但是网上激活码一搜一大堆。
 
-### 下载一个 Linux 发行版的 iso 镜像
+### 3.2 下载一个 Linux 发行版的 iso 镜像
 
 我选择的是 `manjaro`，因为已经有一个 `ubuntu` 的 `wsl` 发行版了。官网  `https://manjaro.org/download/`，推荐 `kde` 版本，下载即可。
 
-### vmware 安装 manjaro
+### 3.3 vmware 安装 manjaro
 
 依次大概是新建虚拟机，典型，安装程序映射文件（`iso`）（选择刚刚下载的 `iso` 镜像即可），`Linux` 和其他 `Linux 5.x 64位`，然后就是自行选择了，名称啥的随意。注意内存大小和存储大小，尽量大点，推荐 `8G + 40G` 。然后就可以打开这个虚拟机了，剩下的内容和初次安装 `windows` 大差不差。
 
-### vscode 远程连接 manjaro
+### 3.4 vscode 远程连接 manjaro
 
 `manjaro` 安装 `ssh` 服务，`sudo pacman -Sy openssh` ，然后开启服务 `systemctl start sshd.service && systemctl enable sshd.service ` 。执行 `sudo pacman -Sy net-tools` ，然后执行 `ifconfig` ，将 `ip` 地址记住。
 
@@ -107,9 +107,9 @@ ssh -T git@github.com
 
 这样，我们只用打开虚拟机，然后就不用操作了，使用 `vscode` 远程连接即可。连接云服务器也是这样的操作。
 
-## docker + remote containers 连接
+## 4 docker + remote containers 连接
 
-### 安装 docker 
+### 4.1 安装 docker 
 
 访问官网，安装即可。最好能配置换源。在设置里查找 `docker engine` ，修改内容如下：
 
@@ -131,7 +131,7 @@ ssh -T git@github.com
 }
 ```
 
-### docker 使用
+### 4.2 docker 使用
 
 这里用配置一个 `mysql` 环境为例：
 
@@ -162,7 +162,7 @@ docker stop mysql-demo
 docker container rm mysql-demo
 ```
 
-### vscode 远程连接 container
+### 4.3 vscode 远程连接 container
 
 终端还是用不习惯，毕竟有些容器里面甚至连 `vim` 都没有，这个时候就要祭出我们的宇宙最强编辑器 `vscode` 了。安装 `docker` 和 `remote-container` 这两个插件。然后就会发现侧边栏出现了一个小鲸鱼，点开，就可以看到镜像和容器了。
 
@@ -170,6 +170,6 @@ docker container rm mysql-demo
 
 ![image-20220626214647085](https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220626214647085.png)
 
-## 小结
+## 5 小结
 
 配环境真的就是一个熟练工，配过两次就会了，没配过就是一头雾水。说实话，我这一篇够别人水十多篇了，一个方面是写的很多，几乎包括了这两年折腾过的所有环境配置；另一方面，是因为我确实写的很简略，有很多都是回忆的大致操作。不明白的地方可以根据关键词搜索一下，或者联系我。

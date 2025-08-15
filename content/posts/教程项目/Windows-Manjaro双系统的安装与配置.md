@@ -10,11 +10,11 @@ slug: 4a1a11d9
 date: 2022-07-10 00:25:51
 ---
 
-## 双系统安装
+## 1 双系统安装
 
 下载 `manjaro kde` 镜像文件，使用 `rufus` 将镜像写入到 U 盘中（搜索关键词即可）。在 `windows` 中打开磁盘管理，压缩出一个 `100G` 的卷（百度解决）。重启系统，狂按 `F12` （不同电脑不同），选择 U 盘启动。然后就是正常的安装一个系统（驱动建议选择 free），分区的话我没搞，直接默认了。但是要注意安装位置选择之前压缩出的分区，不要把 `windows` 给覆盖掉了！！！
 
-## 双系统时间统一
+## 2 双系统时间统一
 
 因为 `windows` 和 `linux` 的时间算法不一样，那么就需要修改一下，这里我选择改 `linux`：
 
@@ -22,11 +22,11 @@ date: 2022-07-10 00:25:51
 sudo timedatectl set-local-rtc true
 ```
 
-## 分辨率
+## 3 分辨率
 
 调整光标、分辨率、缩放等适配显示屏。
 
-## 软件源
+## 4 软件源
 
 执行命令：
 
@@ -44,19 +44,19 @@ SigLevel = Optional TrustAll
 Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch
 ```
 
-## 更新系统
+## 5 更新系统
 
 ```shell
 sudo pacman -Syyu
 ```
 
-## 安装 yay
+## 6 安装 yay
 
 ```shell
 sudo pacman -Sy yay
 ```
 
-## 安装输入法
+## 7 安装输入法
 
 ```shell
 # 安装 fcitx5 框架
@@ -101,7 +101,7 @@ emoji_suggestion:
 
 之前使用过一段时间的搜狗输入法，输入体验较好，使用体验较差。对中文输入支持较好，但是 bug 也多。不知道为什么，我好像装不上了，就用这个了。
 
-## 安装 QQ 微信和腾讯会议
+## 8 安装 QQ 微信和腾讯会议
 
 微信我比较推荐使用下面这个命令安装，这个看名字应该是统信版的。QQ 的话可以使用 `icalingua++` 。这两个虽然不是特别好用，但至少还是能用的咯。我不是很推荐 `wine` ，感觉太臃肿了。
 
@@ -113,7 +113,7 @@ yay -Sy wemeet-bin
 
 其实有一个对 `linux` 支持比较好的平台，就是字节跳动的飞书。
 
-## 安装 oh-my-zsh
+## 9 安装 oh-my-zsh
 
 首先，还是得先确保安装了 `zsh`，然后再安装 `oh-my-zsh` 。
 
@@ -152,7 +152,7 @@ plugins=(
 # 这样在输入命令时会有提示，并且还会有语法正确与否的提示
 ```
 
-## 配置 konsole
+## 10 配置 konsole
 
 依次点击设置 -> 编辑当前方案 -> 外观 -> 编辑，这里就可以添加一个背景壁纸（实测壁纸分辨率需要在 `1280 × 720` 左右。可能是我电脑的问题，分辨率太大了显示有问题。
 
@@ -160,7 +160,7 @@ plugins=(
 
 ![image-20220720190135100](https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220720190135100.png)
 
-## 安装 vscode
+## 11 安装 vscode
 
 ```shell
 yay -Sy visual-studio-code-bin
@@ -168,7 +168,7 @@ yay -Sy visual-studio-code-bin
 
 `vscode` 的配置就是仁者见仁智者见智了。我还是会先下载一个 `consolas` 字体，然后把代码默认字体改成这个，之前用 windows 看习惯了，不愿意再改。然后我也会关闭掉右边的 `minimap` ，因为我屏幕确实太小了。
 
-## 科学上网
+## 12 科学上网
 
 安装 `v2raya` 好像需要一个 `arch` 源，可以把上面提到的那个源加入，安装完之后也可以再把源删了。
 
@@ -182,7 +182,7 @@ sudo systenctl enable v2raya.service
 
 然后浏览器访问网站 `localhost:2017` 你就能开心的上网了。
 
-## 安装 docker
+## 13 安装 docker
 
 ```shell
 # 安装 docker 
@@ -219,7 +219,7 @@ docker info
 
 同样，可以使用 `vscode + remote-container`（插件） + `docker`（插件）来使用 `docker` 。
 
-## 配置浏览器
+## 14 配置浏览器
 
 我还是喜欢用谷歌，必备的拓展：
 
@@ -230,7 +230,7 @@ Adblock Plus（屏蔽广告）
 Tampermonkey(安装 csdn 插件，对抗毒瘤)
 ```
 
-## FlameShot
+## 15 FlameShot
 
 截图软件，安装后需要配置一下截图快捷键。
 
@@ -242,11 +242,11 @@ sudo pacman -Sy flameshot
 
 ![image-20220711165255047](https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220711165255047.png)
 
-## typora + picgo
+## 16 typora + picgo
 
 `markdown` 编辑器 + 图床配置。这两个都可以去 `github` 上下载 `AppImage` 文件。`typora` 图片上传服务选择 `PicGo(App)` ，路径如下，`/home/ceyewan/Applications/PicGo.AppImage`，这个路径只能自己去复制过来。当然也能使用 `yay` 来安装。
 
-## 系统美化
+## 17 系统美化
 
 配置一下 `dock` 栏，虽然美化的终点是默认，但是我还是想折腾一下。。。
 
@@ -260,7 +260,7 @@ yay -S latte-dock # 安装
 
 ![image-20220720191346008](https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/image-20220720191346008.png)
 
-## 配置鼠标滚动速度
+## 18 配置鼠标滚动速度
 
 `manjaro` 的滚动速度简直不能忍，网上搜了一番之后，结论如下：
 
@@ -279,7 +279,7 @@ imwheel # 启动
 
 开机启动我一直没搞定，手动操作也是 ok 的，问题不大。
 
-## 文件同步
+## 19 文件同步
 
 我们可以使用坚果云来进行文件同步，这样在 `manjaro`、`windows` 和手机上同步数据都比较方便
 
@@ -287,7 +287,7 @@ imwheel # 启动
 yay -Sy nutstore
 ```
 
-## clion 的安装
+## 20 clion 的安装
 
 首先，我们去官网下载安装包，然后执行以下命令解压并执行程序。
 
@@ -299,7 +299,7 @@ cd Clion-xxx/bin
 
 总是这样执行也不方便，在打开程序后，`tools -> create desktop entry` 可以创建桌面快捷方式。下次启动就很方便了。
 
-## 安装 VMware-Workstation
+## 21 安装 VMware-Workstation
 
 找不到当时参考的博客了，那篇写的真的是很简练，可惜找不到了。于是我通过查看 `zsh` 的 `history` 找到了当时执行的一些命令。这也是我这篇博客存在的意义吧，把屎里淘金的金记录下来，方便下一次的我。
 
@@ -320,7 +320,7 @@ sudo sh ./VMware-Workstation-Full-16.2.4-20089737.x86_64.bundle
 sudo /etc/init.d/vmware start
 ```
 
-## 安装 todesk 远程控制
+## 22 安装 todesk 远程控制
 
 官网有明确的安装教程，并且支持 `Arch linux`，我愿称之为良心软件。在官网下载好安装包后，执行下面这个命令就可以安装了。
 
@@ -328,14 +328,14 @@ sudo /etc/init.d/vmware start
 sudo pacman -U todesk_4.1.0_x86_64.pkg.tar.zst
 ```
 
-## copytranslator 翻译软件
+## 23 copytranslator 翻译软件
 
 看英文文献时，还是需要一个方便的翻译工具的。[官网](https://copytranslator.github.io/)，我们可以在官网下载 `AppImage` 也可以使用 `yay -Sy copytranslator` 安装。
 
-## 音乐软件
+## 24 音乐软件
 
 目前国内的 QQ 音乐和网易云音乐都有 `linux` 版本，可以直接使用 `pacman` 或者 `yay` 进行安装。腾讯是这样的，看到网易云提供了 `deb` 包，才会开始做 `linux`。QQ 和微信没有竞品就开始摆烂。所以我选择使用 `spotify`。
 
-## 小结
+## 25 小结
 
 ![desktop](https://ceyewan.oss-cn-beijing.aliyuncs.com/typora/2022-11-05_16-15.png)
