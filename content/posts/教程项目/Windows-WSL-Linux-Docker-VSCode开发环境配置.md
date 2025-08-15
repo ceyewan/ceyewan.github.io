@@ -1,12 +1,13 @@
 ---
-title: Windows/WSL/Linux/Docker+VSCode开发环境配置
 categories:
-  - ForFun
-tags:
-  - Dev Tips
+- ForFun
+date: 2022-06-26 22:28:24
 draft: false
 slug: b638e272
-date: 2022-06-26 22:28:24
+summary: 本文详细介绍Windows下C/C++开发环境配置，涵盖WSL、Docker、VSCode远程开发及SSH连接虚拟机等核心技术，助力开发者高效搭建跨平台开发环境。
+tags:
+- Dev Tips
+title: Windows/WSL/Linux/Docker+VSCode开发环境配置
 ---
 
 前几天重装了一下系统，于是从头开始配置了一下开发环境，在这里记录一下。主要就是使用虚拟机、`wsl`、`vscode` 以及 `docker` 这几个工具。

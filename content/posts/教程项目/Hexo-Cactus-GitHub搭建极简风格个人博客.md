@@ -1,13 +1,14 @@
 ---
-title: Hexo+Cactus+GitHub搭建极简风格个人博客
 categories:
-  - ForFun
-tags:
-  - Hexo
-  - Cactus
+- ForFun
+date: 2024-03-23 23:32:25
 draft: false
 slug: e06bcce9
-date: 2024-03-23 23:32:25
+summary: 本文详细介绍如何使用Hexo搭建静态博客，包括安装配置、Cactus主题更换、GitHub部署及个性化定制，帮助开发者快速构建简约风格的个人技术博客。
+tags:
+- Hexo
+- Cactus
+title: Hexo+Cactus+GitHub搭建极简风格个人博客
 ---
 
 ## 安装 hexo
@@ -200,4 +201,3 @@ public/
 1.   [cactus 主题源代码修改及优化](https://www.plumstar.cn/2022/10/22/cactus%E4%B8%BB%E9%A2%98%E6%BA%90%E4%BB%A3%E7%A0%81%E6%94%B9%E8%BF%9B%E5%8F%8A%E4%BC%98%E5%8C%96/index.html)
 1.   [hexo史上最全搭建教程](https://blog.csdn.net/sinat_37781304/article/details/82729029)
 1.   [hexo 官方文档](https://hexo.io/zh-cn/docs/index.html)
-

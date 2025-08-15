@@ -1,14 +1,16 @@
 ---
-title: Alacritty+Zellij打造一个炫酷的终端
 categories:
-  - ForFun
-tags:
-  - Alacritty
-  - Zellij
+- ForFun
+date: 2024-03-24 19:57:18
 draft: false
 slug: c628f1dd
-date: 2024-03-24 19:57:18
+summary: 本文介绍如何使用zellij、tmux和alacritty打造高效终端环境，支持多窗口分屏、会话复用与高度定制化配置，提升开发效率与终端颜值。
+tags:
+- Alacritty
+- Zellij
+title: Alacritty+Zellij打造一个炫酷的终端
 ---
+
 ## 前言
 
 在做实验的时候，经常遇到需要开多个终端同时执行一些命令，但是 vscode 终端原生要么只支持垂直切分窗口，要么只支持水平切分窗口，还是不太够用，我希望能同时水平和垂直切分，一直不知道用什么关键词搜索，也就一直没找到趁手的工具。昨晚，问了一嘴 ChatGPT，它给我推荐了 tmux。

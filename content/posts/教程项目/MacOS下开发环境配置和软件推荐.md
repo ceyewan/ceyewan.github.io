@@ -1,13 +1,14 @@
 ---
-title: MacOS下开发环境配置和软件推荐
-categories:
-  - ForFun
-tags:
-  - MacOS
-  - DevTips
 abbrlink: 63f70079
+categories:
+- ForFun
 draft: false
 slug: 2024-03-24 22:35:09
+summary: 本文分享Mac开发环境配置全攻略，涵盖zsh、Homebrew、VSCode、Xcode及实用软件推荐，助力开发者高效搭建Mac工作流。
+tags:
+- MacOS
+- DevTips
+title: MacOS下开发环境配置和软件推荐
 ---
 
 Mac 真香，虽然我只是用的丐版。拿到 Mac 的第一步，当然就是配置开发环境啦。
