@@ -1,6 +1,6 @@
 ---
 date: 2025-08-17T10:45:48+08:00
-draft: true
+draft: false
 title: RAG 工作机制详解——知识库技术全流程
 slug: 20250817-a36lj4xg
 tags:
