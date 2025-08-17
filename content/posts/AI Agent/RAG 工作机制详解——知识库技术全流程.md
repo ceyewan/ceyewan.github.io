@@ -1,12 +1,13 @@
 ---
-date: 2025-08-17T10:45:48+08:00
-draft: false
-title: RAG 工作机制详解——知识库技术全流程
-slug: 20250817-a36lj4xg
-tags:
-  - RAG
 categories:
-  - AI Agent
+- AI Agent
+date: 2025-08-17 10:45:48+08:00
+draft: false
+slug: 20250817-a36lj4xg
+summary: 本文深入解析RAG技术全流程，涵盖分片、索引、召回、重排与生成五大核心环节，系统阐述检索增强生成的工作机制与优化策略，提升大模型回答的准确性与可靠性。
+tags:
+- RAG
+title: RAG 工作机制详解——知识库技术全流程
 ---
 
 ## 1 RAG 概述
