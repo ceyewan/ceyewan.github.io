@@ -1,14 +1,15 @@
 ---
-title: alist+vidhub搭建个人影视库
 categories:
-  - ForFun
-tags:
-  - alist
-  - vidhub
-  - emby
+- ForFun
+date: 2024-04-04 21:28:06
 draft: false
 slug: ff69aff9
-date: 2024-04-04 21:28:06
+summary: 通过Alist挂载多网盘并结合Vidhub打造私人影视库，实现高速播放与美观海报墙，分享小雅数据集、Emby及猫影视等实用方案。
+tags:
+- alist
+- vidhub
+- emby
+title: alist+vidhub搭建个人影视库
 ---
 
 ## 1 使用 Alist 挂载网盘

@@ -1,13 +1,14 @@
 ---
-title: Windows+Manjaro双系统的安装与配置
 categories:
-  - ForFun
-tags:
-  - Dev Tips
-  - Dual System
+- ForFun
+date: 2022-07-10 00:25:51
 draft: false
 slug: 4a1a11d9
-date: 2022-07-10 00:25:51
+summary: 本文详细记录了Manjaro KDE双系统安装及深度配置全过程，涵盖驱动、输入法、软件源、生产力工具、美化等25个步骤，为Linux新手提供一站式桌面环境搭建指南。
+tags:
+- Dev Tips
+- Dual System
+title: Windows+Manjaro双系统的安装与配置
 ---
 
 ## 1 双系统安装
