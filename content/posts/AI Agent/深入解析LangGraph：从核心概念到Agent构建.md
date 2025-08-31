@@ -1,10 +1,12 @@
 ---
 date: 2025-08-31T00:48:04+08:00
-draft: true
-title: LangGraph 核心概念
+draft: false
+title: 深入解析LangGraph：从核心概念到Agent构建
 slug: 20250831-zyvwydbw
 tags:
-  - 标签
+  - LangGraph
+  - Agent
+  - MCP
 categories:
   - AI Agent
 ---
