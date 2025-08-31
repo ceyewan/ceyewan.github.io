@@ -1,17 +1,18 @@
 ---
-date: 2025-08-31T00:48:04+08:00
+categories:
+  - AI Agent
+date: 2025-08-31 00:48:04+08:00
 draft: false
-title: 深入解析LangGraph：从核心概念到Agent构建
 slug: 20250831-zyvwydbw
+summary: LangGraph 是一个面向长期运行、有状态智能体与复杂工作流的低代码编排框架，支持持久化执行、人机协同与多智能体系统，提供高可观测性与生产级部署能力。
 tags:
   - LangGraph
   - Agent
   - MCP
-categories:
-  - AI Agent
+title: 深入解析LangGraph：从核心概念到Agent构建
 ---
 
-## 1 LangGraph 核心笔记
+## 1 LangGraph 核心速览
 
 定位：面向长期运行（long-running）、有状态（stateful）智能体与复杂工作流的低层编排框架，不遮蔽提示与架构，专注执行、状态与可观测性。  
 核心价值：Durable（失败可恢复）+ Stateful（结构化状态）+ Human-in-the-loop（可插人审阅/修改）+ Memory（短期推理上下文 + 长期持久存储）+ Observability（轨迹与指标）+ Production（部署与扩展友好）。
