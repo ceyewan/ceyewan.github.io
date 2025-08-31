@@ -1,12 +1,13 @@
 ---
-date: 2025-08-31T16:49:55+08:00
-draft: true
-title: 基于 LangGraph 实现 Kubernetes AIOps Agent 调研
-slug: 20250831-gho0wr44
-tags:
-  - Agent
 categories:
-  - AI Agent
+- AI Agent
+date: 2025-08-31 16:49:55+08:00
+draft: true
+slug: 20250831-gho0wr44
+summary: 基于LangGraph构建Kubernetes AIOps智能体，融合ReAct与Plan-and-Execute模式，实现故障诊断、根因分析及安全自动化修复，支持多智能体协作与人在环路控制，提升运维效率与系统可靠性。
+tags:
+- Agent
+title: 基于 LangGraph 实现 Kubernetes AIOps Agent 调研
 ---
 
 >由 Gemini Deep Research 生成

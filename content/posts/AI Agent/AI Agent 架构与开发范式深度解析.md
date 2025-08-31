@@ -1,13 +1,15 @@
 ---
-date: 2025-08-31T16:14:19+08:00
-draft: false
-title: AI Agent 架构与开发范式深度解析
-slug: 20250831-rz10o3yx
-tags:
-  - Agent
 categories:
-  - AI Agent
+- AI Agent
+date: 2025-08-31 16:14:19+08:00
+draft: false
+slug: 20250831-rz10o3yx
+summary: 本文深入解析AI智能体的四大核心技术：提示工程、上下文工程、工具使用与RAG，系统阐述智能体架构演进及行业前沿实践，为开发者提供构建生产级智能体的全面指南。
+tags:
+- Agent
+title: AI Agent 架构与开发范式深度解析
 ---
+
 > 由 Gemini Deep Research 生成
 
 ## 1 **引言**

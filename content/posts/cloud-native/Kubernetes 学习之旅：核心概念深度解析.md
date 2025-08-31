@@ -1,12 +1,13 @@
 ---
-date: 2025-08-31T11:43:55+08:00
-draft: true
-title: Kubernetes 学习之旅：核心概念深度解析
-slug: 20250831-ucoyfjaa
-tags:
-  - k8s
 categories:
-  - Cloud Native
+- Cloud Native
+date: 2025-08-31 11:43:55+08:00
+draft: true
+slug: 20250831-ucoyfjaa
+summary: 本文系统解析Kubernetes 30个核心概念，涵盖Pod、Deployment、Service、Ingress、HPA及CRD等关键技术，提供从入门到精通的云原生学习路径，助力开发者构建生产级容器化应用。
+tags:
+- k8s
+title: Kubernetes 学习之旅：核心概念深度解析
 ---
 
 ## 1 **引言**
