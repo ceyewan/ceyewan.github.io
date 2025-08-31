@@ -1,12 +1,13 @@
 ---
-date: 2025-08-31T00:48:04+08:00
-draft: true
-title: LangGraph 核心概念
-slug: 20250831-zyvwydbw
-tags:
-  - 标签
 categories:
-  - AI Agent
+- AI Agent
+date: 2025-08-31 00:48:04+08:00
+draft: true
+slug: 20250831-zyvwydbw
+summary: LangGraph 是一个面向长期运行、有状态智能体与复杂工作流的低代码编排框架，支持持久化执行、人机协同与多智能体系统，提供高可观测性与生产级部署能力。
+tags:
+- 标签
+title: LangGraph 核心概念
 ---
 
 ## 1 LangGraph 核心笔记
