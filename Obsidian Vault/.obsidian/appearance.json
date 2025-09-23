@@ -6,5 +6,7 @@
   "nativeMenus": false,
   "translucency": false,
   "showViewHeader": true,
-  "baseFontSize": 14
+  "baseFontSize": 16,
+  "interfaceFontFamily": "LXGW WenKai",
+  "textFontFamily": "LXGW WenKai"
 }

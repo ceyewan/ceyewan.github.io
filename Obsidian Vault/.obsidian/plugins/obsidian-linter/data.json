@@ -119,7 +119,7 @@
     },
     "blockquote-style": {
       "enabled": true,
-      "style": "no space"
+      "style": "space"
     },
     "convert-bullet-list-markers": {
       "enabled": true
@@ -239,12 +239,12 @@
     },
     "space-between-chinese-japanese-or-korean-and-english-or-numbers": {
       "enabled": true,
-      "english-symbols-punctuation-before": "-+;:'\"°%$)]",
-      "english-symbols-punctuation-after": "-+'\"([¥$"
+      "english-symbols-punctuation-before": "-+;:°%$)]",
+      "english-symbols-punctuation-after": "-+([¥$"
     },
     "trailing-spaces": {
       "enabled": true,
-      "twp-space-line-break": true
+      "two-space-line-break": true
     },
     "add-blockquote-indentation-on-paste": {
       "enabled": true
@@ -271,13 +271,15 @@
       "enabled": true
     }
   },
-  "lintOnSave": true,
+  "lintOnSave": false,
   "recordLintOnSaveLogs": false,
   "displayChanged": true,
   "lintOnFileChange": false,
   "displayLintOnFileChangeNotice": true,
   "settingsConvertedToConfigKeyValues": true,
-  "foldersToIgnore": [],
+  "foldersToIgnore": [
+    "Templates"
+  ],
   "filesToIgnore": [],
   "linterLocale": "system-default",
   "logLevel": "ERROR",
