@@ -6,7 +6,7 @@ draft: false
 slug: 21b8541d
 summary: 本文详细解析了Go语言中常用标准库的使用方法与技巧，涵盖list、heap、unicode、strings等核心包的关键函数。适合开发者快速掌握数据结构操作、字符串处理及排序算法，提升编程效率与代码质量。
 tags:
-title: Go语言标准库常用包详解：List、Heap、Unicode与更多实用工具
+title: Go语言标准库常用包详解：List、Heap、Sort、Unicode 等
 ---
 
 ## 1 List
@@ -142,24 +142,17 @@ func TopK(nums []int, k int) []int {
 
 ## 3 Sort
 
-Go 的排序能力主要分两层：
-
-1. **`sort` 包**：经典接口 + 基于 `sort.Interface` 的通用排序。
-2. **`slices` 包（Go 1.21+）**：泛型化、更简洁的排序 API。
-
 ### 3.1 `sort` 包
 
-#### 3.1.1 基础方法
+`sort` 包提供了对基本类型切片的直接排序方法，以及通过实现 `sort.Interface` 接口来对自定义类型进行排序的通用机制。
+
+对于 `int`、`float64` 和 `string` 类型的切片，`sort` 包提供了便捷的直接排序函数，默认均为 **升序**：
 
 - `sort.Ints([]int)`
 - `sort.Float64s([]float64)`
 - `sort.Strings([]string)`
 
-均为 **升序**。
-
-#### 3.1.2 通用接口
-
-实现 `sort.Interface` 即可用 `sort.Sort`：
+要对自定义类型或复杂结构体切片进行排序，需要让该类型实现 `sort.Interface` 接口。此接口定义了三个方法：
 
 ```go
 type Interface interface {
@@ -169,74 +162,145 @@ type Interface interface {
 }
 ```
 
-`sort.Sort` 使用快速排序；`sort.Stable` 使用归并排序，保证相等元素相对次序不变。
+实现 `sort.Interface` 后，即可使用 `sort.Sort` 或 `sort.Stable` 进行排序：
 
-#### 3.1.3 自定义比较
+- `sort.Sort(data Interface)`：使用 **快速排序** 算法，不保证相等元素的相对次序。
+- `sort.Stable(data Interface)`：使用 **归并排序** 算法，保证相等元素的相对次序不变（稳定排序）。
 
-- `sort.Reverse(sort.IntSlice(ints))`：反转已有比较逻辑。
-- `sort.Slice(x, func(i, j int) bool)`：直接在切片上提供比较函数。
+`sort` 包还提供了一些无需完整实现 `sort.Interface` 即可进行自定义排序的便捷方法：
 
-#### 3.1.4 查找
+- `sort.Slice(x any, less func(i, j int) bool)`：直接在切片 `x` 上提供一个比较函数 `less`。这是对任意切片进行自定义排序最常用的方式。
+- `sort.Reverse(data Interface)`：包装一个 `sort.Interface` 对象，使其排序逻辑反转（例如，将升序变为降序）。
 
-`sort.Search(n, f func(int) bool) int`：二分查找，返回满足 `f(i)==true` 的最小索引。
+`sort.Search(n int, f func(int) bool) int`：在已排序的 `[0, n)` 范围内进行二分查找。它返回满足 `f(i) == true` 的最小索引 `i`。如果不存在这样的 `i`，则返回 `n`。
 
 ### 3.2 `slices` 包（Go 1.21+）
 
-`slices` 基于泛型，提供类型安全的 API，避免了 `sort.Interface` 的冗余。
+Go 1.21 引入的 `slices` 包利用泛型，极大地简化了排序 API，提供了类型安全且更简洁的写法，避免了 `sort.Interface` 的繁琐实现。
 
-常用函数：
+`slices` 包提供了与 `sort` 包功能类似的泛型排序函数：
 
-- `slices.Sort([]T)`：对有序类型（整数、浮点、字符串等）排序，默认升序。
-- `slices.SortFunc([]T, func(a, b T) int)`：自定义比较函数（返回负数/0/正数）。
-- `slices.SortStableFunc([]T, func(a, b T) int)`：稳定排序。
-- `slices.BinarySearch([]T, target T)` / `slices.BinarySearchFunc([]T, x T, cmp func(a, b T) int)`：二分查找。
+- `slices.Sort[E Ordered](s []E)`：对实现了 `Ordered` 约束（如整数、浮点数、字符串）的切片进行升序排序。
+- `slices.SortFunc[E any](s []E, cmp func(a, b E) int)`：通过自定义比较函数 `cmp` 对切片进行排序。`cmp` 函数应返回负数（`a < b`）、零（`a == b`）或正数（`a > b`）。
+- `slices.SortStableFunc[E any](s []E, cmp func(a, b E) int)`：与 `SortFunc`类似，但保证排序的稳定性。
 
-示例：
+`slices` 包也提供了泛型版本的二分查找：
+
+- `slices.BinarySearch[E Ordered](s []E, x E)`：在已排序的切片 `s` 中查找元素 `x`。
+- `slices.BinarySearchFunc[E any, F any](s []E, x F, cmp func(E, F) int)`：通过自定义比较函数进行二分查找。
+
+以下示例展示了 `slices` 包的简洁性，并使用了 `cmp` 包提供的 `Compare` 函数进行比较：
 
 ```go
 import (
-    "cmp"
-    "slices"
+	"cmp"    // Go 1.21+ 提供的比较函数
+	"slices" // Go 1.21+ 提供的泛型切片操作
+	"fmt"
 )
 
 func main() {
-    ints := []int{5, 2, 9, 1, 5, 6}
-    // 升序
-    slices.Sort(ints)
-    // 降序
-    slices.SortFunc(ints, func(a, b int) int {
-        return cmp.Compare(b, a)
-    })
+	ints := []int{5, 2, 9, 1, 5, 6}
+	fmt.Println("原始切片:", ints) // 原始切片: [5 2 9 1 5 6]
+
+	// 1. 升序排序 (使用 slices.Sort)
+	slices.Sort(ints)
+	fmt.Println("升序排序:", ints) // 升序排序: [1 2 5 5 6 9]
+
+	// 2. 降序排序 (使用 slices.SortFunc 和 cmp.Compare)
+	// 注意：slices.SortFunc 会修改原切片，这里为了演示，重新初始化
+	ints = []int{5, 2, 9, 1, 5, 6}
+	slices.SortFunc(ints, func(a, b int) int {
+		return cmp.Compare(b, a) // 比较 b 和 a，实现降序
+	})
+	fmt.Println("降序排序:", ints) // 降序排序: [9 6 5 5 2 1]
+
+	// 3. 二分查找
+	sortedInts := []int{1, 2, 5, 5, 6, 9}
+	target := 5
+	idx, found := slices.BinarySearch(sortedInts, target)
+	fmt.Printf("查找 %d: 索引 %d, 找到 %t\n", target, idx, found) // 查找 5: 索引 2, 找到 true
+
+	target = 4
+	idx, found = slices.BinarySearch(sortedInts, target)
+	fmt.Printf("查找 %d: 索引 %d, 找到 %t\n", target, idx, found) // 查找 4: 索引 2, 找到 false (插入点)
 }
 ```
 
-## 4 Unicode（处理单个字符 `rune`）
+## 4 IO 优化
 
-Go 的 `rune` = Unicode 码点，等价于 `int32`，对应 C 里的 " 字符 "（但不是 1 字节的 char，而是完整的 Unicode 编码）。
+在 Go 语言中，`fmt.Scanf` 的行为与 C 语言的 `scanf` 类似，每次读取操作（例如读取数组中的一个元素）都可能触发一次系统调用。对于大量输入，如一个长度为 n 的数组，这将导致 n 次系统调用，严重拖慢程序执行速度。
 
-- `unicode.IsLetter(r rune)`：是否是字母
-- `unicode.IsDigit(r rune)`：是否是数字（0–9）
-- `unicode.IsSpace(r rune)`：是否是空白字符
-- `unicode.IsUpper(r rune)` / `unicode.IsLower(r rune)`：大写/小写
-- `unicode.ToUpper(r rune)` / `unicode.ToLower(r rune)`：大小写转换
+解决此问题的核心思路是采用带缓冲的 I/O。通过一次性读取大量数据到内存缓冲区，后续操作直接从缓冲区获取，从而显著减少系统调用次数，大幅提升 I/O 效率。
 
-## 5 Strings（字符串操作）
+Go 标准库中的 `bufio.Scanner` 是实现这一策略的理想工具，它能高效地从输入流中解析出单词、行或其他自定义分隔符的数据。以下是一个使用 `bufio.Scanner` 读取整数和整数数组的示例：
 
-字符串是不可变的 UTF-8 字节序列。常见操作：
+```go
+var scanner *bufio.Scanner // 全局 scanner
+func init() {
+	// 从标准输入读取，并按空白字符（空格、制表符、换行符等）分割
+	scanner = bufio.NewScanner(os.Stdin)
+	// bufio.ScanLines 默认按行分割、bufio.ScanBytes、bufio.ScanRunes
+	scanner.Split(bufio.ScanWords)
+}
+// readInt 读取下一个整数
+func readInt() int {
+	scanner.Scan() // 驱动 Scanner 向前读取直到下一个 token
+	// scanner.Text() 将当前 token 作为一个新分配的字符串
+	// scanner.Bytes() 将当前 token 作为一个 []bytes 切片，需要 copy 后使用
+	num, _ := strconv.Atoi(scanner.Text()) 
+	return num
+}
+// readArray 读取长度为 n 的整数数组
+func readArray(n int) []int {
+	arr := make([]int, n)
+	for i := 0; i < n; i++ {
+		arr[i] = readInt()
+	}
+	return arr
+}
+```
 
-- `strings.Contains(s, sub)`：是否包含子串
-- `strings.Index(s, sub)` / `strings.LastIndex(s, sub)`：第一次/最后一次出现位置
-- `strings.Count(s, sub)`：子串出现次数
-- `strings.EqualFold(s1, s2)`：忽略大小写比较
-- `strings.Split(s, sep)` / `strings.SplitAfter(s, sep)`：分割字符串
-- `strings.Fields(s)`：按空白字符分割
-- `strings.FieldsFunc(s, f)`：自定义分割规则
-- `strings.Join(elems, sep)`：切片拼接成字符串
-- `strings.Replace(s, old, new, n)`：替换，`n=-1` 表示替换全部
-- `strings.Trim(s, cutset)` / `strings.TrimSpace(s)`：去掉首尾指定字符 / 空白
-- `strings.ToUpper(s)` / `strings.ToLower(s)`：大小写转换
+除了 `bufio.Scanner`，Go 还提供了 `bufio.Reader` 和 `bufio.Writer` 这两个更通用的带缓冲 I/O 接口。其中，`bufio.Reader` 提供了 `ReadByte()` 等底层方法，需要开发者自行处理数据解析逻辑，相对 `Scanner` 而言，在解析特定格式数据（如整数）时更为繁琐。`bufio.Writer` 则主要用于高效地写入数据，提供了 `WriteString` 和 `WriteByte` 等便捷方法。
 
-拼接效率推荐用 `strings.Builder`：
+## 5 字符与字符串处理
+
+Go 语言在处理文本时，区分了字节、Unicode 码点（rune）和字符串。理解这些概念是高效处理文本的关键。
+
+### 5.1 Unicode 码点 (`rune`)
+
+在 Go 中，`rune` 类型代表一个 Unicode 码点，它等价于 `int32`。这与 C 语言中通常表示单个字节的 `char` 不同，`rune` 能够完整表示任何语言的字符，包括中文、emoji 等。
+
+`unicode` 包提供了丰富的函数来判断和转换 `rune`：
+
+*   `unicode.IsLetter(r rune)`：判断是否为字母。
+*   `unicode.IsDigit(r rune)`：判断是否为数字 (0–9)。
+*   `unicode.IsSpace(r rune)`：判断是否为空白字符。
+*   `unicode.IsUpper(r rune)` / `unicode.IsLower(r rune)`：判断大小写。
+*   `unicode.ToUpper(r rune)` / `unicode.ToLower(r rune)`：进行大小写转换。
+
+### 5.2 字符串 (`string`) 操作
+
+Go 语言的 `string` 是一个不可变的 UTF-8 字节序列。`strings` 包提供了大量用于字符串操作的实用函数：
+
+*   **查找与计数**：
+    *   `strings.Contains(s, sub)`：检查是否包含子串。
+    *   `strings.Index(s, sub)` / `strings.LastIndex(s, sub)`：查找子串第一次/最后一次出现的位置。
+    *   `strings.Count(s, sub)`：计算子串出现的次数。
+*   **比较**：
+    *   `strings.EqualFold(s1, s2)`：忽略大小写比较两个字符串。
+*   **分割与拼接**：
+    *   `strings.Split(s, sep)` / `strings.SplitAfter(s, sep)`：按分隔符分割字符串。
+    *   `strings.Fields(s)`：按连续的空白字符分割字符串。
+    *   `strings.FieldsFunc(s, f)`：使用自定义函数定义分割规则。
+    *   `strings.Join(elems, sep)`：将字符串切片拼接成一个字符串。
+*   **替换与修剪**：
+    *   `strings.Replace(s, old, new, n)`：替换子串，`n=-1` 表示替换所有匹配项。
+    *   `strings.Trim(s, cutset)` / `strings.TrimSpace(s)`：去除字符串首尾指定的字符集 / 空白字符。
+*   **大小写转换**：
+    *   `strings.ToUpper(s)` / `strings.ToLower(s)`：将字符串转换为大写 / 小写。
+
+**高效字符串拼接**：
+由于字符串的不可变性，频繁使用 `+` 进行拼接会导致性能问题。推荐使用 `strings.Builder` 来高效构建字符串：
 
 ```go
 var b strings.Builder
@@ -246,38 +310,40 @@ b.WriteRune('世')  // 写入 Unicode 字符
 res := b.String()
 ```
 
-## 6 Strconv（字符串与数字转换）
+### 5.3 字符串与数字转换 (`strconv`)
 
-- `strconv.Atoi(s)`：string → int
-- `strconv.Itoa(i)`：int → string
-- `strconv.ParseInt(s, base, bitSize)`：进制解析为整数
-- `strconv.FormatInt(i, base)`：整数格式化为字符串
+`strconv` 包提供了字符串和基本数据类型（如整数、浮点数）之间的转换功能：
 
-## 7 Bytes（字节切片操作）
+*   `strconv.Atoi(s)`：将字符串转换为 `int`。
+*   `strconv.Itoa(i)`：将 `int` 转换为字符串。
+*   `strconv.ParseInt(s, base, bitSize)`：将指定进制的字符串解析为整数。
+*   `strconv.FormatInt(i, base)`：将整数格式化为指定进制的字符串。
 
-`[]byte` 是原始字节序列，和 `string` 可以互转：
+### 5.4 字节切片 (`[]byte`) 操作
 
-- `[]byte(s)`：string → `[]byte`
-- `string(b)`：`[]byte` → string
-- `[]rune(s)`：string → `[]rune`（按 Unicode 拆分，常用于处理中文或 emoji）
-- `string(runeSlice)`：`[]rune` → string
+`[]byte` 是 Go 语言中表示原始字节序列的切片。它与 `string` 之间可以方便地相互转换，并且 `bytes` 包提供了与 `strings` 包功能类似的 API，用于操作字节切片。
 
-`bytes` 包的 API 和 `strings` 几乎一样，比如：
+*   **字符串与字节切片互转**：
+    *   `[]byte(s)`：将 `string` 转换为 `[]byte`。
+    *   `string(b)`：将 `[]byte` 转换为 `string`。
+*   **字符串与 `[]rune` 互转**：
+    *   `[]rune(s)`：将 `string` 转换为 `[]rune`，按 Unicode 码点拆分，常用于处理多字节字符（如中文、emoji）。
+    *   `string(runeSlice)`：将 `[]rune` 转换为 `string`。
 
-- `bytes.Contains(b, sub)`
-- `bytes.Split(b, sep)`
-- `bytes.TrimSpace(b)`
+`bytes` 包的 API 与 `strings` 包高度相似，例如：
 
-## 8 常用 Math
+*   `bytes.Contains(b, sub)`
+*   `bytes.Split(b, sep)`
+*   `bytes.TrimSpace(b)`
 
-- `math.Abs(x)`：绝对值
-- `math.Max(x, y)` / `math.Min(x, y)`：最大/最小
-- `math.Ceil(x)` / `math.Floor(x)` / `math.Round(x)` / `math.Trunc(x)`：取整相关
+### 5.5 总结：`byte`、`rune`、`string` 的关系
 
-### 8.1 补充：rune / Byte / Char 对应关系
+理解这三者的关系对于 Go 语言的文本处理至关重要：
 
-- `byte` = `uint8`，一个字节（C 的 `unsigned char`），常用来存放原始数据。
-- `rune` = `int32`，表示一个 Unicode 码点（C 里没有完全对应，接近 `wchar_t`）。
-- `string` = UTF-8 编码的不可变字节序列。
-- **若要逐字符遍历字符串**：用 `for _, r := range s`（按 rune 遍历，支持中文、emoji）。
-- **若只处理 ASCII**：可以直接把 `string` 转为 `[]byte`。
+*   **`byte`**：等价于 `uint8`，表示一个 8 位字节。它是构成所有 Go 数据的最小单位，常用于处理原始二进制数据或 ASCII 字符。
+*   **`rune`**：等价于 `int32`，表示一个 Unicode 码点。它是 Go 语言中处理单个字符（无论其编码长度）的标准方式。
+*   **`string`**：是不可变的 UTF-8 编码的字节序列。它不直接存储字符，而是存储字符的 UTF-8 编码字节。
+
+**遍历字符串的正确姿势**：
+*   **按 `rune` 遍历**：使用 `for _, r := range s` 循环，Go 会自动解码 UTF-8 字节序列，每次迭代提供一个 `rune`。这是处理包含多字节字符（如中文、emoji）字符串的推荐方式。
+*   **按 `byte` 遍历**：使用 `for i := 0; i < len(s); i++ { b := s[i] }` 循环，或者 `for _, b := range []byte(s)`。这适用于只处理 ASCII 字符或需要直接操作底层字节的场景。

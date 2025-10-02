@@ -19,8 +19,8 @@
   "command-palette:open": [
     {
       "modifiers": [
-        "Mod",
-        "Shift"
+        "Alt",
+        "Mod"
       ],
       "key": "P"
     }

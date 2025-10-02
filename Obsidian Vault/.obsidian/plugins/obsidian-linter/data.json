@@ -109,7 +109,7 @@
       "enabled": false
     },
     "re-index-footnotes": {
-      "enabled": true
+      "enabled": false
     },
     "auto-correct-common-misspellings": {
       "enabled": false,
@@ -271,7 +271,7 @@
       "enabled": true
     }
   },
-  "lintOnSave": false,
+  "lintOnSave": true,
   "recordLintOnSaveLogs": false,
   "displayChanged": true,
   "lintOnFileChange": false,
